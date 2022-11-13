@@ -1,7 +1,5 @@
-import { Table } from 'antd';
-import React from 'react'
-
-type Props = {}
+import { PageHeader, Table } from 'antd';
+type Props = {};
 
 export default function Product({ }: Props) {
     const dataSource = [
@@ -38,6 +36,10 @@ export default function Product({ }: Props) {
     ];
     return (
         <>
+            <PageHeader
+                title="Product"
+                subTitle=""
+            />
             <Table dataSource={dataSource} columns={columns} />
         </>
     )

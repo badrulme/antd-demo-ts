@@ -1,4 +1,4 @@
-import { Button, Form, Input, message, Modal, Table } from 'antd';
+import { Button, Form, Input, message, Modal, PageHeader, Table } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
@@ -29,6 +29,9 @@ const UomComponent: React.FC = () => {
         axios.get(`http://localhost:8080/uoms`)
             .then((response) => {
                 console.log(response.data);
+                response.data.map((x: { [x: string]: any; id: any; }) => {
+                    x['key'] = x.id;
+                })
                 setUoms(response.data);
             }).catch(err => {
                 // Handle error
@@ -111,8 +114,11 @@ const UomComponent: React.FC = () => {
     return (
         <>
             <div>
+                <PageHeader
+                    title="UoM"
+                    subTitle=""
+                />
                 <Button type="primary" onClick={showModal}>Create</Button>
-                <h4>Middle size table</h4>
                 <Table size="small" dataSource={uoms} columns={uomColumns} />
 
                 <Modal
