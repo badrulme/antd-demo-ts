@@ -14,6 +14,25 @@ const UomComponent: React.FC = () => {
     const [confirmLoading, setConfirmLoading] = useState(false);
     const [modalText, setModalText] = useState('Content of the modal');
     const [okButtonText, setOkButtonText] = useState('Create');
+    const [inputName, setInputName] = useState('l');
+    const [inputAlias, setInputAlias] = useState('s');
+    const [inputDescription, setInputDescription] = useState('d');
+
+    const inputNameHandler = (e: any) => {
+        console.log('s' + e.target.value);
+        setInputName(e.target.value);
+    };
+
+    const inputAliasHandler = (e: any) => {
+        console.log(e.target.value);
+        setInputAlias(e.target.value);
+
+    };
+
+    const inputDescriptionHandler = (e: any) => {
+        console.log(e.target.value);
+        setInputDescription(e.target.value);
+    };
 
     useEffect(() => {
 
@@ -34,6 +53,18 @@ const UomComponent: React.FC = () => {
                 // Handle error
                 console.log("server error");
             });
+    }
+
+    const createUom = () => {
+        axios.post(`http://localhost:8080/uoms`, {
+            name: inputName,
+            alias: inputAlias,
+            description: inputDescription
+        }).then((data) => {
+            console.log(data);
+
+            // history.push('/read')
+        })
     }
 
 
@@ -60,10 +91,15 @@ const UomComponent: React.FC = () => {
     const handleOk = () => {
         setModalText('The modal will be closed after two seconds');
         setConfirmLoading(true);
-        setTimeout(() => {
-            setOpen(false);
-            setConfirmLoading(false);
-        }, 2000);
+        createUom();
+        setOpen(false);
+        setConfirmLoading(false);
+        getUoms();
+        // setTimeout(() => {
+        //     createUom();
+        //     setOpen(false);
+        //     setConfirmLoading(false);
+        // }, 2000);
     };
 
     const handleCancel = () => {
@@ -103,8 +139,6 @@ const UomComponent: React.FC = () => {
     ];
 
 
-
-
     const [uoms, setUoms] = useState([]);
 
 
@@ -112,7 +146,6 @@ const UomComponent: React.FC = () => {
         <>
             <div>
                 <Button type="primary" onClick={showModal}>Create</Button>
-                <h4>Middle size table</h4>
                 <Table size="small" dataSource={uoms} columns={uomColumns} />
 
                 <Modal
@@ -138,19 +171,19 @@ const UomComponent: React.FC = () => {
                                 name="name"
                                 rules={[{ required: true, message: 'Name can not be null!' }]}
                             >
-                                <Input />
+                                <Input onChange={inputNameHandler} value={inputName} />
                             </Form.Item>
                             <Form.Item
                                 label="Alias"
                                 name="alias"
                                 rules={[{ required: true, message: 'Alias can not be null!' }]}
                             >
-                                <Input />
+                                <Input onChange={inputAliasHandler} value={inputAlias} />
                             </Form.Item>
                             <Form.Item
                                 name="description"
                                 label="Description">
-                                <Input.TextArea />
+                                <Input.TextArea onChange={inputDescriptionHandler} value={inputDescription} />
                             </Form.Item>
                         </Form>
                     </div>
