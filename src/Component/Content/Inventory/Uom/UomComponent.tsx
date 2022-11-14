@@ -1,4 +1,4 @@
-import { Button, Form, Input, message, Modal, PageHeader, Table } from 'antd';
+import { Button, Form, Input, message, Modal, PageHeader, Space, Table } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
@@ -63,8 +63,9 @@ const UomComponent: React.FC = () => {
             name: inputName,
             alias: inputAlias,
             description: inputDescription
-        }).then((data) => {
-            console.log(data);
+        }).then((response) => {
+            setUoms(response.data);
+            console.log(response);
 
             // history.push('/read')
         })
@@ -88,21 +89,36 @@ const UomComponent: React.FC = () => {
     };
 
     const showModal = () => {
+        clearModalField();
         setOpen(true);
     };
 
+    const clearModalField = () => {
+        console.log('44444444444');
+        uomForm.setFieldsValue({
+            name: '',
+            alias: '',
+            description: ''
+        });
+    }
+
     const handleOk = () => {
-        setModalText('The modal will be closed after two seconds');
         setConfirmLoading(true);
-        createUom();
-        setOpen(false);
-        setConfirmLoading(false);
-        getUoms();
-        // setTimeout(() => {
-        //     createUom();
-        //     setOpen(false);
-        //     setConfirmLoading(false);
-        // }, 2000);
+        axios.post(`http://localhost:8080/uoms`, {
+            name: inputName,
+            alias: inputAlias,
+            description: inputDescription
+        }).then((response) => {
+            clearModalField();
+            setOpen(false);
+            setConfirmLoading(false);
+            getUoms();
+            console.log(response);
+        }).catch(err => {
+            // Handle error
+            console.log("server error");
+            setConfirmLoading(false);
+        });
     };
 
     const handleCancel = () => {
@@ -130,6 +146,11 @@ const UomComponent: React.FC = () => {
             key: 'alias',
         },
         {
+            title: 'Description',
+            dataIndex: 'description',
+            key: 'description',
+        },
+        {
             title: 'Created Date',
             dataIndex: 'createdDate',
             key: 'createdDate',
@@ -139,7 +160,42 @@ const UomComponent: React.FC = () => {
             dataIndex: 'lastModifiedDate',
             key: 'lastModifiedDate',
         },
+        {
+            title: 'Action',
+            key: 'action',
+            render: (_, record) => (
+                <Space size="middle">
+                    <a onClick={() => updateUom(record.id)}>Update</a>
+                    <a onClick={() => deleteUom(record.id)}>Delete</a>
+                </Space>
+            ),
+        },
     ];
+
+    const updateUom = (id: number) => {
+        alert(id)
+        // setConfirmLoading(true);
+        // axios.put(`http://localhost:8080/uoms/${id}`, {
+        //     name: inputName,
+        //     alias: inputAlias,
+        //     description: inputDescription
+        // }).then((response) => {
+        //     clearModalField();
+        //     setOpen(false);
+        //     setConfirmLoading(false);
+        //     getUoms();
+        //     console.log(response);
+        // }).catch(err => {
+        //     // Handle error
+        //     console.log("server error");
+        //     setConfirmLoading(false);
+        // });
+    }
+
+    const deleteUom = (id: number) => {
+        alert(id)
+
+    }
 
 
     const [uoms, setUoms] = useState([]);
@@ -166,6 +222,7 @@ const UomComponent: React.FC = () => {
                     <div>
                         <Form
                             name="uomForm"
+                            form={uomForm}
                             labelCol={{ span: 8 }}
                             wrapperCol={{ span: 16 }}
                             initialValues={{ remember: true }}
