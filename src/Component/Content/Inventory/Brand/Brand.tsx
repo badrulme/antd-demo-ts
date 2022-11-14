@@ -1,5 +1,4 @@
-import { Table } from 'antd';
-import React from 'react'
+import { PageHeader, Table } from 'antd';
 
 type Props = {}
 
@@ -38,6 +37,10 @@ export default function Brand({ }: Props) {
     ];
     return (
         <>
+            <PageHeader
+                title="Brand"
+                subTitle=""
+            />
             <Table size="small" dataSource={dataSource} columns={columns} />
         </>
     )
