@@ -3,10 +3,11 @@ import { ColumnsType } from 'antd/lib/table';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 
-type Props = {}
+type Props = {};
 
 const UomComponent: React.FC = () => {
     var [modalLoadingSpin, setModalSpinLoading] = useState(false);
+    var [tableLoadingSpin, setTableSpinLoading] = useState(false);
     var [modalState, setmodalState] = useState('CREATE');
     const [okButtonText, setOkButtonText] = useState('Create');
     var [uomId, setUomId] = useState<number>();
@@ -34,18 +35,15 @@ const UomComponent: React.FC = () => {
     const [inputDescription, setInputDescription] = useState();
 
     const inputNameHandler = (e: any) => {
-        console.log('s' + e.target.value);
         setInputName(e.target.value);
     };
 
     const inputAliasHandler = (e: any) => {
-        console.log(e.target.value);
         setInputAlias(e.target.value);
 
     };
 
     const inputDescriptionHandler = (e: any) => {
-        console.log(e.target.value);
         setInputDescription(e.target.value);
     };
 
@@ -59,6 +57,7 @@ const UomComponent: React.FC = () => {
     }, []);
 
     const getUoms = () => {
+        setTableSpinLoading(true);
         axios.get(`http://localhost:8080/uoms`)
             .then((response) => {
                 console.log(response.data);
@@ -66,9 +65,11 @@ const UomComponent: React.FC = () => {
                     x['key'] = x.id;
                 })
                 setUoms(response.data);
+                setTableSpinLoading(false);
             }).catch(err => {
                 // Handle error
                 console.log("server error");
+                setTableSpinLoading(false);
             });
     }
 
@@ -139,42 +140,61 @@ const UomComponent: React.FC = () => {
         });
     }
 
-    const handleOk = () => {
-        setConfirmLoading(true);
-
-        if (modalState === 'CREATE') {
-            axios.post(`http://localhost:8080/uoms`, {
-                name: inputName,
-                alias: inputAlias,
-                description: inputDescription
-            }).then((response) => {
-                setOpen(false);
-                clearModalField();
-                setConfirmLoading(false);
-                getUoms();
-                console.log(response);
-            }).catch(err => {
-                // Handle error
-                console.log("server error");
-                setConfirmLoading(false);
-            });
-        } else {
-            axios.put(`http://localhost:8080/uoms/${uomId}`, {
-                name: inputName,
-                alias: inputAlias,
-                description: inputDescription
-            }).then((response) => {
-                clearModalField();
-                setOpen(false);
-                setConfirmLoading(false);
-                getUoms();
-                console.log(response);
-            }).catch(err => {
-                // Handle error
-                console.log("server error");
-                setConfirmLoading(false);
-            });
+    const onCheck = async () => {
+        try {
+            const values = await uomForm.validateFields();
+            console.log('Success:', values);
+        } catch (errorInfo) {
+            console.log('Failed:', errorInfo);
         }
+    };
+
+    const handleOk = async () => {
+
+        try {
+            const values = await uomForm.validateFields();
+            console.log('Success:', values);
+            onCheck();
+            setConfirmLoading(true);
+
+            if (modalState === 'CREATE') {
+                axios.post(`http://localhost:8080/uoms`, {
+                    name: inputName,
+                    alias: inputAlias,
+                    description: inputDescription
+                }).then((response) => {
+                    setOpen(false);
+                    clearModalField();
+                    setConfirmLoading(false);
+                    getUoms();
+                    console.log(response);
+                }).catch(err => {
+                    // Handle error
+                    console.log("server error");
+                    setConfirmLoading(false);
+                });
+            } else {
+                axios.put(`http://localhost:8080/uoms/${uomId}`, {
+                    name: inputName,
+                    alias: inputAlias,
+                    description: inputDescription
+                }).then((response) => {
+                    clearModalField();
+                    setOpen(false);
+                    setConfirmLoading(false);
+                    getUoms();
+                    console.log(response);
+                }).catch(err => {
+                    // Handle error
+                    console.log("server error");
+                    setConfirmLoading(false);
+                });
+            }
+        } catch (errorInfo) {
+            console.log('Failed:', errorInfo);
+        }
+
+
 
     };
 
@@ -234,13 +254,19 @@ const UomComponent: React.FC = () => {
     ];
 
     const deletePopConfirm = (e: any) => {
-        console.log(e);
-        message.success('Click on Yes');
+        axios.delete(`http://localhost:8080/uoms/${uomId}`)
+            .then((response) => {
+                console.log(response);
+                getUoms();
+                message.success('Deleted Successfully.');
+            }).catch(err => {
+                // Handle error
+                console.log("server error", err);
+            });
     };
 
     const deletePopCancel = (e: any) => {
         console.log(e);
-        message.error('Click on No');
     };
 
     const updateUomAction = (id: number) => {
@@ -278,7 +304,7 @@ const UomComponent: React.FC = () => {
     }
 
     const deleteUomAction = (id: number) => {
-
+        setUomId(id);
     }
 
     return (
@@ -291,7 +317,11 @@ const UomComponent: React.FC = () => {
                     subTitle=""
                 />
                 <Button type="primary" onClick={showModal}>Create</Button>
-                <Table size="small" dataSource={uoms} columns={uomColumns} />
+                <Table
+                    loading={tableLoadingSpin}
+                    size="small"
+                    dataSource={uoms}
+                    columns={uomColumns} />
 
                 <Modal
                     title="Uom"
@@ -310,8 +340,6 @@ const UomComponent: React.FC = () => {
                                 labelCol={{ span: 8 }}
                                 wrapperCol={{ span: 16 }}
                                 initialValues={{ remember: true }}
-                                // onFinish={onFinish}
-                                // onFinishFailed={onFinishFailed}
                                 autoComplete="off"
                             >
                                 <Form.Item
