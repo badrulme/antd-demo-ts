@@ -1,4 +1,4 @@
-import { Button, Form, Input, message, Modal, PageHeader, Space, Table } from 'antd';
+import { Button, Form, Input, message, Modal, PageHeader, Popconfirm, Space, Spin, Table } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
@@ -6,17 +6,32 @@ import React, { useEffect, useState } from 'react';
 type Props = {}
 
 const UomComponent: React.FC = () => {
+    var [modalLoadingSpin, setModalSpinLoading] = useState(false);
+    var [modalState, setmodalState] = useState('CREATE');
+    const [okButtonText, setOkButtonText] = useState('Create');
+    var [uomId, setUomId] = useState<number>();
+
     console.log("Ami run");
 
+    interface Uom {
+        id: number;
+        name: string;
+        alias: string;
+        description: string;
+        createdDate: string;
+        lastModifiedDate: string;
+    }
+
     const [uomForm] = Form.useForm();
+    const [uoms, setUoms] = useState<Uom[]>([]);
+    const [uom, setUom] = useState<Uom>();
+
 
     const [open, setOpen] = useState(false);
     const [confirmLoading, setConfirmLoading] = useState(false);
-    const [modalText, setModalText] = useState('Content of the modal');
-    const [okButtonText, setOkButtonText] = useState('Create');
-    const [inputName, setInputName] = useState('l');
-    const [inputAlias, setInputAlias] = useState('s');
-    const [inputDescription, setInputDescription] = useState('d');
+    const [inputName, setInputName] = useState();
+    const [inputAlias, setInputAlias] = useState();
+    const [inputDescription, setInputDescription] = useState();
 
     const inputNameHandler = (e: any) => {
         console.log('s' + e.target.value);
@@ -38,7 +53,6 @@ const UomComponent: React.FC = () => {
 
         getUoms();
 
-
         return () => {
 
         }
@@ -52,6 +66,17 @@ const UomComponent: React.FC = () => {
                     x['key'] = x.id;
                 })
                 setUoms(response.data);
+            }).catch(err => {
+                // Handle error
+                console.log("server error");
+            });
+    }
+
+    const getUom = (id: number) => {
+        axios.get(`http://localhost:8080/uoms/${id}`)
+            .then((response) => {
+                console.log(response.data);
+                setUom(response.data);
             }).catch(err => {
                 // Handle error
                 console.log("server error");
@@ -88,13 +113,25 @@ const UomComponent: React.FC = () => {
         message.error('Click on No');
     };
 
+    useEffect(() => {
+        if (modalState === 'CREATE') {
+            setOkButtonText('Create');
+            setUomId(0);
+        } else {
+            setOkButtonText('Change');
+        }
+
+        return () => {
+        }
+    }, [modalState])
+
+
     const showModal = () => {
         clearModalField();
         setOpen(true);
     };
 
     const clearModalField = () => {
-        console.log('44444444444');
         uomForm.setFieldsValue({
             name: '',
             alias: '',
@@ -104,35 +141,51 @@ const UomComponent: React.FC = () => {
 
     const handleOk = () => {
         setConfirmLoading(true);
-        axios.post(`http://localhost:8080/uoms`, {
-            name: inputName,
-            alias: inputAlias,
-            description: inputDescription
-        }).then((response) => {
-            clearModalField();
-            setOpen(false);
-            setConfirmLoading(false);
-            getUoms();
-            console.log(response);
-        }).catch(err => {
-            // Handle error
-            console.log("server error");
-            setConfirmLoading(false);
-        });
+
+        if (modalState === 'CREATE') {
+            axios.post(`http://localhost:8080/uoms`, {
+                name: inputName,
+                alias: inputAlias,
+                description: inputDescription
+            }).then((response) => {
+                setOpen(false);
+                clearModalField();
+                setConfirmLoading(false);
+                getUoms();
+                console.log(response);
+            }).catch(err => {
+                // Handle error
+                console.log("server error");
+                setConfirmLoading(false);
+            });
+        } else {
+            axios.put(`http://localhost:8080/uoms/${uomId}`, {
+                name: inputName,
+                alias: inputAlias,
+                description: inputDescription
+            }).then((response) => {
+                clearModalField();
+                setOpen(false);
+                setConfirmLoading(false);
+                getUoms();
+                console.log(response);
+            }).catch(err => {
+                // Handle error
+                console.log("server error");
+                setConfirmLoading(false);
+            });
+        }
+
     };
 
     const handleCancel = () => {
         console.log('Clicked cancel button');
         setOpen(false);
+        setModalSpinLoading(false);
+        setmodalState('CREATE');
     };
 
-    interface Uom {
-        id: number;
-        name: string;
-        alias: string;
-        createdDate: string;
-        lastModifiedDate: string;
-    }
+
 
     const uomColumns: ColumnsType<Uom> = [
         {
@@ -165,45 +218,74 @@ const UomComponent: React.FC = () => {
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
-                    <a onClick={() => updateUom(record.id)}>Update</a>
-                    <a onClick={() => deleteUom(record.id)}>Delete</a>
+                    <a onClick={() => updateUomAction(record.id)}>Update</a>
+                    <Popconfirm
+                        title="Are you sure to delete this task?"
+                        onConfirm={deletePopConfirm}
+                        onCancel={deletePopCancel}
+                        okText="Yes"
+                        cancelText="No"
+                    >
+                        <a onClick={() => deleteUomAction(record.id)}>Delete</a>
+                    </Popconfirm>
                 </Space>
             ),
         },
     ];
 
-    const updateUom = (id: number) => {
-        alert(id)
-        // setConfirmLoading(true);
-        // axios.put(`http://localhost:8080/uoms/${id}`, {
-        //     name: inputName,
-        //     alias: inputAlias,
-        //     description: inputDescription
-        // }).then((response) => {
-        //     clearModalField();
-        //     setOpen(false);
-        //     setConfirmLoading(false);
-        //     getUoms();
-        //     console.log(response);
-        // }).catch(err => {
-        //     // Handle error
-        //     console.log("server error");
-        //     setConfirmLoading(false);
-        // });
+    const deletePopConfirm = (e: any) => {
+        console.log(e);
+        message.success('Click on Yes');
+    };
+
+    const deletePopCancel = (e: any) => {
+        console.log(e);
+        message.error('Click on No');
+    };
+
+    const updateUomAction = (id: number) => {
+
+        setUomId(id);
+        setmodalState('UPDATE');
+        showModal();
+        setModalSpinLoading(true);
+        axios.get(`http://localhost:8080/uoms/${id}`)
+            .then((response) => {
+                console.log(response.data);
+
+                setUom(response.data);
+
+                uomForm.setFieldsValue({
+                    name: response.data.name,
+                    alias: response.data.alias,
+                    description: response.data.description
+                });
+
+                setInputName(response.data.name);
+                setInputAlias(response.data.alias);
+                setInputDescription(response.data.description);
+
+                setModalSpinLoading(false);
+            }).catch(err => {
+                // Handle error
+                console.log("server error");
+                setModalSpinLoading(false);
+            });
+
+
+
+
     }
 
-    const deleteUom = (id: number) => {
-        alert(id)
+    const deleteUomAction = (id: number) => {
 
     }
-
-
-    const [uoms, setUoms] = useState([]);
-
 
     return (
         <>
+
             <div>
+
                 <PageHeader
                     title="UoM"
                     subTitle=""
@@ -219,40 +301,44 @@ const UomComponent: React.FC = () => {
                     onCancel={handleCancel}
                     okText={okButtonText}
                 >
-                    <div>
-                        <Form
-                            name="uomForm"
-                            form={uomForm}
-                            labelCol={{ span: 8 }}
-                            wrapperCol={{ span: 16 }}
-                            initialValues={{ remember: true }}
-                            // onFinish={onFinish}
-                            // onFinishFailed={onFinishFailed}
-                            autoComplete="off"
-                        >
-                            <Form.Item
-                                label="Name"
-                                name="name"
-                                rules={[{ required: true, message: 'Name can not be null!' }]}
+                    <Spin spinning={modalLoadingSpin}>
+
+                        <div>
+                            <Form
+                                name="uomForm"
+                                form={uomForm}
+                                labelCol={{ span: 8 }}
+                                wrapperCol={{ span: 16 }}
+                                initialValues={{ remember: true }}
+                                // onFinish={onFinish}
+                                // onFinishFailed={onFinishFailed}
+                                autoComplete="off"
                             >
-                                <Input onChange={inputNameHandler} value={inputName} />
-                            </Form.Item>
-                            <Form.Item
-                                label="Alias"
-                                name="alias"
-                                rules={[{ required: true, message: 'Alias can not be null!' }]}
-                            >
-                                <Input onChange={inputAliasHandler} value={inputAlias} />
-                            </Form.Item>
-                            <Form.Item
-                                name="description"
-                                label="Description">
-                                <Input.TextArea onChange={inputDescriptionHandler} value={inputDescription} />
-                            </Form.Item>
-                        </Form>
-                    </div>
+                                <Form.Item
+                                    label="Name"
+                                    name="name"
+                                    rules={[{ required: true, message: 'Name can not be null!' }]}
+                                >
+                                    <Input onChange={inputNameHandler} value={inputName} />
+                                </Form.Item>
+                                <Form.Item
+                                    label="Alias"
+                                    name="alias"
+                                    rules={[{ required: true, message: 'Alias can not be null!' }]}
+                                >
+                                    <Input onChange={inputAliasHandler} value={inputAlias} />
+                                </Form.Item>
+                                <Form.Item
+                                    name="description"
+                                    label="Description">
+                                    <Input.TextArea onChange={inputDescriptionHandler} value={inputDescription} />
+                                </Form.Item>
+                            </Form>
+                        </div>
+                    </Spin>
                 </Modal>
             </div>
+
         </>
     )
 }
