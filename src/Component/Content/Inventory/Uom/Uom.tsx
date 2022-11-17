@@ -5,7 +5,7 @@ import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 
 
-const UomComponent: React.FC = () => {
+const Uom: React.FC = () => {
     var [tableLoadingSpin, setTableSpinLoading] = useState(false);
 
     interface Uom {
@@ -20,7 +20,8 @@ const UomComponent: React.FC = () => {
     const [uomForm] = Form.useForm();
     const [uoms, setUoms] = useState<Uom[]>([]);
     const [uom, setUom] = useState<Uom>();
-    var [uomId, setUomId] = useState<number>();
+    const [uomId, setUomId] = useState<number>();
+    const [isFormDisabled, setisFormDisabled] = useState(false);
 
     // Modal related properties
     var [modalLoadingSpin, setModalSpinLoading] = useState(false);
@@ -70,9 +71,14 @@ const UomComponent: React.FC = () => {
     useEffect(() => {
         if (modalState === 'CREATE') {
             setModalOkButtonText('Create');
+            setisFormDisabled(false);
             setUomId(0);
+        } else if (modalState === 'VIEW') {
+            setModalOkButtonText('Change');
+            setisFormDisabled(true);
         } else {
             setModalOkButtonText('Change');
+            setisFormDisabled(false);
         }
 
         return () => {
@@ -154,7 +160,6 @@ const UomComponent: React.FC = () => {
     };
 
     const handleCancel = () => {
-        console.log('Clicked cancel button');
         setModalOpen(false);
         setModalSpinLoading(false);
         setmodalState('CREATE');
@@ -205,7 +210,8 @@ const UomComponent: React.FC = () => {
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
-                    <a onClick={() => updateUomAction(record.id)}>Update</a>
+                    <a onClick={() => viewAction(record.id)}>View</a>
+                    <a onClick={() => updateAction(record.id)}>Update</a>
                     <Popconfirm
                         title="Are you sure to delete this record?"
                         onConfirm={deletePopConfirm}
@@ -234,7 +240,7 @@ const UomComponent: React.FC = () => {
         console.log(e);
     };
 
-    const updateUomAction = (id: number) => {
+    const updateAction = (id: number) => {
 
         setUomId(id);
         setmodalState('UPDATE');
@@ -261,6 +267,28 @@ const UomComponent: React.FC = () => {
         setUomId(id);
     }
 
+    const viewAction = (id: number) => {
+        setUomId(id);
+        setmodalState('VIEW');
+        showModal();
+        setModalSpinLoading(true);
+        axios.get(`http://localhost:8080/uoms/${id}`)
+            .then((response) => {
+
+                uomForm.setFieldsValue({
+                    name: response.data.name,
+                    alias: response.data.alias,
+                    description: response.data.description
+                });
+
+                setModalSpinLoading(false);
+            }).catch(err => {
+                // Handle error
+                console.log("server error");
+                setModalSpinLoading(false);
+            });
+    }
+
     return (
         <>
             <Row>
@@ -285,6 +313,7 @@ const UomComponent: React.FC = () => {
                             confirmLoading={modalConfirmLoading}
                             onCancel={handleCancel}
                             okText={modalOkButtonText}
+                            okButtonProps={{ disabled: isFormDisabled }}
                         >
                             <Spin spinning={modalLoadingSpin}>
 
@@ -296,6 +325,7 @@ const UomComponent: React.FC = () => {
                                         wrapperCol={{ span: 16 }}
                                         initialValues={{ remember: true }}
                                         autoComplete="off"
+                                        disabled={isFormDisabled}
                                     >
                                         <Form.Item
                                             label="Name"
@@ -329,4 +359,4 @@ const UomComponent: React.FC = () => {
     )
 }
 
-export default UomComponent;
+export default Uom;

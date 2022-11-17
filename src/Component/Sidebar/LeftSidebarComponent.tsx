@@ -28,6 +28,7 @@ const items: MenuProps['items'] = [
     getItem('Inventory Management', 'invsum', <SettingOutlined />, [
         getItem('UoM', '/uom'),
         getItem('Brand', '/brand'),
+        getItem('Category', '/category'),
         getItem('Product', '/product'),
     ]),
     getItem('Purchase Management', 'pursum', <SettingOutlined />, [

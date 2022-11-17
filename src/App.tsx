@@ -7,7 +7,7 @@ import HeaderComponent from './Component/Header/HeaderComponent';
 import LeftSidebarComponent from './Component/Sidebar/LeftSidebarComponent';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ContactComponent from './Component/Content/Contact/ContactComponent';
-import UomComponent from './Component/Content/Inventory/Uom/UomComponent';
+import Uom from './Component/Content/Inventory/Uom/Uom';
 
 const App: React.FC = () => (
   <>
