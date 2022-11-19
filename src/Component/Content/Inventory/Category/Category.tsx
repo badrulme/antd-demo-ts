@@ -1,4 +1,4 @@
-import { Button, Col, Form, Input, message, Modal, PageHeader, Popconfirm, Row, Space, Spin, Table } from 'antd';
+import { Button, Col, Form, Input, message, Modal, PageHeader, Popconfirm, Row, Select, Space, Spin, Table } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
 import axios from 'axios';
 import moment from 'moment';
@@ -7,6 +7,16 @@ import { useEffect, useState } from 'react';
 type Props = {}
 
 export default function Category({ }: Props) {
+    const [parentCategories, setParentCategories] = useState<Category[]>([]);
+
+    const onChange = (value: string) => {
+        console.log(`selected ${value}`);
+    };
+
+    const onSearch = (value: string) => {
+        console.log('search:', value);
+    };
+
     var [tableLoadingSpin, setTableSpinLoading] = useState(false);
 
     interface Category {
@@ -47,9 +57,13 @@ export default function Category({ }: Props) {
                 console.log(response.data);
                 response.data.map((x: { [x: string]: any; id: any; }) => {
                     x['key'] = x.id;
+                    x['value'] = x.id;
+                    x['label'] = x.name;
                 })
                 setCategories(response.data);
                 setTableSpinLoading(false);
+                setParentCategories(response.data);
+
             }).catch(err => {
                 // Handle error
                 console.log("server error");
@@ -330,6 +344,19 @@ export default function Category({ }: Props) {
                                             name="description"
                                             label="Description">
                                             <Input.TextArea />
+                                        </Form.Item>
+                                        <Form.Item name="parentId" label="Parent Category" rules={[{ required: false }]}>
+                                            <Select
+                                                showSearch
+                                                placeholder="Parent Category"
+                                                optionFilterProp="children"
+                                                onChange={onChange}
+                                                onSearch={onSearch}
+                                                filterOption={(input, option) =>
+                                                    (option?.name ?? '').toLowerCase().includes(input.toLowerCase())
+                                                }
+                                                options={parentCategories}
+                                            />
                                         </Form.Item>
                                     </Form>
                                 </div>
