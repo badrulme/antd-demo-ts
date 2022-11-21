@@ -25,14 +25,32 @@ function getItem(
 const items: MenuProps['items'] = [
 
     getItem('Dashboard', '/', <PieChartOutlined />),
-    getItem('Inventory Management', 'invsum', <SettingOutlined />, [
+    getItem('Human Resource', 'hrsubm', <SettingOutlined />, [
+        getItem('Job Title', '/job-title'),
+        getItem('Employee', '/employee'),
+    ]),
+    getItem('Inventory', 'invsubm', <SettingOutlined />, [
+        getItem('Transaction Type', '/transaction-type'),
         getItem('UoM', '/uom'),
         getItem('Brand', '/brand'),
         getItem('Category', '/category'),
         getItem('Product', '/product'),
+        getItem('Opening Balance', '/opening-balance'),
     ]),
-    getItem('Purchase Management', 'pursum', <SettingOutlined />, [
+    getItem('Purchase', 'pursubm', <SettingOutlined />, [
         getItem('Supplier', '/supplier'),
+        getItem('Purchase Order', '/purchase-order'),
+        getItem('Product Receive', '/product-receive'),
+        getItem('Purchase Register', '/purchase-register'),
+    ]),
+    getItem('Sales', 'slsubm', <SettingOutlined />, [
+        getItem('Customer', '/customer'),
+        getItem('Sales Invoice', '/sales-invoice'),
+        getItem('Sales Return', '/sales-return'),
+        getItem('Sales Register', '/sales-register'),
+    ]),
+    getItem('Settings', 'settingssubm', <SettingOutlined />, [
+        getItem('Company', '/company'),
     ]),
 ];
 
