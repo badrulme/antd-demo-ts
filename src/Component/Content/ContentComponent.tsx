@@ -1,25 +1,29 @@
-import { Content } from 'antd/lib/layout/layout';
-import { Outlet } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import ContactComponent from './Contact/ContactComponent';
 import DashboardComponent from './Dashboard/DashboardComponent';
-import Uom from './Inventory/Uom/Uom';
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Brand from './Inventory/Brand/Brand';
-import Product from './Inventory/Product/Product';
-import Category from './Inventory/Category/Category';
-import JobTitle from './Hr/JobTitle';
 import Employee from './Hr/Employee';
-import TransactionType from './Inventory/TransactionType/TransactionType';
+import JobTitle from './Hr/JobTitle';
+import Brand from './Inventory/Brand/Brand';
+import Category from './Inventory/Category/Category';
 import OpeningBalance from './Inventory/OpeningBalance/OpeningBalance';
-import SalesInvoice from './Sales/Invoice/SalesInvoice';
-import SalesRegister from './Sales/Register/SalesRegister';
-import SalesReturn from './Sales/Return/SalesReturn';
-import Customer from './Sales/Customer';
-import Supplier from './Purchase/Supplier';
+import Product from './Inventory/Product/Product';
+import TransactionType from './Inventory/TransactionType/TransactionType';
+import Uom from './Inventory/Uom/Uom';
 import PurchaseOrder from './Purchase/Order/PurchaseOrder';
 import ProductReceive from './Purchase/Receive/ProductReceive';
 import PurchaseRegister from './Purchase/Register/PurchaseRegister';
+import Supplier from './Purchase/Supplier';
+import Customer from './Sales/Customer';
+import SalesInvoice from './Sales/Invoice/SalesInvoice';
+import SalesRegister from './Sales/Register/SalesRegister';
+import SalesReturn from './Sales/Return/SalesReturn';
 import CompanyInfo from './Settings/CompanyInfo/CompanyInfo';
+
+import { Layout } from 'antd';
+
+const {  Content } = Layout;
+
+
 const ContentComponent: React.FC = () => (
     <>
         <Content

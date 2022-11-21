@@ -1,4 +1,4 @@
-import { PageHeader, Table } from 'antd';
+import { Table } from 'antd';
 type Props = {};
 
 export default function TransactionType({ }: Props) {
@@ -36,10 +36,11 @@ export default function TransactionType({ }: Props) {
     ];
     return (
         <>
-            <PageHeader
+            {/* <PageHeader
                 title="Transaction Type"
                 subTitle=""
-            />
+            /> */}
+            Transaction Type
             <Table dataSource={dataSource} columns={columns} />
         </>
     )

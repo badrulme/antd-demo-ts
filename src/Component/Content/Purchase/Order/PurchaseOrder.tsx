@@ -1,4 +1,4 @@
-import { PageHeader, Table } from 'antd';
+import { Table } from 'antd';
 type Props = {};
 
 export default function PurchaseOrder({ }: Props) {
@@ -36,10 +36,11 @@ export default function PurchaseOrder({ }: Props) {
     ];
     return (
         <>
-            <PageHeader
+            {/* <PageHeader
                 title="Purchase Order"
                 subTitle=""
-            />
+            /> */}
+            Purchase Order
             <Table dataSource={dataSource} columns={columns} />
         </>
     )

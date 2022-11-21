@@ -1,7 +1,7 @@
 import { PieChartOutlined, SettingOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Menu } from 'antd';
-import Sider from 'antd/lib/layout/Sider';
+import Sider from 'antd/es/layout/Sider';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 type MenuItem = Required<MenuProps>['items'][number];
@@ -65,13 +65,14 @@ const LeftSidebarComponent: React.FC = () => {
 
 
         <>
-            <Sider
+            <Sider width={260}
+                className="site-layout-background"
                 breakpoint="lg"
                 collapsedWidth="0"
-                onBreakpoint={(broken) => {
+                onBreakpoint={(broken: any) => {
                     console.log(broken);
                 }}
-                onCollapse={(collapsed, type) => {
+                onCollapse={(collapsed: any, type: any) => {
                     console.log(collapsed, type);
                 }}
             >
@@ -81,6 +82,7 @@ const LeftSidebarComponent: React.FC = () => {
                     defaultOpenKeys={['invsum']}
                     mode="inline"
                     items={items}
+                    style={{ width: 256, height: '100%', borderRight: 0 }}
                 />
             </Sider>
         </>

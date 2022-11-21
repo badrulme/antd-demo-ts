@@ -1,4 +1,4 @@
-import { PageHeader, Table } from 'antd';
+import { Table } from 'antd';
 type Props = {};
 
 export default function Customer({ }: Props) {
@@ -36,10 +36,11 @@ export default function Customer({ }: Props) {
     ];
     return (
         <>
-            <PageHeader
+            {/* <PageHeader
                 title="Customer"
                 subTitle=""
-            />
+            /> */}
+            Customer
             <Table dataSource={dataSource} columns={columns} />
         </>
     )

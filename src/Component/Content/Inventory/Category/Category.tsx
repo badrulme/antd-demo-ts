@@ -1,5 +1,5 @@
-import { Button, Col, Form, Input, message, Modal, PageHeader, Popconfirm, Row, Select, Space, Spin, Table } from 'antd';
-import { ColumnsType } from 'antd/lib/table';
+import { Button, Col, Form, Input, message, Modal, Popconfirm, Row, Select, Space, Spin, Table } from 'antd';
+import { ColumnsType } from 'antd/es/table';
 import axios from 'axios';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
@@ -195,7 +195,7 @@ export default function Category({ }: Props) {
             title: 'Created Date',
             dataIndex: 'createdDate',
             key: 'createdDate',
-            render: (_, record) => (
+            render: (_: any, record: Category) => (
                 moment
                     .utc(record.createdDate)
                     .local()
@@ -206,7 +206,7 @@ export default function Category({ }: Props) {
             title: 'Last Modified Date',
             dataIndex: 'lastModifiedDate',
             key: 'lastModifiedDate',
-            render: (_, record) => (
+            render: (_: any, record: Category) => (
                 moment
                     .utc(record.lastModifiedDate)
                     .local()
@@ -216,7 +216,7 @@ export default function Category({ }: Props) {
         {
             title: 'Action',
             key: 'action',
-            render: (_, record) => (
+            render: (_: any, record: Category) => (
                 <Space size="middle">
                     <a onClick={() => viewAction(record.id)}>View</a>
                     <a onClick={() => updateAction(record.id)}>Update</a>
@@ -301,10 +301,11 @@ export default function Category({ }: Props) {
                 <Col md={24}>
                     <div>
 
-                        <PageHeader
+                        {/* <PageHeader
                             title="Category"
                             subTitle=""
-                        />
+                        /> */}
+                        Category
                         <Button type="primary" onClick={showModal}>Create</Button>
                         <Table
                             loading={tableLoadingSpin}

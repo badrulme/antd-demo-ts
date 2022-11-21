@@ -1,4 +1,4 @@
-import { PageHeader, Table } from 'antd';
+import { Table } from 'antd';
 type Props = {};
 
 export default function ProductReceive({ }: Props) {
@@ -36,10 +36,11 @@ export default function ProductReceive({ }: Props) {
     ];
     return (
         <>
-            <PageHeader
+            {/* <PageHeader
                 title="Product Receive"
                 subTitle=""
-            />
+            /> */}
+            Product Receive
             <Table dataSource={dataSource} columns={columns} />
         </>
     )

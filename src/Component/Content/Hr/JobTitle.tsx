@@ -1,6 +1,6 @@
 import { CheckCircleTwoTone } from '@ant-design/icons';
-import { Badge, Button, Col, Form, Input, message, Modal, PageHeader, Popconfirm, Row, Space, Spin, Switch, Table } from 'antd';
-import { ColumnsType } from 'antd/lib/table';
+import { Button, Col, Form, Input, message, Modal, Popconfirm, Row, Space, Spin, Switch, Table } from 'antd';
+import { ColumnsType } from 'antd/es/table';
 import axios from 'axios';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
@@ -192,7 +192,7 @@ const JobTitle: React.FC = () => {
             title: 'Status',
             dataIndex: 'status',
             key: 'status',
-            render: (_, record) => {
+            render: (_: any, record: JobTitle) => {
                 if (record.activeStatus) {
                     return (
                         <span>
@@ -213,7 +213,7 @@ const JobTitle: React.FC = () => {
             title: 'Created Date',
             dataIndex: 'createdDate',
             key: 'createdDate',
-            render: (_, record) => (
+            render: (_: any, record: JobTitle) => (
                 moment
                     .utc(record.createdDate)
                     .local()
@@ -224,7 +224,7 @@ const JobTitle: React.FC = () => {
             title: 'Last Modified Date',
             dataIndex: 'lastModifiedDate',
             key: 'lastModifiedDate',
-            render: (_, record) => (
+            render: (_: any, record: JobTitle) => (
                 moment
                     .utc(record.lastModifiedDate)
                     .local()
@@ -234,7 +234,7 @@ const JobTitle: React.FC = () => {
         {
             title: 'Action',
             key: 'action',
-            render: (_, record) => (
+            render: (_: any, record: JobTitle) => (
                 <Space size="middle">
                     <a onClick={() => viewAction(record.id)}>View</a>
                     <a onClick={() => updateAction(record.id)}>Update</a>
@@ -323,10 +323,11 @@ const JobTitle: React.FC = () => {
                 <Col md={24}>
                     <div>
 
-                        <PageHeader
+                        {/* <PageHeader
                             title="Job Title"
                             subTitle=""
-                        />
+                        /> */}
+                        Job Title
                         <Button type="primary" onClick={showModal}>Create</Button>
                         <Table
                             loading={tableLoadingSpin}

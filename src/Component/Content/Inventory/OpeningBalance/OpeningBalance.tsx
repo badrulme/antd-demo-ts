@@ -1,4 +1,4 @@
-import { PageHeader, Table } from 'antd';
+import { Table } from 'antd';
 type Props = {};
 
 export default function OpeningBalance({ }: Props) {
@@ -36,10 +36,11 @@ export default function OpeningBalance({ }: Props) {
     ];
     return (
         <>
-            <PageHeader
+            {/* <PageHeader
                 title="Opening Balance"
                 subTitle=""
-            />
+            /> */}
+            Opening Balance
             <Table dataSource={dataSource} columns={columns} />
         </>
     )

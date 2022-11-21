@@ -1,5 +1,5 @@
-import { Button, Col, Form, Input, message, Modal, PageHeader, Popconfirm, Row, Space, Spin, Table } from 'antd';
-import { ColumnsType } from 'antd/lib/table';
+import { Button, Col, Form, Input, message, Modal, Popconfirm, Row, Space, Spin, Table } from 'antd';
+import { ColumnsType } from 'antd/es/table';
 import axios from 'axios';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
@@ -188,7 +188,7 @@ export default function Brand({ }: Props) {
             title: 'Created Date',
             dataIndex: 'createdDate',
             key: 'createdDate',
-            render: (_, record) => (
+            render: (_: any, record: Brand) => (
                 moment
                     .utc(record.createdDate)
                     .local()
@@ -199,7 +199,7 @@ export default function Brand({ }: Props) {
             title: 'Last Modified Date',
             dataIndex: 'lastModifiedDate',
             key: 'lastModifiedDate',
-            render: (_, record) => (
+            render: (_: any, record: Brand) => (
                 moment
                     .utc(record.lastModifiedDate)
                     .local()
@@ -209,7 +209,7 @@ export default function Brand({ }: Props) {
         {
             title: 'Action',
             key: 'action',
-            render: (_, record) => (
+            render: (_: any, record: Brand) => (
                 <Space size="middle">
                     <a onClick={() => viewAction(record.id)}>View</a>
                     <a onClick={() => updateAction(record.id)}>Update</a>
@@ -296,10 +296,11 @@ export default function Brand({ }: Props) {
                 <Col md={24}>
                     <div>
 
-                        <PageHeader
+                        {/* <PageHeader
                             title="Brand"
                             subTitle=""
-                        />
+                        /> */}
+                        Brand
                         <Button type="primary" onClick={showModal}>Create</Button>
                         <Table
                             loading={tableLoadingSpin}
