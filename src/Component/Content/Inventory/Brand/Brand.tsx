@@ -1,5 +1,6 @@
 import { Button, Col, Form, Input, message, Modal, Popconfirm, Row, Space, Spin, Table } from 'antd';
 import { ColumnsType } from 'antd/es/table';
+import Title from 'antd/es/typography/Title';
 import axios from 'axios';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
@@ -22,7 +23,7 @@ export default function Brand({ }: Props) {
     const [brands, setBrands] = useState<Brand[]>([]);
     const [brand, setBrand] = useState<Brand>();
     const [brandId, setBrandId] = useState<number>();
-    const [isFormDisabled, setisFormDisabled] = useState(false);
+    const [isFormDisabled, setIsFormDisabled] = useState(false);
 
     // Modal related properties
     var [modalLoadingSpin, setModalSpinLoading] = useState(false);
@@ -43,7 +44,7 @@ export default function Brand({ }: Props) {
 
     const getBrands = () => {
         setTableSpinLoading(true);
-        axios.get(`http://localhost:8080/brands`)
+        axios.get(`http://localhost:8081/brands`)
             .then((response) => {
                 console.log(response.data);
                 response.data.map((x: { [x: string]: any; id: any; }) => {
@@ -59,7 +60,7 @@ export default function Brand({ }: Props) {
     }
 
     const getBrand = (id: number) => {
-        axios.get(`http://localhost:8080/brands/${id}`)
+        axios.get(`http://localhost:8081/brands/${id}`)
             .then((response) => {
                 console.log(response.data);
                 setBrand(response.data);
@@ -72,14 +73,14 @@ export default function Brand({ }: Props) {
     useEffect(() => {
         if (modalState === 'CREATE') {
             setModalOkButtonText('Create');
-            setisFormDisabled(false);
+            setIsFormDisabled(false);
             setBrandId(0);
         } else if (modalState === 'VIEW') {
             setModalOkButtonText('Change');
-            setisFormDisabled(true);
+            setIsFormDisabled(true);
         } else {
             setModalOkButtonText('Change');
-            setisFormDisabled(false);
+            setIsFormDisabled(false);
         }
 
         return () => {
@@ -118,7 +119,7 @@ export default function Brand({ }: Props) {
             setModalConfirmLoading(true);
 
             if (modalState === 'CREATE') {
-                axios.post(`http://localhost:8080/brands`, {
+                axios.post(`http://localhost:8081/brands`, {
                     name: brandForm.getFieldValue('name'),
                     alias: brandForm.getFieldValue('alias'),
                     description: brandForm.getFieldValue('description')
@@ -135,7 +136,7 @@ export default function Brand({ }: Props) {
                     setModalConfirmLoading(false);
                 });
             } else {
-                axios.put(`http://localhost:8080/brands/${brandId}`, {
+                axios.put(`http://localhost:8081/brands/${brandId}`, {
                     name: brandForm.getFieldValue('name'),
                     alias: brandForm.getFieldValue('alias'),
                     description: brandForm.getFieldValue('description')
@@ -145,7 +146,7 @@ export default function Brand({ }: Props) {
                     setModalOpen(false);
                     setModalConfirmLoading(false);
                     getBrands();
-                    console.log(response);
+                    setmodalState('CREATE');
                 }).catch(err => {
                     // Handle error
                     console.log("server error");
@@ -192,7 +193,7 @@ export default function Brand({ }: Props) {
                 moment
                     .utc(record.createdDate)
                     .local()
-                    .format('DD-MM-YYYY')
+                    .format('DD-MMM-YYYY')
             )
         },
         {
@@ -228,7 +229,7 @@ export default function Brand({ }: Props) {
     ];
 
     const deletePopConfirm = (e: any) => {
-        axios.delete(`http://localhost:8080/brands/${brandId}`)
+        axios.delete(`http://localhost:8081/brands/${brandId}`)
             .then((response) => {
                 getBrands();
                 message.success('Deleted Successfully.');
@@ -247,7 +248,7 @@ export default function Brand({ }: Props) {
         setmodalState('UPDATE');
         showModal();
         setModalSpinLoading(true);
-        axios.get(`http://localhost:8080/brands/${id}`)
+        axios.get(`http://localhost:8081/brands/${id}`)
             .then((response) => {
 
                 brandForm.setFieldsValue({
@@ -273,7 +274,7 @@ export default function Brand({ }: Props) {
         setmodalState('VIEW');
         showModal();
         setModalSpinLoading(true);
-        axios.get(`http://localhost:8080/brands/${id}`)
+        axios.get(`http://localhost:8081/brands/${id}`)
             .then((response) => {
 
                 brandForm.setFieldsValue({
@@ -295,12 +296,7 @@ export default function Brand({ }: Props) {
             <Row>
                 <Col md={24}>
                     <div>
-
-                        {/* <PageHeader
-                            title="Brand"
-                            subTitle=""
-                        /> */}
-                        Brand
+                        <Title level={2}>Brand</Title>
                         <Button type="primary" onClick={showModal}>Create</Button>
                         <Table
                             loading={tableLoadingSpin}

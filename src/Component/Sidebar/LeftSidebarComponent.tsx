@@ -66,7 +66,7 @@ const LeftSidebarComponent: React.FC = () => {
 
         <>
             <Sider width={260}
-                className="site-layout-background"
+                theme="light"
                 breakpoint="lg"
                 collapsedWidth="0"
                 onBreakpoint={(broken: any) => {

@@ -1,6 +1,7 @@
 import { CheckCircleTwoTone } from '@ant-design/icons';
 import { Button, Col, Form, Input, message, Modal, Popconfirm, Row, Space, Spin, Switch, Table } from 'antd';
 import { ColumnsType } from 'antd/es/table';
+import Title from 'antd/es/typography/Title';
 import axios from 'axios';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
@@ -21,13 +22,13 @@ const JobTitle: React.FC = () => {
 
     const [jobTitleForm] = Form.useForm();
     const [jobTitles, setJobTitles] = useState<JobTitle[]>([]);
-    const [jobTitle, setJobTitle] = useState<JobTitle>();
+    // const [jobTitle, setJobTitle] = useState<JobTitle>();
     const [jobTitleId, setJobTitleId] = useState<number>();
-    const [isFormDisabled, setisFormDisabled] = useState(false);
+    const [isFormDisabled, setIsFormDisabled] = useState(false);
 
     // Modal related properties
     var [modalLoadingSpin, setModalSpinLoading] = useState(false);
-    var [modalState, setmodalState] = useState('CREATE');
+    var [modalState, setModalState] = useState('CREATE');
     const [modalOkButtonText, setModalOkButtonText] = useState('Create');
     const [modalOpen, setModalOpen] = useState(false);
     const [modalConfirmLoading, setModalConfirmLoading] = useState(false);
@@ -44,7 +45,7 @@ const JobTitle: React.FC = () => {
 
     const getJobTitles = () => {
         setTableSpinLoading(true);
-        axios.get(`http://localhost:8080/jobTitles`)
+        axios.get(`http://localhost:8081/jobTitles`)
             .then((response) => {
                 console.log(response.data);
                 response.data.map((x: { [x: string]: any; id: any; }) => {
@@ -59,28 +60,28 @@ const JobTitle: React.FC = () => {
             });
     }
 
-    const getJobTitle = (id: number) => {
-        axios.get(`http://localhost:8080/jobTitles/${id}`)
-            .then((response) => {
-                console.log(response.data);
-                setJobTitle(response.data);
-            }).catch(err => {
-                // Handle error
-                console.log("server error");
-            });
-    }
+    // const getJobTitle = (id: number) => {
+    //     axios.get(`http://localhost:8081/jobTitles/${id}`)
+    //         .then((response) => {
+    //             console.log(response.data);
+    //             setJobTitle(response.data);
+    //         }).catch(err => {
+    //             // Handle error
+    //             console.log("server error");
+    //         });
+    // }
 
     useEffect(() => {
         if (modalState === 'CREATE') {
             setModalOkButtonText('Create');
-            setisFormDisabled(false);
+            setIsFormDisabled(false);
             setJobTitleId(0);
         } else if (modalState === 'VIEW') {
             setModalOkButtonText('Change');
-            setisFormDisabled(true);
+            setIsFormDisabled(true);
         } else {
             setModalOkButtonText('Change');
-            setisFormDisabled(false);
+            setIsFormDisabled(false);
         }
 
         return () => {
@@ -102,73 +103,22 @@ const JobTitle: React.FC = () => {
         });
     }
 
-    const checkFormValidation = async () => {
-        try {
-            const values = await jobTitleForm.validateFields();
-            console.log('Success:', values);
-        } catch (errorInfo) {
-            console.log('Failed:', errorInfo);
-        }
-    };
+    // const checkFormValidation = async () => {
+    //     try {
+    //         const values = await jobTitleForm.validateFields();
+    //         console.log('Success:', values);
+    //     } catch (errorInfo) {
+    //         console.log('Failed:', errorInfo);
+    //     }
+    // };
 
-    const modalFormSubmit = async () => {
-
-        try {
-            const values = await jobTitleForm.validateFields();
-            console.log('Success:', values);
-            checkFormValidation();
-            setModalConfirmLoading(true);
-
-            if (modalState === 'CREATE') {
-                axios.post(`http://localhost:8080/jobTitles`, {
-                    name: jobTitleForm.getFieldValue('name'),
-                    alias: jobTitleForm.getFieldValue('alias'),
-                    description: jobTitleForm.getFieldValue('description'),
-                    activeStatus: jobTitleForm.getFieldValue('activeStatus'),
-
-                }).then((response) => {
-                    setModalOpen(false);
-                    clearModalField();
-                    setModalConfirmLoading(false);
-                    getJobTitles();
-                    console.log(response);
-                }).catch(err => {
-                    // Handle error
-                    console.log("server error");
-                    setModalConfirmLoading(false);
-                });
-            } else {
-                axios.put(`http://localhost:8080/jobTitles/${jobTitleId}`, {
-                    name: jobTitleForm.getFieldValue('name'),
-                    alias: jobTitleForm.getFieldValue('alias'),
-                    description: jobTitleForm.getFieldValue('description'),
-                    activeStatus: jobTitleForm.getFieldValue('activeStatus')
-
-                }).then((response) => {
-                    clearModalField();
-                    setModalOpen(false);
-                    setModalConfirmLoading(false);
-                    getJobTitles();
-                    console.log(response);
-                }).catch(err => {
-                    // Handle error
-                    console.log("server error");
-                    setModalConfirmLoading(false);
-                });
-            }
-        } catch (errorInfo) {
-            console.log('Failed:', errorInfo);
-        }
-
-
-
-    };
 
     const handleCancel = () => {
         setModalOpen(false);
         setModalSpinLoading(false);
-        setmodalState('CREATE');
+        setModalState('CREATE');
     };
+
 
 
     // table rendering settings
@@ -217,18 +167,18 @@ const JobTitle: React.FC = () => {
                 moment
                     .utc(record.createdDate)
                     .local()
-                    .format('DD-MM-YYYY')
+                    .format('DD-MMM-YYYY')
             )
         },
         {
-            title: 'Last Modified Date',
+            title: 'Modified Date',
             dataIndex: 'lastModifiedDate',
             key: 'lastModifiedDate',
             render: (_: any, record: JobTitle) => (
                 moment
                     .utc(record.lastModifiedDate)
                     .local()
-                    .format('DD-MM-YYYY')
+                    .format('DD-MMM-YYYY')
             )
         },
         {
@@ -252,8 +202,60 @@ const JobTitle: React.FC = () => {
         },
     ];
 
+
+    const modalFormSubmit = async () => {
+
+        try {
+            const values = await jobTitleForm.validateFields();
+            console.log('Success:', values);
+            setModalConfirmLoading(true);
+
+            if (modalState === 'CREATE') {
+                axios.post(`http://localhost:8081/jobTitles`, {
+                    name: jobTitleForm.getFieldValue('name'),
+                    alias: jobTitleForm.getFieldValue('alias'),
+                    description: jobTitleForm.getFieldValue('description'),
+                    activeStatus: jobTitleForm.getFieldValue('activeStatus'),
+
+                }).then((response) => {
+                    setModalOpen(false);
+                    clearModalField();
+                    setModalConfirmLoading(false);
+                    getJobTitles();
+                    console.log(response);
+                }).catch(err => {
+                    // Handle error
+                    console.log("server error");
+                    setModalConfirmLoading(false);
+                });
+            } else {
+                axios.put(`http://localhost:8081/jobTitles/${jobTitleId}`, {
+                    name: jobTitleForm.getFieldValue('name'),
+                    alias: jobTitleForm.getFieldValue('alias'),
+                    description: jobTitleForm.getFieldValue('description'),
+                    activeStatus: jobTitleForm.getFieldValue('activeStatus')
+
+                }).then((response) => {
+                    clearModalField();
+                    setModalOpen(false);
+                    setModalConfirmLoading(false);
+                    getJobTitles();
+                    setModalState('CREATE');
+                }).catch(err => {
+                    // Handle error
+                    console.log("server error");
+                    setModalConfirmLoading(false);
+                });
+            }
+        } catch (errorInfo) {
+            console.log('Failed:', errorInfo);
+        }
+
+    };
+
+
     const deletePopConfirm = (e: any) => {
-        axios.delete(`http://localhost:8080/jobTitles/${jobTitleId}`)
+        axios.delete(`http://localhost:8081/jobTitles/${jobTitleId}`)
             .then((response) => {
                 getJobTitles();
                 message.success('Deleted Successfully.');
@@ -263,16 +265,15 @@ const JobTitle: React.FC = () => {
     };
 
     const deletePopCancel = (e: any) => {
-        console.log(e);
     };
 
     const updateAction = (id: number) => {
 
         setJobTitleId(id);
-        setmodalState('UPDATE');
+        setModalState('UPDATE');
         showModal();
         setModalSpinLoading(true);
-        axios.get(`http://localhost:8080/jobTitles/${id}`)
+        axios.get(`http://localhost:8081/jobTitles/${id}`)
             .then((response) => {
 
                 jobTitleForm.setFieldsValue({
@@ -296,10 +297,10 @@ const JobTitle: React.FC = () => {
 
     const viewAction = (id: number) => {
         setJobTitleId(id);
-        setmodalState('VIEW');
+        setModalState('VIEW');
         showModal();
         setModalSpinLoading(true);
-        axios.get(`http://localhost:8080/jobTitles/${id}`)
+        axios.get(`http://localhost:8081/jobTitles/${id}`)
             .then((response) => {
 
                 jobTitleForm.setFieldsValue({
@@ -311,7 +312,6 @@ const JobTitle: React.FC = () => {
 
                 setModalSpinLoading(false);
             }).catch(err => {
-                // Handle error
                 console.log("server error");
                 setModalSpinLoading(false);
             });
@@ -322,12 +322,7 @@ const JobTitle: React.FC = () => {
             <Row>
                 <Col md={24}>
                     <div>
-
-                        {/* <PageHeader
-                            title="Job Title"
-                            subTitle=""
-                        /> */}
-                        Job Title
+                        <Title level={2}>Job Title</Title>
                         <Button type="primary" onClick={showModal}>Create</Button>
                         <Table
                             loading={tableLoadingSpin}

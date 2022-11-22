@@ -1,5 +1,6 @@
 import { Button, Col, Form, Input, message, Modal, Popconfirm, Row, Select, Space, Spin, Table } from 'antd';
 import { ColumnsType } from 'antd/es/table';
+import Title from 'antd/es/typography/Title';
 import axios from 'axios';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
@@ -8,6 +9,7 @@ type Props = {}
 
 export default function Category({ }: Props) {
     const [parentCategories, setParentCategories] = useState<Category[]>([]);
+    const [displayParentCategories, setDisplayParentCategories] = useState<Category[]>([]);
 
     const onChange = (value: string) => {
         console.log(`selected ${value}`);
@@ -22,6 +24,7 @@ export default function Category({ }: Props) {
     interface Category {
         id: number;
         name: string;
+        parentId: number;
         description: string;
         createdDate: string;
         lastModifiedDate: string;
@@ -31,7 +34,7 @@ export default function Category({ }: Props) {
     const [categories, setCategories] = useState<Category[]>([]);
     const [category, setCategory] = useState<Category>();
     const [categoryId, setCategoryId] = useState<number>();
-    const [isFormDisabled, setisFormDisabled] = useState(false);
+    const [isFormDisabled, setIsFormDisabled] = useState(false);
 
     // Modal related properties
     var [modalLoadingSpin, setModalSpinLoading] = useState(false);
@@ -52,7 +55,7 @@ export default function Category({ }: Props) {
 
     const getCategorys = () => {
         setTableSpinLoading(true);
-        axios.get(`http://localhost:8080/categories`)
+        axios.get(`http://localhost:8081/categories`)
             .then((response) => {
                 console.log(response.data);
                 response.data.map((x: { [x: string]: any; id: any; }) => {
@@ -63,6 +66,7 @@ export default function Category({ }: Props) {
                 setCategories(response.data);
                 setTableSpinLoading(false);
                 setParentCategories(response.data);
+                setDisplayParentCategories(response.data);
 
             }).catch(err => {
                 // Handle error
@@ -72,7 +76,7 @@ export default function Category({ }: Props) {
     }
 
     const getCategory = (id: number) => {
-        axios.get(`http://localhost:8080/categories/${id}`)
+        axios.get(`http://localhost:8081/categories/${id}`)
             .then((response) => {
                 console.log(response.data);
                 setCategory(response.data);
@@ -85,14 +89,15 @@ export default function Category({ }: Props) {
     useEffect(() => {
         if (modalState === 'CREATE') {
             setModalOkButtonText('Create');
-            setisFormDisabled(false);
+            setIsFormDisabled(false);
             setCategoryId(0);
+            setDisplayParentCategories(parentCategories);
         } else if (modalState === 'VIEW') {
             setModalOkButtonText('Change');
-            setisFormDisabled(true);
+            setIsFormDisabled(true);
         } else {
             setModalOkButtonText('Change');
-            setisFormDisabled(false);
+            setIsFormDisabled(false);
         }
 
         return () => {
@@ -109,7 +114,8 @@ export default function Category({ }: Props) {
         categoryForm.setFieldsValue({
             name: '',
             alias: '',
-            description: ''
+            description: '',
+            parentId: ''
         });
     }
 
@@ -131,9 +137,10 @@ export default function Category({ }: Props) {
             setModalConfirmLoading(true);
 
             if (modalState === 'CREATE') {
-                axios.post(`http://localhost:8080/categories`, {
+                axios.post(`http://localhost:8081/categories`, {
                     name: categoryForm.getFieldValue('name'),
-                    description: categoryForm.getFieldValue('description')
+                    description: categoryForm.getFieldValue('description'),
+                    parentId: categoryForm.getFieldValue('parentId')
 
                 }).then((response) => {
                     setModalOpen(false);
@@ -147,28 +154,25 @@ export default function Category({ }: Props) {
                     setModalConfirmLoading(false);
                 });
             } else {
-                axios.put(`http://localhost:8080/categories/${categoryId}`, {
+                axios.put(`http://localhost:8081/categories/${categoryId}`, {
                     name: categoryForm.getFieldValue('name'),
-                    alias: categoryForm.getFieldValue('alias'),
-                    description: categoryForm.getFieldValue('description')
+                    description: categoryForm.getFieldValue('description'),
+                    parentId: categoryForm.getFieldValue('parentId')
 
                 }).then((response) => {
                     clearModalField();
                     setModalOpen(false);
                     setModalConfirmLoading(false);
                     getCategorys();
-                    console.log(response);
+                    setmodalState('CREATE');
                 }).catch(err => {
-                    // Handle error
-                    console.log("server error");
+                    console.log("server error", err);
                     setModalConfirmLoading(false);
                 });
             }
         } catch (errorInfo) {
             console.log('Failed:', errorInfo);
         }
-
-
 
     };
 
@@ -235,7 +239,7 @@ export default function Category({ }: Props) {
     ];
 
     const deletePopConfirm = (e: any) => {
-        axios.delete(`http://localhost:8080/categories/${categoryId}`)
+        axios.delete(`http://localhost:8081/categories/${categoryId}`)
             .then((response) => {
                 getCategorys();
                 message.success('Deleted Successfully.');
@@ -254,15 +258,17 @@ export default function Category({ }: Props) {
         setmodalState('UPDATE');
         showModal();
         setModalSpinLoading(true);
-        axios.get(`http://localhost:8080/categories/${id}`)
+        axios.get(`http://localhost:8081/categories/${id}`)
             .then((response) => {
 
                 categoryForm.setFieldsValue({
                     name: response.data.name,
-                    description: response.data.description
+                    description: response.data.description,
+                    parentId: response.data.parentCategory?.id,
                 });
 
                 setModalSpinLoading(false);
+                setDisplayParentCategories(parentCategories.filter(x => x.id != id))
             }).catch(err => {
                 // Handle error
                 console.log("server error");
@@ -279,12 +285,12 @@ export default function Category({ }: Props) {
         setmodalState('VIEW');
         showModal();
         setModalSpinLoading(true);
-        axios.get(`http://localhost:8080/categories/${id}`)
+        axios.get(`http://localhost:8081/categories/${id}`)
             .then((response) => {
-
                 categoryForm.setFieldsValue({
                     name: response.data.name,
-                    description: response.data.description
+                    description: response.data.description,
+                    parentId: response.data.parentCategory?.id,
                 });
 
                 setModalSpinLoading(false);
@@ -305,7 +311,8 @@ export default function Category({ }: Props) {
                             title="Category"
                             subTitle=""
                         /> */}
-                        Category
+                        <Title level={2}>Category</Title>
+
                         <Button type="primary" onClick={showModal}>Create</Button>
                         <Table
                             loading={tableLoadingSpin}
@@ -348,15 +355,16 @@ export default function Category({ }: Props) {
                                         </Form.Item>
                                         <Form.Item name="parentId" label="Parent Category" rules={[{ required: false }]}>
                                             <Select
+                                                allowClear={true}
                                                 showSearch
-                                                placeholder="Parent Category"
+                                                placeholder="Select Parent Category"
                                                 optionFilterProp="children"
                                                 onChange={onChange}
                                                 onSearch={onSearch}
                                                 filterOption={(input, option) =>
                                                     (option?.name ?? '').toLowerCase().includes(input.toLowerCase())
                                                 }
-                                                options={parentCategories}
+                                                options={displayParentCategories}
                                             />
                                         </Form.Item>
                                     </Form>

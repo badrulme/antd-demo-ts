@@ -1,5 +1,6 @@
-import { Button, Col, Form, Input, message, Modal, Popconfirm, Row, Space, Spin, Table } from 'antd';
+import { Button, Card, Col, Form, Input, message, Modal, Popconfirm, Row, Space, Spin, Table } from 'antd';
 import { ColumnsType } from 'antd/es/table';
+import Title from 'antd/es/typography/Title';
 import axios from 'axios';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
@@ -21,7 +22,7 @@ const Uom: React.FC = () => {
     const [uoms, setUoms] = useState<Uom[]>([]);
     const [uom, setUom] = useState<Uom>();
     const [uomId, setUomId] = useState<number>();
-    const [isFormDisabled, setisFormDisabled] = useState(false);
+    const [isFormDisabled, setIsFormDisabled] = useState(false);
 
     // Modal related properties
     var [modalLoadingSpin, setModalSpinLoading] = useState(false);
@@ -42,7 +43,7 @@ const Uom: React.FC = () => {
 
     const getUoms = () => {
         setTableSpinLoading(true);
-        axios.get(`http://localhost:8080/uoms`)
+        axios.get(`http://localhost:8081/uoms`)
             .then((response) => {
                 console.log(response.data);
                 response.data.map((x: { [x: string]: any; id: any; }) => {
@@ -58,7 +59,7 @@ const Uom: React.FC = () => {
     }
 
     const getUom = (id: number) => {
-        axios.get(`http://localhost:8080/uoms/${id}`)
+        axios.get(`http://localhost:8081/uoms/${id}`)
             .then((response) => {
                 console.log(response.data);
                 setUom(response.data);
@@ -71,14 +72,14 @@ const Uom: React.FC = () => {
     useEffect(() => {
         if (modalState === 'CREATE') {
             setModalOkButtonText('Create');
-            setisFormDisabled(false);
+            setIsFormDisabled(false);
             setUomId(0);
         } else if (modalState === 'VIEW') {
             setModalOkButtonText('Change');
-            setisFormDisabled(true);
+            setIsFormDisabled(true);
         } else {
             setModalOkButtonText('Change');
-            setisFormDisabled(false);
+            setIsFormDisabled(false);
         }
 
         return () => {
@@ -92,6 +93,7 @@ const Uom: React.FC = () => {
     };
 
     const clearModalField = () => {
+
         uomForm.setFieldsValue({
             name: '',
             alias: '',
@@ -117,7 +119,7 @@ const Uom: React.FC = () => {
             setModalConfirmLoading(true);
 
             if (modalState === 'CREATE') {
-                axios.post(`http://localhost:8080/uoms`, {
+                axios.post(`http://localhost:8081/uoms`, {
                     name: uomForm.getFieldValue('name'),
                     alias: uomForm.getFieldValue('alias'),
                     description: uomForm.getFieldValue('description')
@@ -134,7 +136,7 @@ const Uom: React.FC = () => {
                     setModalConfirmLoading(false);
                 });
             } else {
-                axios.put(`http://localhost:8080/uoms/${uomId}`, {
+                axios.put(`http://localhost:8081/uoms/${uomId}`, {
                     name: uomForm.getFieldValue('name'),
                     alias: uomForm.getFieldValue('alias'),
                     description: uomForm.getFieldValue('description')
@@ -145,6 +147,7 @@ const Uom: React.FC = () => {
                     setModalConfirmLoading(false);
                     getUoms();
                     console.log(response);
+                    setmodalState('CREATE');
                 }).catch(err => {
                     // Handle error
                     console.log("server error");
@@ -227,7 +230,7 @@ const Uom: React.FC = () => {
     ];
 
     const deletePopConfirm = (e: any) => {
-        axios.delete(`http://localhost:8080/uoms/${uomId}`)
+        axios.delete(`http://localhost:8081/uoms/${uomId}`)
             .then((response) => {
                 getUoms();
                 message.success('Deleted Successfully.');
@@ -246,7 +249,7 @@ const Uom: React.FC = () => {
         setmodalState('UPDATE');
         showModal();
         setModalSpinLoading(true);
-        axios.get(`http://localhost:8080/uoms/${id}`)
+        axios.get(`http://localhost:8081/uoms/${id}`)
             .then((response) => {
 
                 uomForm.setFieldsValue({
@@ -272,7 +275,7 @@ const Uom: React.FC = () => {
         setmodalState('VIEW');
         showModal();
         setModalSpinLoading(true);
-        axios.get(`http://localhost:8080/uoms/${id}`)
+        axios.get(`http://localhost:8081/uoms/${id}`)
             .then((response) => {
 
                 uomForm.setFieldsValue({
@@ -293,13 +296,15 @@ const Uom: React.FC = () => {
         <>
             <Row>
                 <Col md={24}>
+
                     <div>
 
                         {/* <PageHeader
                             title="UoM"
                             subTitle=""
                         /> */}
-                        UoM
+                        <Title level={2}>UoM</Title>
+
                         <Button type="primary" onClick={showModal}>Create</Button>
                         <Table
                             loading={tableLoadingSpin}
