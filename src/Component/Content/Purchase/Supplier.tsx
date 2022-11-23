@@ -107,24 +107,7 @@ const Supplier: React.FC = () => {
     };
 
     const clearModalField = () => {
-
-        supplierForm.setFieldsValue({
-            code: '',
-            name: '',
-            openingBalance: '',
-            openingDate: '',
-            companyName: '',
-            description: '',
-            address: '',
-            email: '',
-            gender: '',
-            contactPersonName: '',
-            contactPersonPhone: '',
-            remarks: '',
-            activeStatus: '',
-            mobile1: '',
-            mobile2: '',
-        });
+        supplierForm.resetFields();
     }
 
     const checkFormValidation = async () => {
