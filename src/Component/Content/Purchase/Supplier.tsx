@@ -1,5 +1,5 @@
 import { CheckCircleTwoTone } from '@ant-design/icons';
-import { Button, Col, Form, Input, message, Modal, Popconfirm, Row, Select, Space, Spin, Switch, Table } from 'antd';
+import { Button, Col, DatePicker, Form, Input, InputNumber, message, Modal, Popconfirm, Row, Select, Space, Spin, Switch, Table } from 'antd';
 import { Option } from 'antd/es/mentions';
 import { ColumnsType } from 'antd/es/table';
 import Title from 'antd/es/typography/Title';
@@ -109,9 +109,21 @@ const Supplier: React.FC = () => {
     const clearModalField = () => {
 
         supplierForm.setFieldsValue({
+            code: '',
             name: '',
-            alias: '',
-            description: ''
+            openingBalance: '',
+            openingDate: '',
+            companyName: '',
+            description: '',
+            address: '',
+            email: '',
+            gender: '',
+            contactPersonName: '',
+            contactPersonPhone: '',
+            remarks: '',
+            activeStatus: '',
+            mobile1: '',
+            mobile2: '',
         });
     }
 
@@ -134,9 +146,21 @@ const Supplier: React.FC = () => {
 
             if (modalState === 'CREATE') {
                 axios.post(`http://localhost:8081/suppliers`, {
+                    code: supplierForm.getFieldValue('code'),
                     name: supplierForm.getFieldValue('name'),
-                    alias: supplierForm.getFieldValue('alias'),
-                    description: supplierForm.getFieldValue('description')
+                    openingBalance: supplierForm.getFieldValue('openingBalance'),
+                    openingDate: supplierForm.getFieldValue('openingDate'),
+                    companyName: supplierForm.getFieldValue('companyName'),
+                    description: supplierForm.getFieldValue('description'),
+                    address: supplierForm.getFieldValue('address'),
+                    email: supplierForm.getFieldValue('email'),
+                    gender: supplierForm.getFieldValue('gender'),
+                    contactPersonName: supplierForm.getFieldValue('contactPersonName'),
+                    contactPersonPhone: supplierForm.getFieldValue('contactPersonPhone'),
+                    remarks: supplierForm.getFieldValue('remarks'),
+                    activeStatus: supplierForm.getFieldValue('activeStatus'),
+                    mobile1: supplierForm.getFieldValue('mobile1'),
+                    mobile2: supplierForm.getFieldValue('mobile2'),
 
                 }).then((response) => {
                     setModalOpen(false);
@@ -151,9 +175,21 @@ const Supplier: React.FC = () => {
                 });
             } else {
                 axios.put(`http://localhost:8081/suppliers/${supplierId}`, {
+                    code: supplierForm.getFieldValue('code'),
                     name: supplierForm.getFieldValue('name'),
-                    alias: supplierForm.getFieldValue('alias'),
-                    description: supplierForm.getFieldValue('description')
+                    openingBalance: supplierForm.getFieldValue('openingBalance'),
+                    openingDate: supplierForm.getFieldValue('openingDate'),
+                    companyName: supplierForm.getFieldValue('companyName'),
+                    description: supplierForm.getFieldValue('description'),
+                    address: supplierForm.getFieldValue('address'),
+                    email: supplierForm.getFieldValue('email'),
+                    gender: supplierForm.getFieldValue('gender'),
+                    contactPersonName: supplierForm.getFieldValue('contactPersonName'),
+                    contactPersonPhone: supplierForm.getFieldValue('contactPersonPhone'),
+                    remarks: supplierForm.getFieldValue('remarks'),
+                    activeStatus: supplierForm.getFieldValue('activeStatus'),
+                    mobile1: supplierForm.getFieldValue('mobile1'),
+                    mobile2: supplierForm.getFieldValue('mobile2'),
 
                 }).then((response) => {
                     clearModalField();
@@ -205,16 +241,6 @@ const Supplier: React.FC = () => {
             dataIndex: 'email',
             key: 'email',
         },
-        // {
-        //     title: 'Contact Person Name',
-        //     dataIndex: 'contactPersonName',
-        //     key: 'contactPersonName',
-        // },
-        // {
-        //     title: 'Contact Person Phone',
-        //     dataIndex: 'contactPersonPhone',
-        //     key: 'contactPersonPhone',
-        // },
         {
             title: 'Status',
             dataIndex: 'status',
@@ -309,8 +335,20 @@ const Supplier: React.FC = () => {
 
                 supplierForm.setFieldsValue({
                     name: response.data.name,
-                    alias: response.data.alias,
-                    description: response.data.description
+                    code: response.data.code,
+                    openingBalance: response.data.openingBalance,
+                    // openingDate: response.data.openingDate,
+                    companyName: response.data.companyName,
+                    description: response.data.description,
+                    address: response.data.address,
+                    email: response.data.email,
+                    gender: response.data.gender,
+                    contactPersonName: response.data.contactPersonName,
+                    contactPersonPhone: response.data.contactPersonPhone,
+                    remarks: response.data.remarks,
+                    activeStatus: response.data.activeStatus,
+                    mobile1: response.data.mobile1,
+                    mobile2: response.data.mobile2,
                 });
 
                 setModalSpinLoading(false);
@@ -335,8 +373,20 @@ const Supplier: React.FC = () => {
 
                 supplierForm.setFieldsValue({
                     name: response.data.name,
-                    alias: response.data.alias,
-                    description: response.data.description
+                    code: response.data.code,
+                    openingBalance: response.data.openingBalance,
+                    // openingDate: response.data.openingDate,
+                    companyName: response.data.companyName,
+                    description: response.data.description,
+                    address: response.data.address,
+                    email: response.data.email,
+                    gender: response.data.gender,
+                    contactPersonName: response.data.contactPersonName,
+                    contactPersonPhone: response.data.contactPersonPhone,
+                    remarks: response.data.remarks,
+                    activeStatus: response.data.activeStatus,
+                    mobile1: response.data.mobile1,
+                    mobile2: response.data.mobile2,
                 });
 
                 setModalSpinLoading(false);
@@ -404,13 +454,13 @@ const Supplier: React.FC = () => {
                                             label="Opening Balance"
                                             name="openingBalance"
                                         >
-                                            <Input />
+                                            <InputNumber />
                                         </Form.Item>
                                         <Form.Item
                                             label="Opening Date"
                                             name="openingDate"
                                         >
-                                            <Input />
+                                            <DatePicker />
                                         </Form.Item>
                                         <Form.Item
                                             label="Company Name"
@@ -478,8 +528,8 @@ const Supplier: React.FC = () => {
                                             <Input.TextArea />
                                         </Form.Item>
                                         <Form.Item
-                                            name="Address"
-                                            label="address">
+                                            name="address"
+                                            label="Address">
                                             <Input.TextArea />
                                         </Form.Item>
                                     </Form>
