@@ -1,15 +1,18 @@
 import { CheckCircleTwoTone } from '@ant-design/icons';
-import { Button, Col, DatePicker, Form, Input, InputNumber, message, Modal, Popconfirm, Row, Select, Space, Spin, Switch, Table } from 'antd';
+import { Button, Col, Collapse, DatePicker, Form, Input, InputNumber, message, Modal, Popconfirm, Row, Select, Space, Spin, Switch, Table } from 'antd';
 import { Option } from 'antd/es/mentions';
 import { ColumnsType } from 'antd/es/table';
 import Title from 'antd/es/typography/Title';
 import axios from 'axios';
+import dayjs from 'dayjs';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 
+const { Panel } = Collapse;
 
 const Customer: React.FC = () => {
     var [tableLoadingSpin, setTableSpinLoading] = useState(false);
+    const dateFormat = 'DD-MMM-YYYY';
 
     interface Customer {
         id: number;
@@ -110,7 +113,13 @@ const Customer: React.FC = () => {
             {
                 'gender': 'MALE',
                 'openingBalance': 0,
-                'activeStatus': true
+                'activeStatus': true,
+                'openingDate': dayjs(
+                    moment
+                        .utc()
+                        .local()
+                        .format('DD-MMM-YYYY')
+                    , dateFormat)
             }
         )
     }
@@ -216,7 +225,7 @@ const Customer: React.FC = () => {
             key: 'name',
         },
         {
-            title: 'Mobile1',
+            title: 'Mobile No',
             dataIndex: 'mobile1',
             key: 'mobile1',
         },
@@ -259,7 +268,7 @@ const Customer: React.FC = () => {
                 moment
                     .utc(record.createdDate)
                     .local()
-                    .format('DD-MM-YYYY')
+                    .format(dateFormat)
             )
         },
         {
@@ -270,7 +279,7 @@ const Customer: React.FC = () => {
                 moment
                     .utc(record.lastModifiedDate)
                     .local()
-                    .format('DD-MM-YYYY')
+                    .format(dateFormat)
             )
         },
         {
@@ -320,7 +329,10 @@ const Customer: React.FC = () => {
                     name: response.data.name,
                     code: response.data.code,
                     openingBalance: response.data.openingBalance,
-                    openingDate: moment(response.data.openingDate),
+                    openingDate: dayjs(moment
+                        .utc(response.data.openingDate)
+                        .local()
+                        .format(dateFormat), dateFormat),
                     companyName: response.data.companyName,
                     description: response.data.description,
                     address: response.data.address,
@@ -356,7 +368,10 @@ const Customer: React.FC = () => {
                     name: response.data.name,
                     code: response.data.code,
                     openingBalance: response.data.openingBalance,
-                    // openingDate: moment(response.data.openingDate),
+                    openingDate: dayjs(moment
+                        .utc(response.data.openingDate)
+                        .local()
+                        .format(dateFormat), dateFormat),
                     companyName: response.data.companyName,
                     description: response.data.description,
                     address: response.data.address,
@@ -430,29 +445,13 @@ const Customer: React.FC = () => {
                                             <Input />
                                         </Form.Item>
                                         <Form.Item
-                                            label="Opening Balance"
-                                            name="openingBalance"
-                                        >
-                                            <InputNumber />
-                                        </Form.Item>
-                                        <Form.Item
-                                            label="Opening Date"
-                                            name="openingDate"
-                                        >
-                                            <DatePicker />
-                                        </Form.Item>
-                                        <Form.Item
-                                            label="Company Name"
-                                            name="companyName"
+                                            label="Mobile No"
+                                            name="mobile1"
                                         >
                                             <Input />
                                         </Form.Item>
-                                        <Form.Item rules={[{ type: 'email' }]}
-                                            label="email"
-                                            name="email"
-                                        >
-                                            <Input />
-                                        </Form.Item>
+
+
                                         <Form.Item
                                             label="Gender"
                                             name="gender"
@@ -466,18 +465,8 @@ const Customer: React.FC = () => {
                                                 <Option value="FEMALE">Female</Option>
                                             </Select>
                                         </Form.Item>
-                                        <Form.Item
-                                            label="Mobile1"
-                                            name="mobile1"
-                                        >
-                                            <Input />
-                                        </Form.Item>
-                                        <Form.Item
-                                            label="Mobile2"
-                                            name="mobile2"
-                                        >
-                                            <Input />
-                                        </Form.Item>
+
+
                                         <Form.Item
                                             label="Active Status"
                                             name="activeStatus"
@@ -485,21 +474,63 @@ const Customer: React.FC = () => {
                                         >
                                             <Switch />
                                         </Form.Item>
-                                        <Form.Item
-                                            name="remarks"
-                                            label="remarks">
-                                            <Input.TextArea />
-                                        </Form.Item>
-                                        <Form.Item
-                                            name="description"
-                                            label="Description">
-                                            <Input.TextArea />
-                                        </Form.Item>
-                                        <Form.Item
-                                            name="address"
-                                            label="Address">
-                                            <Input.TextArea />
-                                        </Form.Item>
+                                        <Collapse ghost>
+                                            <Panel header="Show More Fields" key="1">
+                                                <Form.Item
+                                                    label="Opening Balance"
+                                                    name="openingBalance"
+                                                    rules={[{ required: true, message: 'Opening Balance can not be null!' }]}
+                                                >
+                                                    <InputNumber />
+                                                </Form.Item>
+                                                <Form.Item
+                                                    label="Opening Date"
+                                                    name="openingDate"
+                                                    rules={[{ required: true, message: 'Opening Date can not be null!' }]}
+
+                                                >
+                                                    <DatePicker
+                                                        allowClear={false}
+                                                        format={dateFormat}
+                                                    />
+                                                </Form.Item>
+                                                <Form.Item
+                                                    label="Phone Home"
+                                                    name="mobile2"
+                                                >
+                                                    <Input />
+                                                </Form.Item>
+                                                <Form.Item
+                                                    label="Company Name"
+                                                    name="companyName"
+                                                >
+                                                    <Input />
+                                                </Form.Item>
+                                                <Form.Item rules={[{ type: 'email' }]}
+                                                    label="email"
+                                                    name="email"
+                                                >
+                                                    <Input />
+                                                </Form.Item>
+
+                                                <Form.Item
+                                                    name="remarks"
+                                                    label="remarks">
+                                                    <Input.TextArea />
+                                                </Form.Item>
+                                                <Form.Item
+                                                    name="description"
+                                                    label="Description">
+                                                    <Input.TextArea />
+                                                </Form.Item>
+                                                <Form.Item
+                                                    name="address"
+                                                    label="Address">
+                                                    <Input.TextArea />
+                                                </Form.Item>
+                                            </Panel>
+
+                                        </Collapse>
                                     </Form>
                                 </div>
                             </Spin>

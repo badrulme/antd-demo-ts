@@ -1,12 +1,13 @@
 import { CheckCircleTwoTone } from '@ant-design/icons';
-import { Button, Col, DatePicker, Form, Input, InputNumber, message, Modal, Popconfirm, Row, Select, Space, Spin, Switch, Table } from 'antd';
+import { Button, Col, Collapse, DatePicker, Form, Input, InputNumber, message, Modal, Popconfirm, Row, Select, Space, Spin, Switch, Table } from 'antd';
 import { Option } from 'antd/es/mentions';
 import { ColumnsType } from 'antd/es/table';
 import Title from 'antd/es/typography/Title';
 import axios from 'axios';
+import dayjs from 'dayjs';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import dayjs from 'dayjs';
+const { Panel } = Collapse;
 
 const Supplier: React.FC = () => {
     var [tableLoadingSpin, setTableSpinLoading] = useState(false);
@@ -274,7 +275,7 @@ const Supplier: React.FC = () => {
                 moment
                     .utc(record.createdDate)
                     .local()
-                    .format('DD-MM-YYYY')
+                    .format(dateFormat)
             )
         },
         {
@@ -285,7 +286,7 @@ const Supplier: React.FC = () => {
                 moment
                     .utc(record.lastModifiedDate)
                     .local()
-                    .format('DD-MM-YYYY')
+                    .format(dateFormat)
             )
         },
         {
@@ -338,7 +339,7 @@ const Supplier: React.FC = () => {
                     openingDate: dayjs(moment
                         .utc(response.data.openingDate)
                         .local()
-                        .format('DD-MMM-YYYY'), dateFormat),
+                        .format(dateFormat), dateFormat),
                     companyName: response.data.companyName,
                     description: response.data.description,
                     address: response.data.address,
@@ -379,7 +380,7 @@ const Supplier: React.FC = () => {
                     openingDate: dayjs(moment
                         .utc(response.data.openingDate)
                         .local()
-                        .format('DD-MMM-YYYY'), dateFormat),
+                        .format(dateFormat), dateFormat),
                     companyName: response.data.companyName,
                     description: response.data.description,
                     address: response.data.address,
@@ -455,76 +456,20 @@ const Supplier: React.FC = () => {
                                             <Input />
                                         </Form.Item>
                                         <Form.Item
-                                            label="Opening Balance"
-                                            name="openingBalance"
-                                        >
-                                            <InputNumber />
-                                        </Form.Item>
-                                        <Form.Item
-                                            label="Opening Date"
-                                            name="openingDate"
-                                        >
-                                            <DatePicker
-                                                allowClear={false}
-                                                format={dateFormat}
-                                            // defaultValue={moment()}
-                                            // defaultValue={dayjs(
-                                            //     moment
-                                            //         .utc()
-                                            //         .local()
-                                            //         .format('DD-MMM-YYYY')
-                                            //     , dateFormat)}
-                                            />
-                                        </Form.Item>
-                                        <Form.Item
                                             label="Company Name"
                                             name="companyName"
+                                            rules={[{ required: true, message: 'Company Name can not be null!' }]}
                                         >
                                             <Input />
                                         </Form.Item>
                                         <Form.Item
-                                            label="email"
-                                            name="email"
-                                            rules={[{ type: 'email' }]}
-                                        >
-                                            <Input />
-                                        </Form.Item>
-                                        <Form.Item
-                                            label="Gender"
-                                            name="gender"
-                                        >
-                                            <Select
-                                                placeholder="Select a option"
-                                                allowClear={false}
-                                            >
-                                                <Option value="MALE">Male</Option>
-                                                <Option value="FEMALE">Female</Option>
-                                            </Select>
-                                        </Form.Item>
-                                        <Form.Item
-                                            label="Contact Person Name"
-                                            name="contactPersonName"
-                                        >
-                                            <Input />
-                                        </Form.Item>
-                                        <Form.Item
-                                            label="Contact Person Phone"
-                                            name="contactPersonPhone"
-                                        >
-                                            <Input />
-                                        </Form.Item>
-                                        <Form.Item
-                                            label="Mobile1"
+                                            label="Mobile No"
                                             name="mobile1"
+                                            rules={[{ required: true, message: 'Mobile No can not be null!' }]}
                                         >
                                             <Input />
                                         </Form.Item>
-                                        <Form.Item
-                                            label="Mobile2"
-                                            name="mobile2"
-                                        >
-                                            <Input />
-                                        </Form.Item>
+
                                         <Form.Item
                                             label="Active Status"
                                             name="activeStatus"
@@ -532,21 +477,86 @@ const Supplier: React.FC = () => {
                                         >
                                             <Switch />
                                         </Form.Item>
-                                        <Form.Item
-                                            name="remarks"
-                                            label="remarks">
-                                            <Input.TextArea />
-                                        </Form.Item>
-                                        <Form.Item
-                                            name="description"
-                                            label="Description">
-                                            <Input.TextArea />
-                                        </Form.Item>
-                                        <Form.Item
-                                            name="address"
-                                            label="Address">
-                                            <Input.TextArea />
-                                        </Form.Item>
+                                        <Collapse ghost>
+                                            <Panel header="Show More Fields" key="1">
+                                                <Form.Item
+                                                    label="Opening Balance"
+                                                    name="openingBalance"
+                                                    rules={[{ required: true, message: 'Opening Balance can not be null!' }]}
+
+                                                >
+                                                    <InputNumber />
+                                                </Form.Item>
+                                                <Form.Item
+                                                    label="Opening Date"
+                                                    name="openingDate"
+                                                    rules={[{ required: true, message: 'Opening Date can not be null!' }]}
+                                                >
+                                                    <DatePicker
+                                                        allowClear={false}
+                                                        format={dateFormat}
+                                                    />
+                                                </Form.Item>
+
+
+                                                <Form.Item
+                                                    label="Gender"
+                                                    name="gender"
+                                                >
+                                                    <Select
+                                                        placeholder="Select a option"
+                                                        allowClear={false}
+                                                    >
+                                                        <Option value="MALE">Male</Option>
+                                                        <Option value="FEMALE">Female</Option>
+                                                    </Select>
+                                                </Form.Item>
+                                                <Form.Item
+                                                    label="Contact Person Name"
+                                                    name="contactPersonName"
+                                                >
+                                                    <Input />
+                                                </Form.Item>
+                                                <Form.Item
+                                                    label="Contact Person Phone"
+                                                    name="contactPersonPhone"
+                                                >
+                                                    <Input />
+                                                </Form.Item>
+
+                                                <Form.Item
+                                                    label="Mobile Home"
+                                                    name="mobile2"
+                                                >
+                                                    <Input />
+                                                </Form.Item>
+                                                <Form.Item
+                                                    label="email"
+                                                    name="email"
+                                                    rules={[{ type: 'email' }]}
+                                                >
+                                                    <Input />
+                                                </Form.Item>
+
+                                                <Form.Item
+                                                    name="remarks"
+                                                    label="remarks">
+                                                    <Input.TextArea />
+                                                </Form.Item>
+                                                <Form.Item
+                                                    name="description"
+                                                    label="Description">
+                                                    <Input.TextArea />
+                                                </Form.Item>
+                                                <Form.Item
+                                                    name="address"
+                                                    label="Address">
+                                                    <Input.TextArea />
+                                                </Form.Item>
+
+                                            </Panel>
+                                        </Collapse>
+
                                     </Form>
                                 </div>
                             </Spin>
