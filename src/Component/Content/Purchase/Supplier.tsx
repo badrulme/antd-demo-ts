@@ -6,7 +6,7 @@ import Title from 'antd/es/typography/Title';
 import axios from 'axios';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-
+import dayjs from 'dayjs';
 
 const Supplier: React.FC = () => {
     var [tableLoadingSpin, setTableSpinLoading] = useState(false);
@@ -32,6 +32,7 @@ const Supplier: React.FC = () => {
         lastModifiedDate: Date;
     }
 
+    const dateFormat = 'DD-MMM-YYYY';
     const [supplierForm] = Form.useForm();
     const [suppliers, setSuppliers] = useState<Supplier[]>([]);
     const [supplier, setSupplier] = useState<Supplier>();
@@ -84,6 +85,8 @@ const Supplier: React.FC = () => {
     }
 
     useEffect(() => {
+        console.log(new Date());
+
         if (modalState === 'CREATE') {
             setModalOkButtonText('Create');
             setIsFormDisabled(false);
@@ -108,6 +111,19 @@ const Supplier: React.FC = () => {
 
     const clearModalField = () => {
         supplierForm.resetFields();
+        supplierForm.setFieldsValue(
+            {
+                'gender': 'MALE',
+                'openingBalance': 0,
+                'activeStatus': true,
+                'openingDate': dayjs(
+                    moment
+                        .utc()
+                        .local()
+                        .format('DD-MMM-YYYY')
+                    , dateFormat)
+            }
+        )
     }
 
     const checkFormValidation = async () => {
@@ -315,12 +331,14 @@ const Supplier: React.FC = () => {
         setModalSpinLoading(true);
         axios.get(`http://localhost:8081/suppliers/${id}`)
             .then((response) => {
-
                 supplierForm.setFieldsValue({
                     name: response.data.name,
                     code: response.data.code,
                     openingBalance: response.data.openingBalance,
-                    // openingDate: response.data.openingDate,
+                    openingDate: dayjs(moment
+                        .utc(response.data.openingDate)
+                        .local()
+                        .format('DD-MMM-YYYY'), dateFormat),
                     companyName: response.data.companyName,
                     description: response.data.description,
                     address: response.data.address,
@@ -337,7 +355,7 @@ const Supplier: React.FC = () => {
                 setModalSpinLoading(false);
             }).catch(err => {
                 // Handle error
-                console.log("server error");
+                console.log("server error", err);
                 setModalSpinLoading(false);
             });
     }
@@ -358,7 +376,10 @@ const Supplier: React.FC = () => {
                     name: response.data.name,
                     code: response.data.code,
                     openingBalance: response.data.openingBalance,
-                    // openingDate: response.data.openingDate,
+                    openingDate: dayjs(moment
+                        .utc(response.data.openingDate)
+                        .local()
+                        .format('DD-MMM-YYYY'), dateFormat),
                     companyName: response.data.companyName,
                     description: response.data.description,
                     address: response.data.address,
@@ -443,7 +464,17 @@ const Supplier: React.FC = () => {
                                             label="Opening Date"
                                             name="openingDate"
                                         >
-                                            <DatePicker />
+                                            <DatePicker
+                                                allowClear={false}
+                                                format={dateFormat}
+                                            // defaultValue={moment()}
+                                            // defaultValue={dayjs(
+                                            //     moment
+                                            //         .utc()
+                                            //         .local()
+                                            //         .format('DD-MMM-YYYY')
+                                            //     , dateFormat)}
+                                            />
                                         </Form.Item>
                                         <Form.Item
                                             label="Company Name"
@@ -454,6 +485,7 @@ const Supplier: React.FC = () => {
                                         <Form.Item
                                             label="email"
                                             name="email"
+                                            rules={[{ type: 'email' }]}
                                         >
                                             <Input />
                                         </Form.Item>
