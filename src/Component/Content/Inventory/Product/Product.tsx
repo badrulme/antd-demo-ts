@@ -1,15 +1,21 @@
-import { Button, Card, Col, Form, Input, message, Modal, Popconfirm, Row, Space, Spin, Table } from 'antd';
+import { CheckCircleTwoTone } from '@ant-design/icons';
+import { Button, Col, Collapse, DatePicker, Form, Input, message, Modal, Popconfirm, Row, Select, Space, Spin, Switch, Table } from 'antd';
+import { Option } from 'antd/es/mentions';
 import { ColumnsType } from 'antd/es/table';
 import Title from 'antd/es/typography/Title';
 import axios from 'axios';
+import dayjs from 'dayjs';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-
+const { Panel } = Collapse;
 
 const Product: React.FC = () => {
     var [tableLoadingSpin, setTableSpinLoading] = useState(false);
+    const [uoms, setUoms] = useState<Uom[]>([]);
+    const [brands, setBrands] = useState<Brand[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
 
-    interface Product {
+    interface Uom {
         id: number;
         name: string;
         alias: string;
@@ -18,6 +24,41 @@ const Product: React.FC = () => {
         lastModifiedDate: string;
     }
 
+    interface Category {
+        id: number;
+        name: string;
+        parentId: number;
+        description: string;
+        createdDate: string;
+        lastModifiedDate: string;
+    }
+
+    interface Brand {
+        id: number;
+        name: string;
+        alias: string;
+        description: string;
+        createdDate: string;
+        lastModifiedDate: string;
+    }
+
+    interface Product {
+        id: number;
+        code: string;
+        name: string;
+        summary: string;
+        description: string;
+
+
+        uomId: number;
+        categoryId: number;
+        brandId: number;
+        activeStatus: boolean;
+        createdDate: Date;
+        lastModifiedDate: Date;
+    }
+
+    const dateFormat = 'DD-MMM-YYYY';
     const [productForm] = Form.useForm();
     const [products, setProducts] = useState<Product[]>([]);
     const [product, setProduct] = useState<Product>();
@@ -35,15 +76,66 @@ const Product: React.FC = () => {
     useEffect(() => {
 
         getProducts();
+        getUoms();
+        getBrands();
+        getCategories();
 
         return () => {
 
         }
     }, []);
 
+    const getUoms = () => {
+        axios.get(`http://localhost:8081/uoms`)
+            .then((response) => {
+                console.log(response.data);
+                response.data.map((x: { [x: string]: any; id: any; }) => {
+                    x['key'] = x.id;
+                    x['value'] = x.id;
+                    x['label'] = x.name;
+                })
+                setUoms(response.data);
+            }).catch(err => {
+                // Handle error
+                console.log("server error");
+            });
+    }
+
+    const getBrands = () => {
+        axios.get(`http://localhost:8081/brands`)
+            .then((response) => {
+                console.log(response.data);
+                response.data.map((x: { [x: string]: any; id: any; }) => {
+                    x['key'] = x.id;
+                    x['value'] = x.id;
+                    x['label'] = x.name;
+                })
+                setBrands(response.data);
+            }).catch(err => {
+                // Handle error
+                console.log("server error");
+            });
+    }
+
+    const getCategories = () => {
+        axios.get(`http://localhost:8081/categories`)
+            .then((response) => {
+                console.log(response.data);
+                response.data.map((x: { [x: string]: any; id: any; }) => {
+                    x['key'] = x.id;
+                    x['value'] = x.id;
+                    x['label'] = x.name;
+                })
+                setCategories(response.data);
+            }).catch(err => {
+                // Handle error
+                console.log("server error");
+            });
+    }
+
     const getProducts = () => {
         setTableSpinLoading(true);
-        axios.get(`http://localhost:8081/products`)
+        axios.get(`http://localhost:8081/products/all-product-details`)
             .then((response) => {
                 console.log(response.data);
                 response.data.map((x: { [x: string]: any; id: any; }) => {
@@ -69,7 +161,10 @@ const Product: React.FC = () => {
             });
     }
 
+
     useEffect(() => {
+        console.log(new Date());
+
         if (modalState === 'CREATE') {
             setModalOkButtonText('Create');
             setIsFormDisabled(false);
@@ -93,12 +188,13 @@ const Product: React.FC = () => {
     };
 
     const clearModalField = () => {
-
-        productForm.setFieldsValue({
-            name: '',
-            alias: '',
-            description: ''
-        });
+        productForm.resetFields();
+        productForm.setFieldsValue(
+            {
+                'gender': 'MALE',
+                'activeStatus': true,
+            }
+        )
     }
 
     const checkFormValidation = async () => {
@@ -120,9 +216,14 @@ const Product: React.FC = () => {
 
             if (modalState === 'CREATE') {
                 axios.post(`http://localhost:8081/products`, {
+                    code: productForm.getFieldValue('code'),
                     name: productForm.getFieldValue('name'),
-                    alias: productForm.getFieldValue('alias'),
-                    description: productForm.getFieldValue('description')
+                    summary: productForm.getFieldValue('summary'),
+                    description: productForm.getFieldValue('description'),
+                    uomId: productForm.getFieldValue('uomId'),
+                    categoryId: productForm.getFieldValue('categoryId'),
+                    brandId: productForm.getFieldValue('brandId'),
+                    activeStatus: productForm.getFieldValue('activeStatus'),
 
                 }).then((response) => {
                     setModalOpen(false);
@@ -137,9 +238,14 @@ const Product: React.FC = () => {
                 });
             } else {
                 axios.put(`http://localhost:8081/products/${productId}`, {
+                    code: productForm.getFieldValue('code'),
                     name: productForm.getFieldValue('name'),
-                    alias: productForm.getFieldValue('alias'),
-                    description: productForm.getFieldValue('description')
+                    summary: productForm.getFieldValue('summary'),
+                    description: productForm.getFieldValue('description'),
+                    uomId: productForm.getFieldValue('uomId'),
+                    categoryId: productForm.getFieldValue('categoryId'),
+                    brandId: productForm.getFieldValue('brandId'),
+                    activeStatus: productForm.getFieldValue('activeStatus'),
 
                 }).then((response) => {
                     clearModalField();
@@ -157,9 +263,6 @@ const Product: React.FC = () => {
         } catch (errorInfo) {
             console.log('Failed:', errorInfo);
         }
-
-
-
     };
 
     const handleCancel = () => {
@@ -172,19 +275,45 @@ const Product: React.FC = () => {
     // table rendering settings
     const productColumns: ColumnsType<Product> = [
         {
-            title: 'Name',
-            dataIndex: 'name',
-            key: 'name',
+            title: 'Code',
+            dataIndex: 'code',
+            key: 'code',
         },
         {
-            title: 'Alias',
-            dataIndex: 'alias',
-            key: 'alias',
+            title: 'Job Title',
+            dataIndex: 'jobTitle.name',
+            key: 'jobTitle.name',
         },
         {
-            title: 'Description',
-            dataIndex: 'description',
-            key: 'description',
+            title: 'Email Official',
+            dataIndex: 'emailOfficial',
+            key: 'emailOfficial',
+        },
+        {
+            title: 'Phone Official',
+            dataIndex: 'phoneOfficial',
+            key: 'phoneOfficial',
+        },
+        {
+            title: 'Status',
+            dataIndex: 'status',
+            key: 'status',
+            render: (_: any, record: Product) => {
+                if (record.activeStatus) {
+                    return (
+                        <span>
+                            <CheckCircleTwoTone twoToneColor="#52c41a" /> Active
+                        </span>
+                    )
+                } else {
+                    return (
+                        <span>
+                            <CheckCircleTwoTone twoToneColor="#eb2f96" /> InActive
+                        </span>
+                    )
+                }
+
+            },
         },
         {
             title: 'Created Date',
@@ -194,7 +323,7 @@ const Product: React.FC = () => {
                 moment
                     .utc(record.createdDate)
                     .local()
-                    .format('DD-MM-YYYY')
+                    .format(dateFormat)
             )
         },
         {
@@ -205,7 +334,7 @@ const Product: React.FC = () => {
                 moment
                     .utc(record.lastModifiedDate)
                     .local()
-                    .format('DD-MM-YYYY')
+                    .format(dateFormat)
             )
         },
         {
@@ -251,17 +380,31 @@ const Product: React.FC = () => {
         setModalSpinLoading(true);
         axios.get(`http://localhost:8081/products/${id}`)
             .then((response) => {
-
                 productForm.setFieldsValue({
-                    name: response.data.name,
-                    alias: response.data.alias,
-                    description: response.data.description
+                    code: response.data.code,
+                    firstName: response.data.firstName,
+                    lastName: response.data.lastName,
+                    gender: response.data.gender,
+                    dob: dayjs(moment
+                        .utc(response.data.dob)
+                        .local()
+                        .format(dateFormat), dateFormat),
+                    emailOfficial: response.data.emailOfficial,
+                    emailPersonal: response.data.emailPersonal,
+                    phoneOfficial: response.data.phoneOfficial,
+                    phonePersonal: response.data.phonePersonal,
+                    presentAddress: response.data.presentAddress,
+                    permanentAddress: response.data.permanentAddress,
+                    bloodGroup: response.data.bloodGroup,
+                    activeStatus: response.data.activeStatus,
+                    jobTitleId: response.data.jobTitleId,
+                    productId: response.data.productId,
                 });
 
                 setModalSpinLoading(false);
             }).catch(err => {
                 // Handle error
-                console.log("server error");
+                console.log("server error", err);
                 setModalSpinLoading(false);
             });
     }
@@ -279,9 +422,24 @@ const Product: React.FC = () => {
             .then((response) => {
 
                 productForm.setFieldsValue({
-                    name: response.data.name,
-                    alias: response.data.alias,
-                    description: response.data.description
+                    code: response.data.code,
+                    firstName: response.data.firstName,
+                    lastName: response.data.lastName,
+                    gender: response.data.gender,
+                    dob: dayjs(moment
+                        .utc(response.data.dob)
+                        .local()
+                        .format(dateFormat), dateFormat),
+                    emailOfficial: response.data.emailOfficial,
+                    emailPersonal: response.data.emailPersonal,
+                    phoneOfficial: response.data.phoneOfficial,
+                    phonePersonal: response.data.phonePersonal,
+                    presentAddress: response.data.presentAddress,
+                    permanentAddress: response.data.permanentAddress,
+                    bloodGroup: response.data.bloodGroup,
+                    activeStatus: response.data.activeStatus,
+                    jobTitleId: response.data.jobTitleId,
+                    productId: response.data.productId,
                 });
 
                 setModalSpinLoading(false);
@@ -295,10 +453,9 @@ const Product: React.FC = () => {
     return (
         <>
             <Row>
-                <Col md={24}>
+                <Col span={24}>
 
                     <div>
-
                         <Title level={2}>Product</Title>
 
                         <Button type="primary" onClick={showModal}>Create</Button>
@@ -306,7 +463,8 @@ const Product: React.FC = () => {
                             loading={tableLoadingSpin}
                             size="small"
                             dataSource={products}
-                            columns={productColumns} />
+                            columns={productColumns}
+                        />
 
                         <Modal
                             title="Product"
@@ -316,11 +474,13 @@ const Product: React.FC = () => {
                             onCancel={handleCancel}
                             okText={modalOkButtonText}
                             okButtonProps={{ disabled: isFormDisabled }}
+                            centered={true}
                         >
                             <Spin spinning={modalLoadingSpin}>
 
                                 <div>
                                     <Form
+
                                         name="productForm"
                                         form={productForm}
                                         labelCol={{ span: 8 }}
@@ -330,24 +490,82 @@ const Product: React.FC = () => {
                                         disabled={isFormDisabled}
                                     >
                                         <Form.Item
+                                            label="Code"
+                                            name="code"
+                                            rules={[{ required: true, message: 'Code can not be null!' }]}
+                                        >
+                                            <Input />
+                                        </Form.Item>
+                                        <Form.Item
                                             label="Name"
                                             name="name"
                                             rules={[{ required: true, message: 'Name can not be null!' }]}
                                         >
                                             <Input />
                                         </Form.Item>
+
+                                        <Form.Item name="uomId" label="Uom" rules={[{ required: true }]}>
+                                            <Select
+                                                showSearch={true}
+                                                placeholder="Select a Uom"
+                                                optionFilterProp="children"
+                                                filterOption={(input, option) =>
+                                                    (option?.name ?? '').toLowerCase().includes(input.toLowerCase())
+                                                }
+                                                options={uoms}
+                                            />
+                                        </Form.Item>
+
+                                        <Form.Item name="brandId" label="Brand" rules={[{ required: true }]}>
+                                            <Select
+                                                showSearch={true}
+                                                placeholder="Select a Brand"
+                                                optionFilterProp="children"
+                                                filterOption={(input, option) =>
+                                                    (option?.name ?? '').toLowerCase().includes(input.toLowerCase())
+                                                }
+                                                options={brands}
+                                            />
+                                        </Form.Item>
+
+                                        <Form.Item name="categoryId" label="Category" rules={[{ required: true }]}>
+                                            <Select
+                                                showSearch={true}
+                                                placeholder="Select a Category"
+                                                optionFilterProp="children"
+                                                filterOption={(input, option) =>
+                                                    (option?.name ?? '').toLowerCase().includes(input.toLowerCase())
+                                                }
+                                                options={categories}
+                                            />
+                                        </Form.Item>
+
                                         <Form.Item
-                                            label="Alias"
-                                            name="alias"
-                                            rules={[{ required: true, message: 'Alias can not be null!' }]}
+                                            label="Active Status"
+                                            name="activeStatus"
+                                            valuePropName="checked"
                                         >
-                                            <Input />
+                                            <Switch />
                                         </Form.Item>
-                                        <Form.Item
-                                            name="description"
-                                            label="Description">
-                                            <Input.TextArea />
-                                        </Form.Item>
+                                        <Collapse ghost>
+                                            <Panel header="Show More Fields" key="1">
+                                                <Form.Item
+                                                    label="summary"
+                                                    name="summary"
+                                                    rules={[]}
+                                                >
+                                                    <Input.TextArea />
+                                                </Form.Item>
+                                                <Form.Item
+                                                    label="description"
+                                                    name="description"
+                                                    rules={[]}
+                                                >
+                                                    <Input.TextArea />
+                                                </Form.Item>
+                                            </Panel>
+                                        </Collapse>
+
                                     </Form>
                                 </div>
                             </Spin>
@@ -355,7 +573,6 @@ const Product: React.FC = () => {
                     </div>
                 </Col>
             </Row>
-
 
         </>
     )
