@@ -20,8 +20,9 @@ import SalesReturn from './Sales/Return/SalesReturn';
 import CompanyInfo from './Settings/CompanyInfo/CompanyInfo';
 
 import { Layout } from 'antd';
+import Department from "./Hr/Department";
 
-const {  Content } = Layout;
+const { Content } = Layout;
 
 
 const ContentComponent: React.FC = () => (
@@ -45,6 +46,7 @@ const ContentComponent: React.FC = () => (
                     <Route path="brand" element={<Brand />} />
                     <Route path="product" element={<Product />} />
                     <Route path="category" element={<Category />} />
+                    <Route path="department" element={<Department />} />
                     <Route path="job-title" element={<JobTitle />} />
                     <Route path="employee" element={<Employee />} />
                     <Route path="customer" element={<Customer />} />

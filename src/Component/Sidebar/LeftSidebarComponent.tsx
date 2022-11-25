@@ -26,6 +26,7 @@ const items: MenuProps['items'] = [
 
     getItem('Dashboard', '/', <PieChartOutlined />),
     getItem('Human Resource', 'hrsubm', <SettingOutlined />, [
+        getItem('Department', '/department'),
         getItem('Job Title', '/job-title'),
         getItem('Employee', '/employee'),
     ]),

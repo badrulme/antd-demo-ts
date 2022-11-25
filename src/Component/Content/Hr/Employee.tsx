@@ -1,5 +1,5 @@
 import { CheckCircleTwoTone } from '@ant-design/icons';
-import { Button, Col, Collapse, DatePicker, Form, Input, InputNumber, message, Modal, Popconfirm, Row, Select, Space, Spin, Switch, Table } from 'antd';
+import { Button, Col, Collapse, DatePicker, Form, Input, message, Modal, Popconfirm, Row, Select, Space, Spin, Switch, Table } from 'antd';
 import { Option } from 'antd/es/mentions';
 import { ColumnsType } from 'antd/es/table';
 import Title from 'antd/es/typography/Title';
@@ -11,6 +11,29 @@ const { Panel } = Collapse;
 
 const Employee: React.FC = () => {
     var [tableLoadingSpin, setTableSpinLoading] = useState(false);
+    const [jobTitles, setJobTitles] = useState<JobTitle[]>([]);
+    const [departments, setDepartments] = useState<Department[]>([]);
+
+
+    interface JobTitle {
+        id: number;
+        name: string;
+        alias: string;
+        activeStatus: boolean;
+        description: string;
+        createdDate: string;
+        lastModifiedDate: string;
+    }
+
+    interface Department {
+        id: number;
+        name: string;
+        alias: string;
+        activeStatus: boolean;
+        description: string;
+        createdDate: string;
+        lastModifiedDate: string;
+    }
 
     interface Employee {
         id: number;
@@ -49,12 +72,30 @@ const Employee: React.FC = () => {
 
     useEffect(() => {
 
+        getJobTitles();
+        getDepartments();
         getEmployees();
 
         return () => {
 
         }
     }, []);
+
+    const getDepartments = () => {
+        axios.get(`http://localhost:8081/departments`)
+            .then((response) => {
+                console.log(response.data);
+                response.data.map((x: { [x: string]: any; id: any; }) => {
+                    x['key'] = x.id;
+                    x['value'] = x.id;
+                    x['label'] = x.name;
+                })
+                setDepartments(response.data);
+            }).catch(err => {
+                // Handle error
+                console.log("server error");
+            });
+    }
 
     const getEmployees = () => {
         setTableSpinLoading(true);
@@ -78,6 +119,22 @@ const Employee: React.FC = () => {
             .then((response) => {
                 console.log(response.data);
                 setEmployee(response.data);
+            }).catch(err => {
+                // Handle error
+                console.log("server error");
+            });
+    }
+
+    const getJobTitles = () => {
+        axios.get(`http://localhost:8081/jobTitles`)
+            .then((response) => {
+                console.log(response.data);
+                response.data.map((x: { [x: string]: any; id: any; }) => {
+                    x['key'] = x.id;
+                    x['value'] = x.id;
+                    x['label'] = x.name;
+                })
+                setJobTitles(response.data);
             }).catch(err => {
                 // Handle error
                 console.log("server error");
@@ -152,6 +209,7 @@ const Employee: React.FC = () => {
                     activeStatus: employeeForm.getFieldValue('activeStatus'),
                     bloodGroup: employeeForm.getFieldValue('bloodGroup'),
                     jobTitleId: employeeForm.getFieldValue('jobTitleId'),
+                    departmentId: employeeForm.getFieldValue('departmentId'),
 
                 }).then((response) => {
                     setModalOpen(false);
@@ -180,6 +238,7 @@ const Employee: React.FC = () => {
                     activeStatus: employeeForm.getFieldValue('activeStatus'),
                     bloodGroup: employeeForm.getFieldValue('bloodGroup'),
                     jobTitleId: employeeForm.getFieldValue('jobTitleId'),
+                    departmentId: employeeForm.getFieldValue('departmentId'),
 
                 }).then((response) => {
                     clearModalField();
@@ -220,14 +279,19 @@ const Employee: React.FC = () => {
             render: (_: any, record: Employee) => (record.firstName + " " + record.lastName)
         },
         {
-            title: 'Mobile1',
-            dataIndex: 'mobile1',
-            key: 'mobile1',
+            title: 'Job Title',
+            dataIndex: 'jobTitle.name',
+            key: 'jobTitle.name',
         },
         {
-            title: 'Email',
-            dataIndex: 'email',
-            key: 'email',
+            title: 'Email Official',
+            dataIndex: 'emailOfficial',
+            key: 'emailOfficial',
+        },
+        {
+            title: 'Phone Official',
+            dataIndex: 'phoneOfficial',
+            key: 'phoneOfficial',
         },
         {
             title: 'Status',
@@ -249,11 +313,6 @@ const Employee: React.FC = () => {
                 }
 
             },
-        },
-        {
-            title: 'Description',
-            dataIndex: 'description',
-            key: 'description',
         },
         {
             title: 'Created Date',
@@ -321,24 +380,24 @@ const Employee: React.FC = () => {
         axios.get(`http://localhost:8081/employees/${id}`)
             .then((response) => {
                 employeeForm.setFieldsValue({
-                    name: response.data.name,
                     code: response.data.code,
-                    openingBalance: response.data.openingBalance,
-                    openingDate: dayjs(moment
-                        .utc(response.data.openingDate)
+                    firstName: response.data.firstName,
+                    lastName: response.data.lastName,
+                    gender: response.data.gender,
+                    dob: dayjs(moment
+                        .utc(response.data.dob)
                         .local()
                         .format(dateFormat), dateFormat),
-                    companyName: response.data.companyName,
-                    description: response.data.description,
-                    address: response.data.address,
-                    email: response.data.email,
-                    gender: response.data.gender,
-                    contactPersonName: response.data.contactPersonName,
-                    contactPersonPhone: response.data.contactPersonPhone,
-                    remarks: response.data.remarks,
+                    emailOfficial: response.data.emailOfficial,
+                    emailPersonal: response.data.emailPersonal,
+                    phoneOfficial: response.data.phoneOfficial,
+                    phonePersonal: response.data.phonePersonal,
+                    presentAddress: response.data.presentAddress,
+                    permanentAddress: response.data.permanentAddress,
+                    bloodGroup: response.data.bloodGroup,
                     activeStatus: response.data.activeStatus,
-                    mobile1: response.data.mobile1,
-                    mobile2: response.data.mobile2,
+                    jobTitleId: response.data.jobTitleId,
+                    departmentId: response.data.departmentId,
                 });
 
                 setModalSpinLoading(false);
@@ -362,24 +421,24 @@ const Employee: React.FC = () => {
             .then((response) => {
 
                 employeeForm.setFieldsValue({
-                    name: response.data.name,
                     code: response.data.code,
-                    openingBalance: response.data.openingBalance,
-                    openingDate: dayjs(moment
-                        .utc(response.data.openingDate)
+                    firstName: response.data.firstName,
+                    lastName: response.data.lastName,
+                    gender: response.data.gender,
+                    dob: dayjs(moment
+                        .utc(response.data.dob)
                         .local()
                         .format(dateFormat), dateFormat),
-                    companyName: response.data.companyName,
-                    description: response.data.description,
-                    address: response.data.address,
-                    email: response.data.email,
-                    gender: response.data.gender,
-                    contactPersonName: response.data.contactPersonName,
-                    contactPersonPhone: response.data.contactPersonPhone,
-                    remarks: response.data.remarks,
+                    emailOfficial: response.data.emailOfficial,
+                    emailPersonal: response.data.emailPersonal,
+                    phoneOfficial: response.data.phoneOfficial,
+                    phonePersonal: response.data.phonePersonal,
+                    presentAddress: response.data.presentAddress,
+                    permanentAddress: response.data.permanentAddress,
+                    bloodGroup: response.data.bloodGroup,
                     activeStatus: response.data.activeStatus,
-                    mobile1: response.data.mobile1,
-                    mobile2: response.data.mobile2,
+                    jobTitleId: response.data.jobTitleId,
+                    departmentId: response.data.departmentId,
                 });
 
                 setModalSpinLoading(false);
@@ -393,7 +452,7 @@ const Employee: React.FC = () => {
     return (
         <>
             <Row>
-                <Col md={24}>
+                <Col span={24}>
 
                     <div>
                         <Title level={2}>Employee</Title>
@@ -437,23 +496,53 @@ const Employee: React.FC = () => {
                                             <Input />
                                         </Form.Item>
                                         <Form.Item
-                                            label="Name"
-                                            name="name"
-                                            rules={[{ required: true, message: 'Name can not be null!' }]}
+                                            label="First Name"
+                                            name="firstName"
+                                            rules={[{ required: true, message: 'First Name can not be null!' }]}
                                         >
                                             <Input />
                                         </Form.Item>
                                         <Form.Item
-                                            label="Company Name"
-                                            name="companyName"
-                                            rules={[{ required: true, message: 'Company Name can not be null!' }]}
+                                            label="Last Name"
+                                            name="lastName"
+                                            rules={[{ required: true, message: 'Last Name can not be null!' }]}
                                         >
                                             <Input />
                                         </Form.Item>
+                                        <Form.Item name="departmentId" label="Department" rules={[{ required: true }]}>
+                                            <Select
+                                                showSearch={true}
+                                                placeholder="Select a Department"
+                                                optionFilterProp="children"
+                                                filterOption={(input, option) =>
+                                                    (option?.name ?? '').toLowerCase().includes(input.toLowerCase())
+                                                }
+                                                options={departments}
+                                            />
+                                        </Form.Item>
+                                        <Form.Item name="jobTitleId" label="Job Title" rules={[{ required: true }]}>
+                                            <Select
+                                                showSearch={true}
+                                                placeholder="Select a Job Title"
+                                                optionFilterProp="children"
+                                                filterOption={(input, option) =>
+                                                    (option?.name ?? '').toLowerCase().includes(input.toLowerCase())
+                                                }
+                                                options={jobTitles}
+                                            />
+                                        </Form.Item>
+
                                         <Form.Item
                                             label="Mobile No"
-                                            name="mobile1"
-                                            rules={[{ required: true, message: 'Mobile No can not be null!' }]}
+                                            name="phonePersonal"
+                                            rules={[]}
+                                        >
+                                            <Input />
+                                        </Form.Item>
+                                        <Form.Item
+                                            label="Official Email"
+                                            name="emailOfficial"
+                                            rules={[{ type: 'email', message: "Email should be valid!" }]}
                                         >
                                             <Input />
                                         </Form.Item>
@@ -468,25 +557,19 @@ const Employee: React.FC = () => {
                                         <Collapse ghost>
                                             <Panel header="Show More Fields" key="1">
                                                 <Form.Item
-                                                    label="Opening Balance"
-                                                    name="openingBalance"
-                                                    rules={[{ required: true, message: 'Opening Balance can not be null!' }]}
-
+                                                    label="Personal Email"
+                                                    name="emailPersonal"
+                                                    rules={[{ type: 'email' }]}
                                                 >
-                                                    <InputNumber />
+                                                    <Input />
                                                 </Form.Item>
                                                 <Form.Item
-                                                    label="Opening Date"
-                                                    name="openingDate"
-                                                    rules={[{ required: true, message: 'Opening Date can not be null!' }]}
+                                                    label="Phone Office"
+                                                    name="phoneOfficial"
+                                                    rules={[]}
                                                 >
-                                                    <DatePicker
-                                                        allowClear={false}
-                                                        format={dateFormat}
-                                                    />
+                                                    <Input />
                                                 </Form.Item>
-
-
                                                 <Form.Item
                                                     label="Gender"
                                                     name="gender"
@@ -497,38 +580,41 @@ const Employee: React.FC = () => {
                                                     >
                                                         <Option value="MALE">Male</Option>
                                                         <Option value="FEMALE">Female</Option>
+                                                        <Option value="OTHERS">Others</Option>
                                                     </Select>
                                                 </Form.Item>
                                                 <Form.Item
-                                                    label="Mobile Home"
-                                                    name="mobile2"
+                                                    label="Date of Birth"
+                                                    name="dob"
+                                                    rules={[]}
+                                                >
+                                                    <DatePicker
+                                                        allowClear={false}
+                                                        format={dateFormat}
+                                                    />
+                                                </Form.Item>
+                                                <Form.Item
+                                                    label="Blood Group"
+                                                    name="bloodGroup"
+                                                    rules={[]}
                                                 >
                                                     <Input />
                                                 </Form.Item>
                                                 <Form.Item
-                                                    label="email"
-                                                    name="email"
-                                                    rules={[{ type: 'email' }]}
+                                                    label="Present Address"
+                                                    name="presentAddress"
+                                                    rules={[]}
                                                 >
                                                     <Input />
                                                 </Form.Item>
 
                                                 <Form.Item
-                                                    name="remarks"
-                                                    label="remarks">
-                                                    <Input.TextArea />
+                                                    label="Permanent Address"
+                                                    name="permanentAddress"
+                                                    rules={[]}
+                                                >
+                                                    <Input />
                                                 </Form.Item>
-                                                <Form.Item
-                                                    name="description"
-                                                    label="Description">
-                                                    <Input.TextArea />
-                                                </Form.Item>
-                                                <Form.Item
-                                                    name="address"
-                                                    label="Address">
-                                                    <Input.TextArea />
-                                                </Form.Item>
-
                                             </Panel>
                                         </Collapse>
 
