@@ -1,4 +1,6 @@
 @import 'antd/dist/reset.css';
+@import url('../src/assets/css/main.css');
+
 /* 
 #components-layout-demo-responsive .logo {
   height: 32px;
@@ -17,4 +19,4 @@
 .ant-page-header-ghost {
   padding: 0px 0px 15px 0px !important;
 
-} 
+}

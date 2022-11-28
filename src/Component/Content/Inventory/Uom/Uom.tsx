@@ -1,27 +1,28 @@
-import { Button, Card, Col, Form, Input, message, Modal, Popconfirm, Row, Space, Spin, Table } from 'antd';
+import { Button, Col, Form, Input, message, Modal, Popconfirm, Row, Space, Spin, Table } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import Title from 'antd/es/typography/Title';
 import axios from 'axios';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
+import IUom from '../../../../Interfaces/Uom';
 
 
 const Uom: React.FC = () => {
     var [tableLoadingSpin, setTableSpinLoading] = useState(false);
 
-    interface Uom {
-        id: number;
-        name: string;
-        alias: string;
-        description: string;
-        createdDate: string;
-        lastModifiedDate: string;
-    }
+    // interface IUom {
+    //     id: number;
+    //     name: string;
+    //     alias: string;
+    //     description: string;
+    //     createdDate: string;
+    //     lastModifiedDate: string;
+    // }
 
     const [uomForm] = Form.useForm();
-    const [uoms, setUoms] = useState<Uom[]>([]);
-    const [uom, setUom] = useState<Uom>();
-    const [uomId, setUomId] = useState<number>();
+    const [uoms, setIUoms] = useState<IUom[]>([]);
+    const [uom, setIUom] = useState<IUom>();
+    const [uomId, setIUomId] = useState<number>();
     const [isFormDisabled, setIsFormDisabled] = useState(false);
 
     // Modal related properties
@@ -34,14 +35,14 @@ const Uom: React.FC = () => {
 
     useEffect(() => {
 
-        getUoms();
+        getIUoms();
 
         return () => {
 
         }
     }, []);
 
-    const getUoms = () => {
+    const getIUoms = () => {
         setTableSpinLoading(true);
         axios.get(`http://localhost:8081/uoms`)
             .then((response) => {
@@ -49,7 +50,7 @@ const Uom: React.FC = () => {
                 response.data.map((x: { [x: string]: any; id: any; }) => {
                     x['key'] = x.id;
                 })
-                setUoms(response.data);
+                setIUoms(response.data);
                 setTableSpinLoading(false);
             }).catch(err => {
                 // Handle error
@@ -58,11 +59,11 @@ const Uom: React.FC = () => {
             });
     }
 
-    const getUom = (id: number) => {
+    const getIUom = (id: number) => {
         axios.get(`http://localhost:8081/uoms/${id}`)
             .then((response) => {
                 console.log(response.data);
-                setUom(response.data);
+                setIUom(response.data);
             }).catch(err => {
                 // Handle error
                 console.log("server error");
@@ -73,7 +74,7 @@ const Uom: React.FC = () => {
         if (modalState === 'CREATE') {
             setModalOkButtonText('Create');
             setIsFormDisabled(false);
-            setUomId(0);
+            setIUomId(0);
         } else if (modalState === 'VIEW') {
             setModalOkButtonText('Change');
             setIsFormDisabled(true);
@@ -128,7 +129,7 @@ const Uom: React.FC = () => {
                     setModalOpen(false);
                     clearModalField();
                     setModalConfirmLoading(false);
-                    getUoms();
+                    getIUoms();
                     console.log(response);
                 }).catch(err => {
                     // Handle error
@@ -145,7 +146,7 @@ const Uom: React.FC = () => {
                     clearModalField();
                     setModalOpen(false);
                     setModalConfirmLoading(false);
-                    getUoms();
+                    getIUoms();
                     console.log(response);
                     setmodalState('CREATE');
                 }).catch(err => {
@@ -170,7 +171,7 @@ const Uom: React.FC = () => {
 
 
     // table rendering settings
-    const uomColumns: ColumnsType<Uom> = [
+    const uomColumns: ColumnsType<IUom> = [
         {
             title: 'Name',
             dataIndex: 'name',
@@ -222,7 +223,7 @@ const Uom: React.FC = () => {
                         okText="Yes"
                         cancelText="No"
                     >
-                        <a onClick={() => deleteUomAction(record.id)}>Delete</a>
+                        <a onClick={() => deleteIUomAction(record.id)}>Delete</a>
                     </Popconfirm>
                 </Space>
             ),
@@ -232,7 +233,7 @@ const Uom: React.FC = () => {
     const deletePopConfirm = (e: any) => {
         axios.delete(`http://localhost:8081/uoms/${uomId}`)
             .then((response) => {
-                getUoms();
+                getIUoms();
                 message.success('Deleted Successfully.');
             }).catch(err => {
                 console.log("server error", err);
@@ -245,7 +246,7 @@ const Uom: React.FC = () => {
 
     const updateAction = (id: number) => {
 
-        setUomId(id);
+        setIUomId(id);
         setmodalState('UPDATE');
         showModal();
         setModalSpinLoading(true);
@@ -266,12 +267,12 @@ const Uom: React.FC = () => {
             });
     }
 
-    const deleteUomAction = (id: number) => {
-        setUomId(id);
+    const deleteIUomAction = (id: number) => {
+        setIUomId(id);
     }
 
     const viewAction = (id: number) => {
-        setUomId(id);
+        setIUomId(id);
         setmodalState('VIEW');
         showModal();
         setModalSpinLoading(true);
@@ -313,7 +314,7 @@ const Uom: React.FC = () => {
                             columns={uomColumns} />
 
                         <Modal
-                            title="Uom"
+                            title="IUom"
                             open={modalOpen}
                             onOk={modalFormSubmit}
                             confirmLoading={modalConfirmLoading}

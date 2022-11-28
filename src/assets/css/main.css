@@ -1,0 +1,30 @@
+/* 
+@import url('./module/ant-datepicker');
+@import url('./module/animation.css');
+@import url('./module/table.css');
+@import url('./module/ant-extenstion.css');
+@import url('./module/utilities.css');
+@import url('./module/forms.css'); */
+/* @import url('./module/ant-extenstion.css'); */
+@import url('./module/font-awesome.css');
+
+/* .ant-table-thead > tr > th, .ant-table-tbody > tr > td, .ant-table tfoot > tr > th, .ant-table tfoot > tr > td {
+  position: relative;
+  padding: 5px 16px !important;
+  overflow-wrap: break-word;
+}
+
+.nub-table {
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 1rem;
+  background-color: transparent;
+}
+.nub-table thead tr th, .nub-table tbody tr td{
+  border: 1px solid #212121;
+  font-size: 12px;
+  padding:2px;
+}
+.flarie__menu{
+  z-index: 99 !important;
+} */

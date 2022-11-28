@@ -4,25 +4,19 @@ import Title from 'antd/es/typography/Title';
 import axios from 'axios';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
+import IBrand from '../../../../Interfaces/Brand';
 
 type Props = {}
 
 export default function Brand({ }: Props) {
     var [tableLoadingSpin, setTableSpinLoading] = useState(false);
 
-    interface Brand {
-        id: number;
-        name: string;
-        alias: string;
-        description: string;
-        createdDate: string;
-        lastModifiedDate: string;
-    }
+
 
     const [brandForm] = Form.useForm();
-    const [brands, setBrands] = useState<Brand[]>([]);
-    const [brand, setBrand] = useState<Brand>();
-    const [brandId, setBrandId] = useState<number>();
+    const [brands, setIBrands] = useState<IBrand[]>([]);
+    const [brand, setIBrand] = useState<IBrand>();
+    const [brandId, setIBrandId] = useState<number>();
     const [isFormDisabled, setIsFormDisabled] = useState(false);
 
     // Modal related properties
@@ -35,14 +29,14 @@ export default function Brand({ }: Props) {
 
     useEffect(() => {
 
-        getBrands();
+        getIBrands();
 
         return () => {
 
         }
     }, []);
 
-    const getBrands = () => {
+    const getIBrands = () => {
         setTableSpinLoading(true);
         axios.get(`http://localhost:8081/brands`)
             .then((response) => {
@@ -50,7 +44,7 @@ export default function Brand({ }: Props) {
                 response.data.map((x: { [x: string]: any; id: any; }) => {
                     x['key'] = x.id;
                 })
-                setBrands(response.data);
+                setIBrands(response.data);
                 setTableSpinLoading(false);
             }).catch(err => {
                 // Handle error
@@ -59,11 +53,11 @@ export default function Brand({ }: Props) {
             });
     }
 
-    const getBrand = (id: number) => {
+    const getIBrand = (id: number) => {
         axios.get(`http://localhost:8081/brands/${id}`)
             .then((response) => {
                 console.log(response.data);
-                setBrand(response.data);
+                setIBrand(response.data);
             }).catch(err => {
                 // Handle error
                 console.log("server error");
@@ -74,7 +68,7 @@ export default function Brand({ }: Props) {
         if (modalState === 'CREATE') {
             setModalOkButtonText('Create');
             setIsFormDisabled(false);
-            setBrandId(0);
+            setIBrandId(0);
         } else if (modalState === 'VIEW') {
             setModalOkButtonText('Change');
             setIsFormDisabled(true);
@@ -128,7 +122,7 @@ export default function Brand({ }: Props) {
                     setModalOpen(false);
                     clearModalField();
                     setModalConfirmLoading(false);
-                    getBrands();
+                    getIBrands();
                     console.log(response);
                 }).catch(err => {
                     // Handle error
@@ -145,7 +139,7 @@ export default function Brand({ }: Props) {
                     clearModalField();
                     setModalOpen(false);
                     setModalConfirmLoading(false);
-                    getBrands();
+                    getIBrands();
                     setmodalState('CREATE');
                 }).catch(err => {
                     // Handle error
@@ -169,7 +163,7 @@ export default function Brand({ }: Props) {
 
 
     // table rendering settings
-    const brandColumns: ColumnsType<Brand> = [
+    const brandColumns: ColumnsType<IBrand> = [
         {
             title: 'Name',
             dataIndex: 'name',
@@ -189,7 +183,7 @@ export default function Brand({ }: Props) {
             title: 'Created Date',
             dataIndex: 'createdDate',
             key: 'createdDate',
-            render: (_: any, record: Brand) => (
+            render: (_: any, record: IBrand) => (
                 moment
                     .utc(record.createdDate)
                     .local()
@@ -200,7 +194,7 @@ export default function Brand({ }: Props) {
             title: 'Last Modified Date',
             dataIndex: 'lastModifiedDate',
             key: 'lastModifiedDate',
-            render: (_: any, record: Brand) => (
+            render: (_: any, record: IBrand) => (
                 moment
                     .utc(record.lastModifiedDate)
                     .local()
@@ -210,7 +204,7 @@ export default function Brand({ }: Props) {
         {
             title: 'Action',
             key: 'action',
-            render: (_: any, record: Brand) => (
+            render: (_: any, record: IBrand) => (
                 <Space size="middle">
                     <a onClick={() => viewAction(record.id)}>View</a>
                     <a onClick={() => updateAction(record.id)}>Update</a>
@@ -221,7 +215,7 @@ export default function Brand({ }: Props) {
                         okText="Yes"
                         cancelText="No"
                     >
-                        <a onClick={() => deleteBrandAction(record.id)}>Delete</a>
+                        <a onClick={() => deleteIBrandAction(record.id)}>Delete</a>
                     </Popconfirm>
                 </Space>
             ),
@@ -231,7 +225,7 @@ export default function Brand({ }: Props) {
     const deletePopConfirm = (e: any) => {
         axios.delete(`http://localhost:8081/brands/${brandId}`)
             .then((response) => {
-                getBrands();
+                getIBrands();
                 message.success('Deleted Successfully.');
             }).catch(err => {
                 console.log("server error", err);
@@ -244,7 +238,7 @@ export default function Brand({ }: Props) {
 
     const updateAction = (id: number) => {
 
-        setBrandId(id);
+        setIBrandId(id);
         setmodalState('UPDATE');
         showModal();
         setModalSpinLoading(true);
@@ -265,12 +259,12 @@ export default function Brand({ }: Props) {
             });
     }
 
-    const deleteBrandAction = (id: number) => {
-        setBrandId(id);
+    const deleteIBrandAction = (id: number) => {
+        setIBrandId(id);
     }
 
     const viewAction = (id: number) => {
-        setBrandId(id);
+        setIBrandId(id);
         setmodalState('VIEW');
         showModal();
         setModalSpinLoading(true);
@@ -305,7 +299,7 @@ export default function Brand({ }: Props) {
                             columns={brandColumns} />
 
                         <Modal
-                            title="Brand"
+                            title="IBrand"
                             open={modalOpen}
                             onOk={modalFormSubmit}
                             confirmLoading={modalConfirmLoading}
