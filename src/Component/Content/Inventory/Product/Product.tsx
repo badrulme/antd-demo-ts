@@ -48,11 +48,12 @@ const Product: React.FC = () => {
         name: string;
         summary: string;
         description: string;
-
-
         uomId: number;
+        uom: Uom;
         categoryId: number;
+        category: Category;
         brandId: number;
+        brand: Brand;
         activeStatus: boolean;
         createdDate: Date;
         lastModifiedDate: Date;
@@ -280,19 +281,33 @@ const Product: React.FC = () => {
             key: 'code',
         },
         {
-            title: 'Job Title',
-            dataIndex: 'jobTitle.name',
-            key: 'jobTitle.name',
+            title: 'Name',
+            dataIndex: 'name',
+            key: 'name',
         },
         {
-            title: 'Email Official',
-            dataIndex: 'emailOfficial',
-            key: 'emailOfficial',
+            title: 'uom',
+            dataIndex: 'uom',
+            key: 'uom',
+            render: (_, record) => (
+                record.uom.name
+            )
         },
         {
-            title: 'Phone Official',
-            dataIndex: 'phoneOfficial',
-            key: 'phoneOfficial',
+            title: 'category',
+            dataIndex: 'category',
+            key: 'category',
+            render: (_, record) => (
+                record.category.name
+            )
+        },
+        {
+            title: 'brand',
+            dataIndex: 'brand',
+            key: 'brand',
+            render: (_, record) => (
+                record.brand.name
+            )
         },
         {
             title: 'Status',
@@ -382,23 +397,14 @@ const Product: React.FC = () => {
             .then((response) => {
                 productForm.setFieldsValue({
                     code: response.data.code,
-                    firstName: response.data.firstName,
-                    lastName: response.data.lastName,
-                    gender: response.data.gender,
-                    dob: dayjs(moment
-                        .utc(response.data.dob)
-                        .local()
-                        .format(dateFormat), dateFormat),
-                    emailOfficial: response.data.emailOfficial,
-                    emailPersonal: response.data.emailPersonal,
-                    phoneOfficial: response.data.phoneOfficial,
-                    phonePersonal: response.data.phonePersonal,
-                    presentAddress: response.data.presentAddress,
-                    permanentAddress: response.data.permanentAddress,
-                    bloodGroup: response.data.bloodGroup,
+                    name: response.data.name,
+                    summary: response.data.summary,
+                    description: response.data.description,
+
+                    uomId: response.data.uomId,
+                    categoryId: response.data.categoryId,
+                    brandId: response.data.brandId,
                     activeStatus: response.data.activeStatus,
-                    jobTitleId: response.data.jobTitleId,
-                    productId: response.data.productId,
                 });
 
                 setModalSpinLoading(false);
@@ -423,23 +429,14 @@ const Product: React.FC = () => {
 
                 productForm.setFieldsValue({
                     code: response.data.code,
-                    firstName: response.data.firstName,
-                    lastName: response.data.lastName,
-                    gender: response.data.gender,
-                    dob: dayjs(moment
-                        .utc(response.data.dob)
-                        .local()
-                        .format(dateFormat), dateFormat),
-                    emailOfficial: response.data.emailOfficial,
-                    emailPersonal: response.data.emailPersonal,
-                    phoneOfficial: response.data.phoneOfficial,
-                    phonePersonal: response.data.phonePersonal,
-                    presentAddress: response.data.presentAddress,
-                    permanentAddress: response.data.permanentAddress,
-                    bloodGroup: response.data.bloodGroup,
+                    name: response.data.name,
+                    summary: response.data.summary,
+                    description: response.data.description,
+
+                    uomId: response.data.uomId,
+                    categoryId: response.data.categoryId,
+                    brandId: response.data.brandId,
                     activeStatus: response.data.activeStatus,
-                    jobTitleId: response.data.jobTitleId,
-                    productId: response.data.productId,
                 });
 
                 setModalSpinLoading(false);

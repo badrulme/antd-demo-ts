@@ -49,6 +49,10 @@ const Employee: React.FC = () => {
         dob: Date;
         bloodGroup: string;
         jobTitleId: number;
+        jobTitle: JobTitle;
+        departmentId: number;
+        department: Department;
+
         gender: string;
         activeStatus: boolean;
         createdDate: Date;
@@ -280,8 +284,17 @@ const Employee: React.FC = () => {
         },
         {
             title: 'Job Title',
-            dataIndex: 'jobTitle.name',
-            key: 'jobTitle.name',
+            dataIndex: 'jobTitle',
+            key: 'jobTitle',
+            render: (_: any, record: Employee) => (record.jobTitle?.name)
+
+        },
+        {
+            title: 'Department',
+            dataIndex: 'department',
+            key: 'department',
+            render: (_: any, record: Employee) => (record.department?.name)
+
         },
         {
             title: 'Email Official',
