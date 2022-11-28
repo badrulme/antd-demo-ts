@@ -18,3 +18,31 @@ export const getUom = async (
         `${API_URL}/${ApiServicePath.Uom}/${id}`,
     );
 };
+
+export const deleteUom = async (
+    id: number,
+): Promise<AxiosResponse<IUom>> => {
+    return axios.delete(
+        `${API_URL}/${ApiServicePath.Uom}/${id}`,
+    );
+};
+
+export const createUom = async (
+    uom: IUom,
+): Promise<AxiosResponse<IUom>> => {
+    return axios.post(
+        `${API_URL}/${ApiServicePath.Uom}`,
+        uom,
+    );
+};
+
+
+export const updateUom = async (
+    id: number,
+    uom: IUom,
+): Promise<AxiosResponse<IUom>> => {
+    return axios.patch(
+        `${API_URL}/${ApiServicePath.Uom}/${id}`,
+        uom
+    );
+};

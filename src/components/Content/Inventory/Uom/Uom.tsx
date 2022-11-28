@@ -4,7 +4,7 @@ import Title from 'antd/es/typography/Title';
 import axios from 'axios';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import { getUom, getUoms } from '../../../../actions/UomAction';
+import { deleteUom, getUom, getUoms } from '../../../../actions/UomAction';
 import IUom from '../../../../interfaces/Uom';
 
 
@@ -14,7 +14,7 @@ const Uom: React.FC = () => {
     const [uomForm] = Form.useForm();
     const [uoms, setIUoms] = useState<IUom[]>([]);
     const [uom, setIUom] = useState<IUom>();
-    const [uomId, setIUomId] = useState<number>();
+    const [uomId, setIUomId] = useState<number>(0);
     const [isFormDisabled, setIsFormDisabled] = useState(false);
 
     // Modal related properties
@@ -39,13 +39,15 @@ const Uom: React.FC = () => {
         try {
             setTableSpinLoading(true);
             const { data } = await getUoms();
+            data.map((x: { [x: string]: any; id: any; }) => {
+                x['key'] = x.id;
+            })
             setIUoms(data);
-            console.log(data);
+            setTableSpinLoading(false);
 
         } catch (error) {
             console.log("server error");
             setTableSpinLoading(false);
-            // httpErrorDisplay(error, EntityName.User);
         }
 
     }
@@ -57,7 +59,6 @@ const Uom: React.FC = () => {
 
         } catch (error) {
             console.log("server error");
-            // httpErrorDisplay(error, EntityName.User);
         }
     }
 
@@ -86,11 +87,7 @@ const Uom: React.FC = () => {
 
     const clearModalField = () => {
 
-        uomForm.setFieldsValue({
-            name: '',
-            alias: '',
-            description: ''
-        });
+        uomForm.resetFields();
     }
 
     const checkFormValidation = async () => {
@@ -105,8 +102,7 @@ const Uom: React.FC = () => {
     const modalFormSubmit = async () => {
 
         try {
-            const values = await uomForm.validateFields();
-            console.log('Success:', values);
+
             checkFormValidation();
             setModalConfirmLoading(true);
 
@@ -221,14 +217,15 @@ const Uom: React.FC = () => {
         },
     ];
 
-    const deletePopConfirm = (e: any) => {
-        axios.delete(`http://localhost:8081/uoms/${uomId}`)
-            .then((response) => {
-                getIUoms();
-                message.success('Deleted Successfully.');
-            }).catch(err => {
-                console.log("server error", err);
-            });
+    const deletePopConfirm = async (e: any) => {
+        try {
+            await deleteUom(uomId);
+            message.success('Deleted Successfully.');
+            getIUoms();
+        } catch (error) {
+            message.error('Failed!');
+        }
+
     };
 
     const deletePopCancel = (e: any) => {
@@ -240,23 +237,11 @@ const Uom: React.FC = () => {
         setIUomId(id);
         setmodalState('UPDATE');
         showModal();
-
         setModalSpinLoading(true);
-
         getUomDetails(id);
-
-        uomForm.setFieldsValue({
-            name: uom?.name,
-            alias: uom?.alias,
-            description: uom?.description
-        });
-
+        setFormValues();
         setModalSpinLoading(false);
 
-    }
-
-    const deleteIUomAction = (id: number) => {
-        setIUomId(id);
     }
 
     const viewAction = (id: number) => {
@@ -264,15 +249,20 @@ const Uom: React.FC = () => {
         setmodalState('VIEW');
         showModal();
         setModalSpinLoading(true);
-        getUomDetails(id);
+        setFormValues();
+        setModalSpinLoading(false);
+    }
 
+    const deleteIUomAction = (id: number) => {
+        setIUomId(id);
+    }
+
+    const setFormValues = () => {
         uomForm.setFieldsValue({
             name: uom?.name,
             alias: uom?.alias,
             description: uom?.description
         });
-
-        setModalSpinLoading(false);
     }
 
     return (
@@ -337,8 +327,6 @@ const Uom: React.FC = () => {
                     </div>
                 </Col>
             </Row>
-
-
         </>
     )
 }
