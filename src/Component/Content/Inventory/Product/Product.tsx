@@ -7,62 +7,23 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
+import IBrand from '../../../../Interfaces/Brand';
+import ICategory from '../../../../Interfaces/Category';
+import IProduct from '../../../../Interfaces/Product';
+import IUom from '../../../../Interfaces/Uom';
 const { Panel } = Collapse;
 
 const Product: React.FC = () => {
     var [tableLoadingSpin, setTableSpinLoading] = useState(false);
-    const [uoms, setUoms] = useState<Uom[]>([]);
-    const [brands, setBrands] = useState<Brand[]>([]);
-    const [categories, setCategories] = useState<Category[]>([]);
+    const [uoms, setUoms] = useState<IUom[]>([]);
+    const [brands, setBrands] = useState<IBrand[]>([]);
+    const [categories, setCategories] = useState<ICategory[]>([]);
 
-    interface Uom {
-        id: number;
-        name: string;
-        alias: string;
-        description: string;
-        createdDate: string;
-        lastModifiedDate: string;
-    }
-
-    interface Category {
-        id: number;
-        name: string;
-        parentId: number;
-        description: string;
-        createdDate: string;
-        lastModifiedDate: string;
-    }
-
-    interface Brand {
-        id: number;
-        name: string;
-        alias: string;
-        description: string;
-        createdDate: string;
-        lastModifiedDate: string;
-    }
-
-    interface Product {
-        id: number;
-        code: string;
-        name: string;
-        summary: string;
-        description: string;
-        uomId: number;
-        uom: Uom;
-        categoryId: number;
-        category: Category;
-        brandId: number;
-        brand: Brand;
-        activeStatus: boolean;
-        createdDate: Date;
-        lastModifiedDate: Date;
-    }
 
     const dateFormat = 'DD-MMM-YYYY';
     const [productForm] = Form.useForm();
-    const [products, setProducts] = useState<Product[]>([]);
-    const [product, setProduct] = useState<Product>();
+    const [products, setProducts] = useState<IProduct[]>([]);
+    const [product, setProduct] = useState<IProduct>();
     const [productId, setProductId] = useState<number>();
     const [isFormDisabled, setIsFormDisabled] = useState(false);
 
@@ -274,7 +235,7 @@ const Product: React.FC = () => {
 
 
     // table rendering settings
-    const productColumns: ColumnsType<Product> = [
+    const productColumns: ColumnsType<IProduct> = [
         {
             title: 'Code',
             dataIndex: 'code',
@@ -313,7 +274,7 @@ const Product: React.FC = () => {
             title: 'Status',
             dataIndex: 'status',
             key: 'status',
-            render: (_: any, record: Product) => {
+            render: (_: any, record: IProduct) => {
                 if (record.activeStatus) {
                     return (
                         <span>

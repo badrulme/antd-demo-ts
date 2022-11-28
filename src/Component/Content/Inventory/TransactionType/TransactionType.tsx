@@ -6,25 +6,18 @@ import Title from 'antd/es/typography/Title';
 import axios from 'axios';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
+import ITransactionType from '../../../../Interfaces/TransactionType';
 
 
 const TransactionType: React.FC = () => {
     var [tableLoadingSpin, setTableSpinLoading] = useState(false);
 
-    interface TransactionType {
-        id: number;
-        name: string;
-        alias: string;
-        description: string;
-        transactionFlow: string;
-        createdDate: string;
-        lastModifiedDate: string;
-    }
+
 
     const [transactionTypeForm] = Form.useForm();
-    const [transactionTypes, setTransactionTypes] = useState<TransactionType[]>([]);
-    const [transactionType, setTransactionType] = useState<TransactionType>();
-    const [transactionTypeId, setTransactionTypeId] = useState<number>();
+    const [transactionTypes, setITransactionTypes] = useState<ITransactionType[]>([]);
+    const [transactionType, setITransactionType] = useState<ITransactionType>();
+    const [transactionTypeId, setITransactionTypeId] = useState<number>();
     const [isFormDisabled, setIsFormDisabled] = useState(false);
 
     // Modal related properties
@@ -37,14 +30,14 @@ const TransactionType: React.FC = () => {
 
     useEffect(() => {
 
-        getTransactionTypes();
+        getITransactionTypes();
 
         return () => {
 
         }
     }, []);
 
-    const getTransactionTypes = () => {
+    const getITransactionTypes = () => {
         setTableSpinLoading(true);
         axios.get(`http://localhost:8081/transactionTypes`)
             .then((response) => {
@@ -52,7 +45,7 @@ const TransactionType: React.FC = () => {
                 response.data.map((x: { [x: string]: any; id: any; }) => {
                     x['key'] = x.id;
                 })
-                setTransactionTypes(response.data);
+                setITransactionTypes(response.data);
                 setTableSpinLoading(false);
             }).catch(err => {
                 // Handle error
@@ -61,11 +54,11 @@ const TransactionType: React.FC = () => {
             });
     }
 
-    const getTransactionType = (id: number) => {
+    const getITransactionType = (id: number) => {
         axios.get(`http://localhost:8081/transactionTypes/${id}`)
             .then((response) => {
                 console.log(response.data);
-                setTransactionType(response.data);
+                setITransactionType(response.data);
             }).catch(err => {
                 // Handle error
                 console.log("server error");
@@ -76,7 +69,7 @@ const TransactionType: React.FC = () => {
         if (modalState === 'CREATE') {
             setModalOkButtonText('Create');
             setIsFormDisabled(false);
-            setTransactionTypeId(0);
+            setITransactionTypeId(0);
         } else if (modalState === 'VIEW') {
             setModalOkButtonText('Change');
             setIsFormDisabled(true);
@@ -133,7 +126,7 @@ const TransactionType: React.FC = () => {
                     setModalOpen(false);
                     clearModalField();
                     setModalConfirmLoading(false);
-                    getTransactionTypes();
+                    getITransactionTypes();
                     console.log(response);
                 }).catch(err => {
                     // Handle error
@@ -151,7 +144,7 @@ const TransactionType: React.FC = () => {
                     clearModalField();
                     setModalOpen(false);
                     setModalConfirmLoading(false);
-                    getTransactionTypes();
+                    getITransactionTypes();
                     console.log(response);
                     setmodalState('CREATE');
                 }).catch(err => {
@@ -176,7 +169,7 @@ const TransactionType: React.FC = () => {
 
 
     // table rendering settings
-    const transactionTypeColumns: ColumnsType<TransactionType> = [
+    const transactionTypeColumns: ColumnsType<ITransactionType> = [
         {
             title: 'Name',
             dataIndex: 'name',
@@ -191,7 +184,7 @@ const TransactionType: React.FC = () => {
             title: 'Flow',
             dataIndex: 'transactionFlow',
             key: 'transactionFlow',
-            render: (_: any, record: TransactionType) => {
+            render: (_: any, record: ITransactionType) => {
                 if (record.transactionFlow === 'OUT') {
                     return (
                         <span>
@@ -249,7 +242,7 @@ const TransactionType: React.FC = () => {
                         okText="Yes"
                         cancelText="No"
                     >
-                        <a onClick={() => deleteTransactionTypeAction(record.id)}>Delete</a>
+                        <a onClick={() => deleteITransactionTypeAction(record.id)}>Delete</a>
                     </Popconfirm>
                 </Space>
             ),
@@ -259,7 +252,7 @@ const TransactionType: React.FC = () => {
     const deletePopConfirm = (e: any) => {
         axios.delete(`http://localhost:8081/transactionTypes/${transactionTypeId}`)
             .then((response) => {
-                getTransactionTypes();
+                getITransactionTypes();
                 message.success('Deleted Successfully.');
             }).catch(err => {
                 console.log("server error", err);
@@ -272,7 +265,7 @@ const TransactionType: React.FC = () => {
 
     const updateAction = (id: number) => {
 
-        setTransactionTypeId(id);
+        setITransactionTypeId(id);
         setmodalState('UPDATE');
         showModal();
         setModalSpinLoading(true);
@@ -294,12 +287,12 @@ const TransactionType: React.FC = () => {
             });
     }
 
-    const deleteTransactionTypeAction = (id: number) => {
-        setTransactionTypeId(id);
+    const deleteITransactionTypeAction = (id: number) => {
+        setITransactionTypeId(id);
     }
 
     const viewAction = (id: number) => {
-        setTransactionTypeId(id);
+        setITransactionTypeId(id);
         setmodalState('VIEW');
         showModal();
         setModalSpinLoading(true);

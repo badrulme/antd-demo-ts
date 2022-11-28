@@ -7,36 +7,18 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
+import ISupplier from '../../../Interfaces/Supplier';
 const { Panel } = Collapse;
 
 const Supplier: React.FC = () => {
     var [tableLoadingSpin, setTableSpinLoading] = useState(false);
 
-    interface Supplier {
-        id: number;
-        code: string;
-        name: string;
-        openingBalance: number;
-        openingDate: Date;
-        companyName: string;
-        description: string;
-        address: string;
-        email: string;
-        gender: string;
-        contactPersonName: string;
-        contactPersonPhone: string;
-        remarks: string;
-        activeStatus: boolean;
-        mobile1: string;
-        mobile2: string;
-        createdDate: Date;
-        lastModifiedDate: Date;
-    }
+
 
     const dateFormat = 'DD-MMM-YYYY';
     const [supplierForm] = Form.useForm();
-    const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-    const [supplier, setSupplier] = useState<Supplier>();
+    const [suppliers, setSuppliers] = useState<ISupplier[]>([]);
+    const [supplier, setSupplier] = useState<ISupplier>();
     const [supplierId, setSupplierId] = useState<number>();
     const [isFormDisabled, setIsFormDisabled] = useState(false);
 
@@ -220,7 +202,7 @@ const Supplier: React.FC = () => {
 
 
     // table rendering settings
-    const supplierColumns: ColumnsType<Supplier> = [
+    const supplierColumns: ColumnsType<ISupplier> = [
         {
             title: 'Code',
             dataIndex: 'code',
@@ -245,7 +227,7 @@ const Supplier: React.FC = () => {
             title: 'Status',
             dataIndex: 'status',
             key: 'status',
-            render: (_: any, record: Supplier) => {
+            render: (_: any, record: ISupplier) => {
                 if (record.activeStatus) {
                     return (
                         <span>

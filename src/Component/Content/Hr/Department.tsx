@@ -5,23 +5,14 @@ import Title from 'antd/es/typography/Title';
 import axios from 'axios';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
+import IDepartment from '../../../Interfaces/Department';
 
 
 const Department: React.FC = () => {
     var [tableLoadingSpin, setTableSpinLoading] = useState(false);
 
-    interface Department {
-        id: number;
-        name: string;
-        alias: string;
-        activeStatus: boolean;
-        description: string;
-        createdDate: string;
-        lastModifiedDate: string;
-    }
-
     const [departmentForm] = Form.useForm();
-    const [departments, setDepartments] = useState<Department[]>([]);
+    const [departments, setDepartments] = useState<IDepartment[]>([]);
     // const [department, setDepartment] = useState<Department>();
     const [departmentId, setDepartmentId] = useState<number>();
     const [isFormDisabled, setIsFormDisabled] = useState(false);
@@ -122,7 +113,7 @@ const Department: React.FC = () => {
 
 
     // table rendering settings
-    const departmentColumns: ColumnsType<Department> = [
+    const departmentColumns: ColumnsType<IDepartment> = [
         {
             title: 'Name',
             dataIndex: 'name',
@@ -142,7 +133,7 @@ const Department: React.FC = () => {
             title: 'Status',
             dataIndex: 'status',
             key: 'status',
-            render: (_: any, record: Department) => {
+            render: (_: any, record: IDepartment) => {
                 if (record.activeStatus) {
                     return (
                         <span>
@@ -163,7 +154,7 @@ const Department: React.FC = () => {
             title: 'Created Date',
             dataIndex: 'createdDate',
             key: 'createdDate',
-            render: (_: any, record: Department) => (
+            render: (_: any, record: IDepartment) => (
                 moment
                     .utc(record.createdDate)
                     .local()
@@ -174,7 +165,7 @@ const Department: React.FC = () => {
             title: 'Modified Date',
             dataIndex: 'lastModifiedDate',
             key: 'lastModifiedDate',
-            render: (_: any, record: Department) => (
+            render: (_: any, record: IDepartment) => (
                 moment
                     .utc(record.lastModifiedDate)
                     .local()
@@ -184,7 +175,7 @@ const Department: React.FC = () => {
         {
             title: 'Action',
             key: 'action',
-            render: (_: any, record: Department) => (
+            render: (_: any, record: IDepartment) => (
                 <Space size="middle">
                     <a onClick={() => viewAction(record.id)}>View</a>
                     <a onClick={() => updateAction(record.id)}>Update</a>

@@ -5,23 +5,14 @@ import Title from 'antd/es/typography/Title';
 import axios from 'axios';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
+import IJobTitle from '../../../Interfaces/JobTitle';
 
 
 const JobTitle: React.FC = () => {
     var [tableLoadingSpin, setTableSpinLoading] = useState(false);
 
-    interface JobTitle {
-        id: number;
-        name: string;
-        alias: string;
-        activeStatus: boolean;
-        description: string;
-        createdDate: string;
-        lastModifiedDate: string;
-    }
-
     const [jobTitleForm] = Form.useForm();
-    const [jobTitles, setJobTitles] = useState<JobTitle[]>([]);
+    const [jobTitles, setJobTitles] = useState<IJobTitle[]>([]);
     // const [jobTitle, setJobTitle] = useState<JobTitle>();
     const [jobTitleId, setJobTitleId] = useState<number>();
     const [isFormDisabled, setIsFormDisabled] = useState(false);
@@ -122,7 +113,7 @@ const JobTitle: React.FC = () => {
 
 
     // table rendering settings
-    const jobTitleColumns: ColumnsType<JobTitle> = [
+    const jobTitleColumns: ColumnsType<IJobTitle> = [
         {
             title: 'Name',
             dataIndex: 'name',
@@ -142,7 +133,7 @@ const JobTitle: React.FC = () => {
             title: 'Status',
             dataIndex: 'status',
             key: 'status',
-            render: (_: any, record: JobTitle) => {
+            render: (_: any, record: IJobTitle) => {
                 if (record.activeStatus) {
                     return (
                         <span>
@@ -163,7 +154,7 @@ const JobTitle: React.FC = () => {
             title: 'Created Date',
             dataIndex: 'createdDate',
             key: 'createdDate',
-            render: (_: any, record: JobTitle) => (
+            render: (_: any, record: IJobTitle) => (
                 moment
                     .utc(record.createdDate)
                     .local()
@@ -174,7 +165,7 @@ const JobTitle: React.FC = () => {
             title: 'Modified Date',
             dataIndex: 'lastModifiedDate',
             key: 'lastModifiedDate',
-            render: (_: any, record: JobTitle) => (
+            render: (_: any, record: IJobTitle) => (
                 moment
                     .utc(record.lastModifiedDate)
                     .local()
@@ -184,7 +175,7 @@ const JobTitle: React.FC = () => {
         {
             title: 'Action',
             key: 'action',
-            render: (_: any, record: JobTitle) => (
+            render: (_: any, record: IJobTitle) => (
                 <Space size="middle">
                     <a onClick={() => viewAction(record.id)}>View</a>
                     <a onClick={() => updateAction(record.id)}>Update</a>

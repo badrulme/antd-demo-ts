@@ -7,6 +7,7 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
+import ICustomer from '../../../Interfaces/Customer';
 
 const { Panel } = Collapse;
 
@@ -14,28 +15,11 @@ const Customer: React.FC = () => {
     var [tableLoadingSpin, setTableSpinLoading] = useState(false);
     const dateFormat = 'DD-MMM-YYYY';
 
-    interface Customer {
-        id: number;
-        code: string;
-        name: string;
-        openingBalance: number;
-        openingDate: Date;
-        companyName: string;
-        description: string;
-        address: string;
-        email: string;
-        gender: string;
-        remarks: string;
-        activeStatus: boolean;
-        mobile1: string;
-        mobile2: string;
-        createdDate: Date;
-        lastModifiedDate: Date;
-    }
+
 
     const [customerForm] = Form.useForm();
-    const [customers, setCustomers] = useState<Customer[]>([]);
-    const [customer, setCustomer] = useState<Customer>();
+    const [customers, setCustomers] = useState<ICustomer[]>([]);
+    const [customer, setCustomer] = useState<ICustomer>();
     const [customerId, setCustomerId] = useState<number>();
     const [isFormDisabled, setIsFormDisabled] = useState(false);
 
@@ -213,7 +197,7 @@ const Customer: React.FC = () => {
 
 
     // table rendering settings
-    const customerColumns: ColumnsType<Customer> = [
+    const customerColumns: ColumnsType<ICustomer> = [
         {
             title: 'Code',
             dataIndex: 'code',
@@ -238,7 +222,7 @@ const Customer: React.FC = () => {
             title: 'Status',
             dataIndex: 'status',
             key: 'status',
-            render: (_: any, record: Customer) => {
+            render: (_: any, record: ICustomer) => {
                 if (record.activeStatus) {
                     return (
                         <span>

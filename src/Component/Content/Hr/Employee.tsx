@@ -7,62 +7,23 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
+import IDepartment from '../../../Interfaces/Department';
+import IEmployee from '../../../Interfaces/Employee';
+import IJobTitle from '../../../Interfaces/JobTitle';
 const { Panel } = Collapse;
 
 const Employee: React.FC = () => {
     var [tableLoadingSpin, setTableSpinLoading] = useState(false);
-    const [jobTitles, setJobTitles] = useState<JobTitle[]>([]);
-    const [departments, setDepartments] = useState<Department[]>([]);
+    const [jobTitles, setJobTitles] = useState<IJobTitle[]>([]);
+    const [departments, setDepartments] = useState<IDepartment[]>([]);
 
 
-    interface JobTitle {
-        id: number;
-        name: string;
-        alias: string;
-        activeStatus: boolean;
-        description: string;
-        createdDate: string;
-        lastModifiedDate: string;
-    }
 
-    interface Department {
-        id: number;
-        name: string;
-        alias: string;
-        activeStatus: boolean;
-        description: string;
-        createdDate: string;
-        lastModifiedDate: string;
-    }
-
-    interface Employee {
-        id: number;
-        code: string;
-        firstName: string;
-        lastName: string;
-        emailOfficial: string;
-        emailPersonal: string;
-        phonePersonal: string;
-        phoneOfficial: string;
-        presentAddress: string;
-        permanentAddress: string;
-        dob: Date;
-        bloodGroup: string;
-        jobTitleId: number;
-        jobTitle: JobTitle;
-        departmentId: number;
-        department: Department;
-
-        gender: string;
-        activeStatus: boolean;
-        createdDate: Date;
-        lastModifiedDate: Date;
-    }
 
     const dateFormat = 'DD-MMM-YYYY';
     const [employeeForm] = Form.useForm();
-    const [employees, setEmployees] = useState<Employee[]>([]);
-    const [employee, setEmployee] = useState<Employee>();
+    const [employees, setEmployees] = useState<IEmployee[]>([]);
+    const [employee, setEmployee] = useState<IEmployee>();
     const [employeeId, setEmployeeId] = useState<number>();
     const [isFormDisabled, setIsFormDisabled] = useState(false);
 
@@ -270,7 +231,7 @@ const Employee: React.FC = () => {
 
 
     // table rendering settings
-    const employeeColumns: ColumnsType<Employee> = [
+    const employeeColumns: ColumnsType<IEmployee> = [
         {
             title: 'Code',
             dataIndex: 'code',
@@ -280,20 +241,20 @@ const Employee: React.FC = () => {
             title: 'Name',
             dataIndex: 'name',
             key: 'name',
-            render: (_: any, record: Employee) => (record.firstName + " " + record.lastName)
+            render: (_: any, record: IEmployee) => (record.firstName + " " + record.lastName)
         },
         {
             title: 'Job Title',
             dataIndex: 'jobTitle',
             key: 'jobTitle',
-            render: (_: any, record: Employee) => (record.jobTitle?.name)
+            render: (_: any, record: IEmployee) => (record.jobTitle?.name)
 
         },
         {
             title: 'Department',
             dataIndex: 'department',
             key: 'department',
-            render: (_: any, record: Employee) => (record.department?.name)
+            render: (_: any, record: IEmployee) => (record.department?.name)
 
         },
         {
@@ -310,7 +271,7 @@ const Employee: React.FC = () => {
             title: 'Status',
             dataIndex: 'status',
             key: 'status',
-            render: (_: any, record: Employee) => {
+            render: (_: any, record: IEmployee) => {
                 if (record.activeStatus) {
                     return (
                         <span>
@@ -630,7 +591,6 @@ const Employee: React.FC = () => {
                                                 </Form.Item>
                                             </Panel>
                                         </Collapse>
-
                                     </Form>
                                 </div>
                             </Spin>
@@ -638,7 +598,6 @@ const Employee: React.FC = () => {
                     </div>
                 </Col>
             </Row>
-
         </>
     )
 }

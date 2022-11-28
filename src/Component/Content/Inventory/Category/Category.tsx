@@ -4,12 +4,13 @@ import Title from 'antd/es/typography/Title';
 import axios from 'axios';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
+import ICategory from '../../../../Interfaces/Category';
 
 type Props = {}
 
 export default function Category({ }: Props) {
-    const [parentCategories, setParentCategories] = useState<Category[]>([]);
-    const [displayParentCategories, setDisplayParentCategories] = useState<Category[]>([]);
+    const [parentCategories, setParentCategories] = useState<ICategory[]>([]);
+    const [displayParentCategories, setDisplayParentCategories] = useState<ICategory[]>([]);
 
     const onChange = (value: string) => {
         console.log(`selected ${value}`);
@@ -21,19 +22,10 @@ export default function Category({ }: Props) {
 
     var [tableLoadingSpin, setTableSpinLoading] = useState(false);
 
-    interface Category {
-        id: number;
-        name: string;
-        parentId: number;
-        description: string;
-        createdDate: string;
-        lastModifiedDate: string;
-    }
-
     const [categoryForm] = Form.useForm();
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [category, setCategory] = useState<Category>();
-    const [categoryId, setCategoryId] = useState<number>();
+    const [categories, setCategories] = useState<ICategory[]>([]);
+    const [category, setICategory] = useState<ICategory>();
+    const [categoryId, setICategoryId] = useState<number>();
     const [isFormDisabled, setIsFormDisabled] = useState(false);
 
     // Modal related properties
@@ -46,14 +38,14 @@ export default function Category({ }: Props) {
 
     useEffect(() => {
 
-        getCategorys();
+        getICategorys();
 
         return () => {
 
         }
     }, []);
 
-    const getCategorys = () => {
+    const getICategorys = () => {
         setTableSpinLoading(true);
         axios.get(`http://localhost:8081/categories`)
             .then((response) => {
@@ -75,11 +67,11 @@ export default function Category({ }: Props) {
             });
     }
 
-    const getCategory = (id: number) => {
+    const getICategory = (id: number) => {
         axios.get(`http://localhost:8081/categories/${id}`)
             .then((response) => {
                 console.log(response.data);
-                setCategory(response.data);
+                setICategory(response.data);
             }).catch(err => {
                 // Handle error
                 console.log("server error");
@@ -90,7 +82,7 @@ export default function Category({ }: Props) {
         if (modalState === 'CREATE') {
             setModalOkButtonText('Create');
             setIsFormDisabled(false);
-            setCategoryId(0);
+            setICategoryId(0);
             setDisplayParentCategories(parentCategories);
         } else if (modalState === 'VIEW') {
             setModalOkButtonText('Change');
@@ -146,7 +138,7 @@ export default function Category({ }: Props) {
                     setModalOpen(false);
                     clearModalField();
                     setModalConfirmLoading(false);
-                    getCategorys();
+                    getICategorys();
                     console.log(response);
                 }).catch(err => {
                     // Handle error
@@ -163,7 +155,7 @@ export default function Category({ }: Props) {
                     clearModalField();
                     setModalOpen(false);
                     setModalConfirmLoading(false);
-                    getCategorys();
+                    getICategorys();
                     setmodalState('CREATE');
                 }).catch(err => {
                     console.log("server error", err);
@@ -184,7 +176,7 @@ export default function Category({ }: Props) {
 
 
     // table rendering settings
-    const categoryColumns: ColumnsType<Category> = [
+    const categoryColumns: ColumnsType<ICategory> = [
         {
             title: 'Name',
             dataIndex: 'name',
@@ -199,7 +191,7 @@ export default function Category({ }: Props) {
             title: 'Created Date',
             dataIndex: 'createdDate',
             key: 'createdDate',
-            render: (_: any, record: Category) => (
+            render: (_: any, record: ICategory) => (
                 moment
                     .utc(record.createdDate)
                     .local()
@@ -210,7 +202,7 @@ export default function Category({ }: Props) {
             title: 'Last Modified Date',
             dataIndex: 'lastModifiedDate',
             key: 'lastModifiedDate',
-            render: (_: any, record: Category) => (
+            render: (_: any, record: ICategory) => (
                 moment
                     .utc(record.lastModifiedDate)
                     .local()
@@ -220,7 +212,7 @@ export default function Category({ }: Props) {
         {
             title: 'Action',
             key: 'action',
-            render: (_: any, record: Category) => (
+            render: (_: any, record: ICategory) => (
                 <Space size="middle">
                     <a onClick={() => viewAction(record.id)}>View</a>
                     <a onClick={() => updateAction(record.id)}>Update</a>
@@ -231,7 +223,7 @@ export default function Category({ }: Props) {
                         okText="Yes"
                         cancelText="No"
                     >
-                        <a onClick={() => deleteCategoryAction(record.id)}>Delete</a>
+                        <a onClick={() => deleteICategoryAction(record.id)}>Delete</a>
                     </Popconfirm>
                 </Space>
             ),
@@ -241,7 +233,7 @@ export default function Category({ }: Props) {
     const deletePopConfirm = (e: any) => {
         axios.delete(`http://localhost:8081/categories/${categoryId}`)
             .then((response) => {
-                getCategorys();
+                getICategorys();
                 message.success('Deleted Successfully.');
             }).catch(err => {
                 console.log("server error", err);
@@ -254,7 +246,7 @@ export default function Category({ }: Props) {
 
     const updateAction = (id: number) => {
 
-        setCategoryId(id);
+        setICategoryId(id);
         setmodalState('UPDATE');
         showModal();
         setModalSpinLoading(true);
@@ -264,7 +256,7 @@ export default function Category({ }: Props) {
                 categoryForm.setFieldsValue({
                     name: response.data.name,
                     description: response.data.description,
-                    parentId: response.data.parentCategory?.id,
+                    parentId: response.data.parentICategory?.id,
                 });
 
                 setModalSpinLoading(false);
@@ -276,12 +268,12 @@ export default function Category({ }: Props) {
             });
     }
 
-    const deleteCategoryAction = (id: number) => {
-        setCategoryId(id);
+    const deleteICategoryAction = (id: number) => {
+        setICategoryId(id);
     }
 
     const viewAction = (id: number) => {
-        setCategoryId(id);
+        setICategoryId(id);
         setmodalState('VIEW');
         showModal();
         setModalSpinLoading(true);
@@ -290,7 +282,7 @@ export default function Category({ }: Props) {
                 categoryForm.setFieldsValue({
                     name: response.data.name,
                     description: response.data.description,
-                    parentId: response.data.parentCategory?.id,
+                    parentId: response.data.parentICategory?.id,
                 });
 
                 setModalSpinLoading(false);
@@ -307,10 +299,6 @@ export default function Category({ }: Props) {
                 <Col md={24}>
                     <div>
 
-                        {/* <PageHeader
-                            title="Category"
-                            subTitle=""
-                        /> */}
                         <Title level={2}>Category</Title>
 
                         <Button type="primary" onClick={showModal}>Create</Button>
@@ -321,7 +309,7 @@ export default function Category({ }: Props) {
                             columns={categoryColumns} />
 
                         <Modal
-                            title="Category"
+                            title="ICategory"
                             open={modalOpen}
                             onOk={modalFormSubmit}
                             confirmLoading={modalConfirmLoading}
@@ -353,11 +341,11 @@ export default function Category({ }: Props) {
                                             label="Description">
                                             <Input.TextArea />
                                         </Form.Item>
-                                        <Form.Item name="parentId" label="Parent Category" rules={[{ required: false }]}>
+                                        <Form.Item name="parentId" label="Parent ICategory" rules={[{ required: false }]}>
                                             <Select
                                                 allowClear={true}
                                                 showSearch
-                                                placeholder="Select Parent Category"
+                                                placeholder="Select Parent ICategory"
                                                 optionFilterProp="children"
                                                 onChange={onChange}
                                                 onSearch={onSearch}
