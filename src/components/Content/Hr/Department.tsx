@@ -1,27 +1,25 @@
-import { Button, Col, Form, Input, message, Modal, Popconfirm, Row, Space, Spin, Table } from 'antd';
+import { CheckCircleTwoTone } from '@ant-design/icons';
+import { Button, Col, Form, Input, message, Modal, Popconfirm, Row, Space, Spin, Switch, Table } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import Title from 'antd/es/typography/Title';
 import axios from 'axios';
 import moment from 'moment';
-import { useEffect, useState } from 'react';
-import IBrand from '../../../../Interfaces/Brand';
+import React, { useEffect, useState } from 'react';
+import IDepartment from '../../../interfaces/Department';
 
-type Props = {}
 
-export default function Brand({ }: Props) {
+const Department: React.FC = () => {
     var [tableLoadingSpin, setTableSpinLoading] = useState(false);
 
-
-
-    const [brandForm] = Form.useForm();
-    const [brands, setIBrands] = useState<IBrand[]>([]);
-    const [brand, setIBrand] = useState<IBrand>();
-    const [brandId, setIBrandId] = useState<number>();
+    const [departmentForm] = Form.useForm();
+    const [departments, setDepartments] = useState<IDepartment[]>([]);
+    // const [department, setDepartment] = useState<Department>();
+    const [departmentId, setDepartmentId] = useState<number>();
     const [isFormDisabled, setIsFormDisabled] = useState(false);
 
     // Modal related properties
     var [modalLoadingSpin, setModalSpinLoading] = useState(false);
-    var [modalState, setmodalState] = useState('CREATE');
+    var [modalState, setModalState] = useState('CREATE');
     const [modalOkButtonText, setModalOkButtonText] = useState('Create');
     const [modalOpen, setModalOpen] = useState(false);
     const [modalConfirmLoading, setModalConfirmLoading] = useState(false);
@@ -29,22 +27,22 @@ export default function Brand({ }: Props) {
 
     useEffect(() => {
 
-        getIBrands();
+        getDepartments();
 
         return () => {
 
         }
     }, []);
 
-    const getIBrands = () => {
+    const getDepartments = () => {
         setTableSpinLoading(true);
-        axios.get(`http://localhost:8081/brands`)
+        axios.get(`http://localhost:8081/departments`)
             .then((response) => {
                 console.log(response.data);
                 response.data.map((x: { [x: string]: any; id: any; }) => {
                     x['key'] = x.id;
                 })
-                setIBrands(response.data);
+                setDepartments(response.data);
                 setTableSpinLoading(false);
             }).catch(err => {
                 // Handle error
@@ -53,22 +51,22 @@ export default function Brand({ }: Props) {
             });
     }
 
-    const getIBrand = (id: number) => {
-        axios.get(`http://localhost:8081/brands/${id}`)
-            .then((response) => {
-                console.log(response.data);
-                setIBrand(response.data);
-            }).catch(err => {
-                // Handle error
-                console.log("server error");
-            });
-    }
+    // const getDepartment = (id: number) => {
+    //     axios.get(`http://localhost:8081/departments/${id}`)
+    //         .then((response) => {
+    //             console.log(response.data);
+    //             setDepartment(response.data);
+    //         }).catch(err => {
+    //             // Handle error
+    //             console.log("server error");
+    //         });
+    // }
 
     useEffect(() => {
         if (modalState === 'CREATE') {
             setModalOkButtonText('Create');
             setIsFormDisabled(false);
-            setIBrandId(0);
+            setDepartmentId(0);
         } else if (modalState === 'VIEW') {
             setModalOkButtonText('Change');
             setIsFormDisabled(true);
@@ -88,82 +86,34 @@ export default function Brand({ }: Props) {
     };
 
     const clearModalField = () => {
-        brandForm.setFieldsValue({
+        departmentForm.setFieldsValue({
             name: '',
             alias: '',
-            description: ''
+            description: '',
+            activeStatus: true
         });
     }
 
-    const checkFormValidation = async () => {
-        try {
-            const values = await brandForm.validateFields();
-            console.log('Success:', values);
-        } catch (errorInfo) {
-            console.log('Failed:', errorInfo);
-        }
-    };
+    // const checkFormValidation = async () => {
+    //     try {
+    //         const values = await departmentForm.validateFields();
+    //         console.log('Success:', values);
+    //     } catch (errorInfo) {
+    //         console.log('Failed:', errorInfo);
+    //     }
+    // };
 
-    const modalFormSubmit = async () => {
-
-        try {
-            const values = await brandForm.validateFields();
-            console.log('Success:', values);
-            checkFormValidation();
-            setModalConfirmLoading(true);
-
-            if (modalState === 'CREATE') {
-                axios.post(`http://localhost:8081/brands`, {
-                    name: brandForm.getFieldValue('name'),
-                    alias: brandForm.getFieldValue('alias'),
-                    description: brandForm.getFieldValue('description')
-
-                }).then((response) => {
-                    setModalOpen(false);
-                    clearModalField();
-                    setModalConfirmLoading(false);
-                    getIBrands();
-                    console.log(response);
-                }).catch(err => {
-                    // Handle error
-                    console.log("server error");
-                    setModalConfirmLoading(false);
-                });
-            } else {
-                axios.put(`http://localhost:8081/brands/${brandId}`, {
-                    name: brandForm.getFieldValue('name'),
-                    alias: brandForm.getFieldValue('alias'),
-                    description: brandForm.getFieldValue('description')
-
-                }).then((response) => {
-                    clearModalField();
-                    setModalOpen(false);
-                    setModalConfirmLoading(false);
-                    getIBrands();
-                    setmodalState('CREATE');
-                }).catch(err => {
-                    // Handle error
-                    console.log("server error");
-                    setModalConfirmLoading(false);
-                });
-            }
-        } catch (errorInfo) {
-            console.log('Failed:', errorInfo);
-        }
-
-
-
-    };
 
     const handleCancel = () => {
         setModalOpen(false);
         setModalSpinLoading(false);
-        setmodalState('CREATE');
+        setModalState('CREATE');
     };
 
 
+
     // table rendering settings
-    const brandColumns: ColumnsType<IBrand> = [
+    const departmentColumns: ColumnsType<IDepartment> = [
         {
             title: 'Name',
             dataIndex: 'name',
@@ -180,10 +130,31 @@ export default function Brand({ }: Props) {
             key: 'description',
         },
         {
+            title: 'Status',
+            dataIndex: 'status',
+            key: 'status',
+            render: (_: any, record: IDepartment) => {
+                if (record.activeStatus) {
+                    return (
+                        <span>
+                            <CheckCircleTwoTone twoToneColor="#52c41a" /> Active
+                        </span>
+                    )
+                } else {
+                    return (
+                        <span>
+                            <CheckCircleTwoTone twoToneColor="#eb2f96" /> InActive
+                        </span>
+                    )
+                }
+
+            },
+        },
+        {
             title: 'Created Date',
             dataIndex: 'createdDate',
             key: 'createdDate',
-            render: (_: any, record: IBrand) => (
+            render: (_: any, record: IDepartment) => (
                 moment
                     .utc(record.createdDate)
                     .local()
@@ -191,20 +162,20 @@ export default function Brand({ }: Props) {
             )
         },
         {
-            title: 'Last Modified Date',
+            title: 'Modified Date',
             dataIndex: 'lastModifiedDate',
             key: 'lastModifiedDate',
-            render: (_: any, record: IBrand) => (
+            render: (_: any, record: IDepartment) => (
                 moment
                     .utc(record.lastModifiedDate)
                     .local()
-                    .format('DD-MM-YYYY')
+                    .format('DD-MMM-YYYY')
             )
         },
         {
             title: 'Action',
             key: 'action',
-            render: (_: any, record: IBrand) => (
+            render: (_: any, record: IDepartment) => (
                 <Space size="middle">
                     <a onClick={() => viewAction(record.id)}>View</a>
                     <a onClick={() => updateAction(record.id)}>Update</a>
@@ -215,17 +186,69 @@ export default function Brand({ }: Props) {
                         okText="Yes"
                         cancelText="No"
                     >
-                        <a onClick={() => deleteIBrandAction(record.id)}>Delete</a>
+                        <a onClick={() => deleteDepartmentAction(record.id)}>Delete</a>
                     </Popconfirm>
                 </Space>
             ),
         },
     ];
 
+
+    const modalFormSubmit = async () => {
+
+        try {
+            const values = await departmentForm.validateFields();
+            console.log('Success:', values);
+            setModalConfirmLoading(true);
+
+            if (modalState === 'CREATE') {
+                axios.post(`http://localhost:8081/departments`, {
+                    name: departmentForm.getFieldValue('name'),
+                    alias: departmentForm.getFieldValue('alias'),
+                    description: departmentForm.getFieldValue('description'),
+                    activeStatus: departmentForm.getFieldValue('activeStatus'),
+
+                }).then((response) => {
+                    setModalOpen(false);
+                    clearModalField();
+                    setModalConfirmLoading(false);
+                    getDepartments();
+                    console.log(response);
+                }).catch(err => {
+                    // Handle error
+                    console.log("server error");
+                    setModalConfirmLoading(false);
+                });
+            } else {
+                axios.put(`http://localhost:8081/departments/${departmentId}`, {
+                    name: departmentForm.getFieldValue('name'),
+                    alias: departmentForm.getFieldValue('alias'),
+                    description: departmentForm.getFieldValue('description'),
+                    activeStatus: departmentForm.getFieldValue('activeStatus')
+
+                }).then((response) => {
+                    clearModalField();
+                    setModalOpen(false);
+                    setModalConfirmLoading(false);
+                    getDepartments();
+                    setModalState('CREATE');
+                }).catch(err => {
+                    // Handle error
+                    console.log("server error");
+                    setModalConfirmLoading(false);
+                });
+            }
+        } catch (errorInfo) {
+            console.log('Failed:', errorInfo);
+        }
+
+    };
+
+
     const deletePopConfirm = (e: any) => {
-        axios.delete(`http://localhost:8081/brands/${brandId}`)
+        axios.delete(`http://localhost:8081/departments/${departmentId}`)
             .then((response) => {
-                getIBrands();
+                getDepartments();
                 message.success('Deleted Successfully.');
             }).catch(err => {
                 console.log("server error", err);
@@ -233,22 +256,22 @@ export default function Brand({ }: Props) {
     };
 
     const deletePopCancel = (e: any) => {
-        console.log(e);
     };
 
     const updateAction = (id: number) => {
 
-        setIBrandId(id);
-        setmodalState('UPDATE');
+        setDepartmentId(id);
+        setModalState('UPDATE');
         showModal();
         setModalSpinLoading(true);
-        axios.get(`http://localhost:8081/brands/${id}`)
+        axios.get(`http://localhost:8081/departments/${id}`)
             .then((response) => {
 
-                brandForm.setFieldsValue({
+                departmentForm.setFieldsValue({
                     name: response.data.name,
                     alias: response.data.alias,
-                    description: response.data.description
+                    description: response.data.description,
+                    activeStatus: response.data.activeStatus
                 });
 
                 setModalSpinLoading(false);
@@ -259,27 +282,27 @@ export default function Brand({ }: Props) {
             });
     }
 
-    const deleteIBrandAction = (id: number) => {
-        setIBrandId(id);
+    const deleteDepartmentAction = (id: number) => {
+        setDepartmentId(id);
     }
 
     const viewAction = (id: number) => {
-        setIBrandId(id);
-        setmodalState('VIEW');
+        setDepartmentId(id);
+        setModalState('VIEW');
         showModal();
         setModalSpinLoading(true);
-        axios.get(`http://localhost:8081/brands/${id}`)
+        axios.get(`http://localhost:8081/departments/${id}`)
             .then((response) => {
 
-                brandForm.setFieldsValue({
+                departmentForm.setFieldsValue({
                     name: response.data.name,
                     alias: response.data.alias,
-                    description: response.data.description
+                    description: response.data.description,
+                    activeStatus: response.data.activeStatus
                 });
 
                 setModalSpinLoading(false);
             }).catch(err => {
-                // Handle error
                 console.log("server error");
                 setModalSpinLoading(false);
             });
@@ -290,16 +313,16 @@ export default function Brand({ }: Props) {
             <Row>
                 <Col md={24}>
                     <div>
-                        <Title level={2}>Brand</Title>
+                        <Title level={2}>Department</Title>
                         <Button type="primary" onClick={showModal}>Create</Button>
                         <Table
                             loading={tableLoadingSpin}
                             size="small"
-                            dataSource={brands}
-                            columns={brandColumns} />
+                            dataSource={departments}
+                            columns={departmentColumns} />
 
                         <Modal
-                            title="IBrand"
+                            title="Department"
                             open={modalOpen}
                             onOk={modalFormSubmit}
                             confirmLoading={modalConfirmLoading}
@@ -311,8 +334,8 @@ export default function Brand({ }: Props) {
 
                                 <div>
                                     <Form
-                                        name="brandForm"
-                                        form={brandForm}
+                                        name="departmentForm"
+                                        form={departmentForm}
                                         labelCol={{ span: 8 }}
                                         wrapperCol={{ span: 16 }}
                                         initialValues={{ remember: true }}
@@ -338,6 +361,12 @@ export default function Brand({ }: Props) {
                                             label="Description">
                                             <Input.TextArea />
                                         </Form.Item>
+                                        <Form.Item
+                                            name="activeStatus"
+                                            label="Active"
+                                            valuePropName="checked">
+                                            <Switch />
+                                        </Form.Item>
                                     </Form>
                                 </div>
                             </Spin>
@@ -350,3 +379,5 @@ export default function Brand({ }: Props) {
         </>
     )
 }
+
+export default Department;

@@ -1,23 +1,20 @@
-import { ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons';
-import { Button, Col, Form, Input, message, Modal, Popconfirm, Row, Select, Space, Spin, Table } from 'antd';
-import { Option } from 'antd/es/mentions';
+import { Button, Col, Form, Input, message, Modal, Popconfirm, Row, Space, Spin, Table } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import Title from 'antd/es/typography/Title';
 import axios from 'axios';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import ITransactionType from '../../../../Interfaces/TransactionType';
+import { getUom, getUoms } from '../../../../actions/UomAction';
+import IUom from '../../../../interfaces/Uom';
 
 
-const TransactionType: React.FC = () => {
+const Uom: React.FC = () => {
     var [tableLoadingSpin, setTableSpinLoading] = useState(false);
 
-
-
-    const [transactionTypeForm] = Form.useForm();
-    const [transactionTypes, setITransactionTypes] = useState<ITransactionType[]>([]);
-    const [transactionType, setITransactionType] = useState<ITransactionType>();
-    const [transactionTypeId, setITransactionTypeId] = useState<number>();
+    const [uomForm] = Form.useForm();
+    const [uoms, setIUoms] = useState<IUom[]>([]);
+    const [uom, setIUom] = useState<IUom>();
+    const [uomId, setIUomId] = useState<number>();
     const [isFormDisabled, setIsFormDisabled] = useState(false);
 
     // Modal related properties
@@ -30,46 +27,45 @@ const TransactionType: React.FC = () => {
 
     useEffect(() => {
 
-        getITransactionTypes();
+        getIUoms();
 
         return () => {
 
         }
     }, []);
 
-    const getITransactionTypes = () => {
-        setTableSpinLoading(true);
-        axios.get(`http://localhost:8081/transactionTypes`)
-            .then((response) => {
-                console.log(response.data);
-                response.data.map((x: { [x: string]: any; id: any; }) => {
-                    x['key'] = x.id;
-                })
-                setITransactionTypes(response.data);
-                setTableSpinLoading(false);
-            }).catch(err => {
-                // Handle error
-                console.log("server error");
-                setTableSpinLoading(false);
-            });
+    const getIUoms = async () => {
+
+        try {
+            setTableSpinLoading(true);
+            const { data } = await getUoms();
+            setIUoms(data);
+            console.log(data);
+
+        } catch (error) {
+            console.log("server error");
+            setTableSpinLoading(false);
+            // httpErrorDisplay(error, EntityName.User);
+        }
+
     }
 
-    const getITransactionType = (id: number) => {
-        axios.get(`http://localhost:8081/transactionTypes/${id}`)
-            .then((response) => {
-                console.log(response.data);
-                setITransactionType(response.data);
-            }).catch(err => {
-                // Handle error
-                console.log("server error");
-            });
+    const getUomDetails = async (id: number) => {
+        try {
+            const { data } = await getUom(id);
+            setIUom(data);
+
+        } catch (error) {
+            console.log("server error");
+            // httpErrorDisplay(error, EntityName.User);
+        }
     }
 
     useEffect(() => {
         if (modalState === 'CREATE') {
             setModalOkButtonText('Create');
             setIsFormDisabled(false);
-            setITransactionTypeId(0);
+            setIUomId(0);
         } else if (modalState === 'VIEW') {
             setModalOkButtonText('Change');
             setIsFormDisabled(true);
@@ -90,17 +86,16 @@ const TransactionType: React.FC = () => {
 
     const clearModalField = () => {
 
-        transactionTypeForm.setFieldsValue({
+        uomForm.setFieldsValue({
             name: '',
             alias: '',
-            description: '',
-            transactionFlow: ''
+            description: ''
         });
     }
 
     const checkFormValidation = async () => {
         try {
-            const values = await transactionTypeForm.validateFields();
+            const values = await uomForm.validateFields();
             console.log('Success:', values);
         } catch (errorInfo) {
             console.log('Failed:', errorInfo);
@@ -110,23 +105,22 @@ const TransactionType: React.FC = () => {
     const modalFormSubmit = async () => {
 
         try {
-            const values = await transactionTypeForm.validateFields();
+            const values = await uomForm.validateFields();
             console.log('Success:', values);
             checkFormValidation();
             setModalConfirmLoading(true);
 
             if (modalState === 'CREATE') {
-                axios.post(`http://localhost:8081/transactionTypes`, {
-                    name: transactionTypeForm.getFieldValue('name'),
-                    alias: transactionTypeForm.getFieldValue('alias'),
-                    description: transactionTypeForm.getFieldValue('description'),
-                    transactionFlow: transactionTypeForm.getFieldValue('transactionFlow')
+                axios.post(`http://localhost:8081/uoms`, {
+                    name: uomForm.getFieldValue('name'),
+                    alias: uomForm.getFieldValue('alias'),
+                    description: uomForm.getFieldValue('description')
 
                 }).then((response) => {
                     setModalOpen(false);
                     clearModalField();
                     setModalConfirmLoading(false);
-                    getITransactionTypes();
+                    getIUoms();
                     console.log(response);
                 }).catch(err => {
                     // Handle error
@@ -134,17 +128,16 @@ const TransactionType: React.FC = () => {
                     setModalConfirmLoading(false);
                 });
             } else {
-                axios.put(`http://localhost:8081/transactionTypes/${transactionTypeId}`, {
-                    name: transactionTypeForm.getFieldValue('name'),
-                    alias: transactionTypeForm.getFieldValue('alias'),
-                    description: transactionTypeForm.getFieldValue('description'),
-                    transactionFlow: transactionTypeForm.getFieldValue('transactionFlow')
+                axios.put(`http://localhost:8081/uoms/${uomId}`, {
+                    name: uomForm.getFieldValue('name'),
+                    alias: uomForm.getFieldValue('alias'),
+                    description: uomForm.getFieldValue('description')
 
                 }).then((response) => {
                     clearModalField();
                     setModalOpen(false);
                     setModalConfirmLoading(false);
-                    getITransactionTypes();
+                    getIUoms();
                     console.log(response);
                     setmodalState('CREATE');
                 }).catch(err => {
@@ -169,7 +162,7 @@ const TransactionType: React.FC = () => {
 
 
     // table rendering settings
-    const transactionTypeColumns: ColumnsType<ITransactionType> = [
+    const uomColumns: ColumnsType<IUom> = [
         {
             title: 'Name',
             dataIndex: 'name',
@@ -179,27 +172,6 @@ const TransactionType: React.FC = () => {
             title: 'Alias',
             dataIndex: 'alias',
             key: 'alias',
-        },
-        {
-            title: 'Flow',
-            dataIndex: 'transactionFlow',
-            key: 'transactionFlow',
-            render: (_: any, record: ITransactionType) => {
-                if (record.transactionFlow === 'OUT') {
-                    return (
-                        <span>
-                            <ArrowDownOutlined /> {record.transactionFlow}
-                        </span>
-                    )
-                } else {
-                    return (
-                        <span>
-                            <ArrowUpOutlined />  {record.transactionFlow}
-                        </span>
-                    )
-                }
-
-            },
         },
         {
             title: 'Description',
@@ -242,7 +214,7 @@ const TransactionType: React.FC = () => {
                         okText="Yes"
                         cancelText="No"
                     >
-                        <a onClick={() => deleteITransactionTypeAction(record.id)}>Delete</a>
+                        <a onClick={() => deleteIUomAction(record.id)}>Delete</a>
                     </Popconfirm>
                 </Space>
             ),
@@ -250,9 +222,9 @@ const TransactionType: React.FC = () => {
     ];
 
     const deletePopConfirm = (e: any) => {
-        axios.delete(`http://localhost:8081/transactionTypes/${transactionTypeId}`)
+        axios.delete(`http://localhost:8081/uoms/${uomId}`)
             .then((response) => {
-                getITransactionTypes();
+                getIUoms();
                 message.success('Deleted Successfully.');
             }).catch(err => {
                 console.log("server error", err);
@@ -265,53 +237,42 @@ const TransactionType: React.FC = () => {
 
     const updateAction = (id: number) => {
 
-        setITransactionTypeId(id);
+        setIUomId(id);
         setmodalState('UPDATE');
         showModal();
+
         setModalSpinLoading(true);
-        axios.get(`http://localhost:8081/transactionTypes/${id}`)
-            .then((response) => {
 
-                transactionTypeForm.setFieldsValue({
-                    name: response.data.name,
-                    alias: response.data.alias,
-                    description: response.data.description,
-                    transactionFlow: response.data.transactionFlow
-                });
+        getUomDetails(id);
 
-                setModalSpinLoading(false);
-            }).catch(err => {
-                // Handle error
-                console.log("server error");
-                setModalSpinLoading(false);
-            });
+        uomForm.setFieldsValue({
+            name: uom?.name,
+            alias: uom?.alias,
+            description: uom?.description
+        });
+
+        setModalSpinLoading(false);
+
     }
 
-    const deleteITransactionTypeAction = (id: number) => {
-        setITransactionTypeId(id);
+    const deleteIUomAction = (id: number) => {
+        setIUomId(id);
     }
 
     const viewAction = (id: number) => {
-        setITransactionTypeId(id);
+        setIUomId(id);
         setmodalState('VIEW');
         showModal();
         setModalSpinLoading(true);
-        axios.get(`http://localhost:8081/transactionTypes/${id}`)
-            .then((response) => {
+        getUomDetails(id);
 
-                transactionTypeForm.setFieldsValue({
-                    name: response.data.name,
-                    alias: response.data.alias,
-                    description: response.data.description,
-                    transactionFlow: response.data.transactionFlow
-                });
+        uomForm.setFieldsValue({
+            name: uom?.name,
+            alias: uom?.alias,
+            description: uom?.description
+        });
 
-                setModalSpinLoading(false);
-            }).catch(err => {
-                // Handle error
-                console.log("server error");
-                setModalSpinLoading(false);
-            });
+        setModalSpinLoading(false);
     }
 
     return (
@@ -320,17 +281,17 @@ const TransactionType: React.FC = () => {
                 <Col md={24}>
 
                     <div>
-                        <Title level={2}>Transaction Type</Title>
+                        <Title level={2}>UoM</Title>
 
                         <Button type="primary" onClick={showModal}>Create</Button>
                         <Table
                             loading={tableLoadingSpin}
                             size="small"
-                            dataSource={transactionTypes}
-                            columns={transactionTypeColumns} />
+                            dataSource={uoms}
+                            columns={uomColumns} />
 
                         <Modal
-                            title="Transaction Type"
+                            title="IUom"
                             open={modalOpen}
                             onOk={modalFormSubmit}
                             confirmLoading={modalConfirmLoading}
@@ -342,8 +303,8 @@ const TransactionType: React.FC = () => {
 
                                 <div>
                                     <Form
-                                        name="transactionTypeForm"
-                                        form={transactionTypeForm}
+                                        name="uomForm"
+                                        form={uomForm}
                                         labelCol={{ span: 8 }}
                                         wrapperCol={{ span: 16 }}
                                         initialValues={{ remember: true }}
@@ -364,15 +325,6 @@ const TransactionType: React.FC = () => {
                                         >
                                             <Input />
                                         </Form.Item>
-                                        <Form.Item name="transactionFlow" label="Flow" rules={[{ required: true }]}>
-                                            <Select
-                                                placeholder="Select a option"
-                                                allowClear={false}
-                                            >
-                                                <Option value="IN">IN (+)</Option>
-                                                <Option value="OUT">OUT (-)</Option>
-                                            </Select>
-                                        </Form.Item>
                                         <Form.Item
                                             name="description"
                                             label="Description">
@@ -391,4 +343,4 @@ const TransactionType: React.FC = () => {
     )
 }
 
-export default TransactionType;
+export default Uom;

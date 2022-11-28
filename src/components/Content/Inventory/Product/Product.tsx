@@ -7,10 +7,11 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import IBrand from '../../../../Interfaces/Brand';
-import ICategory from '../../../../Interfaces/Category';
-import IProduct from '../../../../Interfaces/Product';
-import IUom from '../../../../Interfaces/Uom';
+import { getUoms } from '../../../../actions/UomAction';
+import IBrand from '../../../../interfaces/Brand';
+import ICategory from '../../../../interfaces/Category';
+import IProduct from '../../../../interfaces/Product';
+import IUom from '../../../../interfaces/Uom';
 const { Panel } = Collapse;
 
 const Product: React.FC = () => {
@@ -38,7 +39,7 @@ const Product: React.FC = () => {
     useEffect(() => {
 
         getProducts();
-        getUoms();
+        getUomList();
         getBrands();
         getCategories();
 
@@ -47,20 +48,18 @@ const Product: React.FC = () => {
         }
     }, []);
 
-    const getUoms = () => {
-        axios.get(`http://localhost:8081/uoms`)
-            .then((response) => {
-                console.log(response.data);
-                response.data.map((x: { [x: string]: any; id: any; }) => {
-                    x['key'] = x.id;
-                    x['value'] = x.id;
-                    x['label'] = x.name;
-                })
-                setUoms(response.data);
-            }).catch(err => {
-                // Handle error
-                console.log("server error");
+    const getUomList = async () => {
+        try {
+            const { data } = await getUoms();
+            data.map((x: { [x: string]: any; id: any; }) => {
+                x['key'] = x.id;
+                x['value'] = x.id;
+                x['label'] = x.name;
             });
+            setUoms(data);
+        } catch (error) {
+            console.log("server error");
+        }
     }
 
     const getBrands = () => {

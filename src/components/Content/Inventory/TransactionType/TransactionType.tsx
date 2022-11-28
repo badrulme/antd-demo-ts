@@ -1,25 +1,28 @@
-import { CheckCircleTwoTone } from '@ant-design/icons';
-import { Button, Col, Form, Input, message, Modal, Popconfirm, Row, Space, Spin, Switch, Table } from 'antd';
+import { ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons';
+import { Button, Col, Form, Input, message, Modal, Popconfirm, Row, Select, Space, Spin, Table } from 'antd';
+import { Option } from 'antd/es/mentions';
 import { ColumnsType } from 'antd/es/table';
 import Title from 'antd/es/typography/Title';
 import axios from 'axios';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import IJobTitle from '../../../Interfaces/JobTitle';
+import ITransactionType from '../../../../interfaces/TransactionType';
 
 
-const JobTitle: React.FC = () => {
+const TransactionType: React.FC = () => {
     var [tableLoadingSpin, setTableSpinLoading] = useState(false);
 
-    const [jobTitleForm] = Form.useForm();
-    const [jobTitles, setJobTitles] = useState<IJobTitle[]>([]);
-    // const [jobTitle, setJobTitle] = useState<JobTitle>();
-    const [jobTitleId, setJobTitleId] = useState<number>();
+
+
+    const [transactionTypeForm] = Form.useForm();
+    const [transactionTypes, setITransactionTypes] = useState<ITransactionType[]>([]);
+    const [transactionType, setITransactionType] = useState<ITransactionType>();
+    const [transactionTypeId, setITransactionTypeId] = useState<number>();
     const [isFormDisabled, setIsFormDisabled] = useState(false);
 
     // Modal related properties
     var [modalLoadingSpin, setModalSpinLoading] = useState(false);
-    var [modalState, setModalState] = useState('CREATE');
+    var [modalState, setmodalState] = useState('CREATE');
     const [modalOkButtonText, setModalOkButtonText] = useState('Create');
     const [modalOpen, setModalOpen] = useState(false);
     const [modalConfirmLoading, setModalConfirmLoading] = useState(false);
@@ -27,22 +30,22 @@ const JobTitle: React.FC = () => {
 
     useEffect(() => {
 
-        getJobTitles();
+        getITransactionTypes();
 
         return () => {
 
         }
     }, []);
 
-    const getJobTitles = () => {
+    const getITransactionTypes = () => {
         setTableSpinLoading(true);
-        axios.get(`http://localhost:8081/jobTitles`)
+        axios.get(`http://localhost:8081/transactionTypes`)
             .then((response) => {
                 console.log(response.data);
                 response.data.map((x: { [x: string]: any; id: any; }) => {
                     x['key'] = x.id;
                 })
-                setJobTitles(response.data);
+                setITransactionTypes(response.data);
                 setTableSpinLoading(false);
             }).catch(err => {
                 // Handle error
@@ -51,22 +54,22 @@ const JobTitle: React.FC = () => {
             });
     }
 
-    // const getJobTitle = (id: number) => {
-    //     axios.get(`http://localhost:8081/jobTitles/${id}`)
-    //         .then((response) => {
-    //             console.log(response.data);
-    //             setJobTitle(response.data);
-    //         }).catch(err => {
-    //             // Handle error
-    //             console.log("server error");
-    //         });
-    // }
+    const getITransactionType = (id: number) => {
+        axios.get(`http://localhost:8081/transactionTypes/${id}`)
+            .then((response) => {
+                console.log(response.data);
+                setITransactionType(response.data);
+            }).catch(err => {
+                // Handle error
+                console.log("server error");
+            });
+    }
 
     useEffect(() => {
         if (modalState === 'CREATE') {
             setModalOkButtonText('Create');
             setIsFormDisabled(false);
-            setJobTitleId(0);
+            setITransactionTypeId(0);
         } else if (modalState === 'VIEW') {
             setModalOkButtonText('Change');
             setIsFormDisabled(true);
@@ -86,34 +89,87 @@ const JobTitle: React.FC = () => {
     };
 
     const clearModalField = () => {
-        jobTitleForm.setFieldsValue({
+
+        transactionTypeForm.setFieldsValue({
             name: '',
             alias: '',
             description: '',
-            activeStatus: true
+            transactionFlow: ''
         });
     }
 
-    // const checkFormValidation = async () => {
-    //     try {
-    //         const values = await jobTitleForm.validateFields();
-    //         console.log('Success:', values);
-    //     } catch (errorInfo) {
-    //         console.log('Failed:', errorInfo);
-    //     }
-    // };
+    const checkFormValidation = async () => {
+        try {
+            const values = await transactionTypeForm.validateFields();
+            console.log('Success:', values);
+        } catch (errorInfo) {
+            console.log('Failed:', errorInfo);
+        }
+    };
 
+    const modalFormSubmit = async () => {
+
+        try {
+            const values = await transactionTypeForm.validateFields();
+            console.log('Success:', values);
+            checkFormValidation();
+            setModalConfirmLoading(true);
+
+            if (modalState === 'CREATE') {
+                axios.post(`http://localhost:8081/transactionTypes`, {
+                    name: transactionTypeForm.getFieldValue('name'),
+                    alias: transactionTypeForm.getFieldValue('alias'),
+                    description: transactionTypeForm.getFieldValue('description'),
+                    transactionFlow: transactionTypeForm.getFieldValue('transactionFlow')
+
+                }).then((response) => {
+                    setModalOpen(false);
+                    clearModalField();
+                    setModalConfirmLoading(false);
+                    getITransactionTypes();
+                    console.log(response);
+                }).catch(err => {
+                    // Handle error
+                    console.log("server error");
+                    setModalConfirmLoading(false);
+                });
+            } else {
+                axios.put(`http://localhost:8081/transactionTypes/${transactionTypeId}`, {
+                    name: transactionTypeForm.getFieldValue('name'),
+                    alias: transactionTypeForm.getFieldValue('alias'),
+                    description: transactionTypeForm.getFieldValue('description'),
+                    transactionFlow: transactionTypeForm.getFieldValue('transactionFlow')
+
+                }).then((response) => {
+                    clearModalField();
+                    setModalOpen(false);
+                    setModalConfirmLoading(false);
+                    getITransactionTypes();
+                    console.log(response);
+                    setmodalState('CREATE');
+                }).catch(err => {
+                    // Handle error
+                    console.log("server error");
+                    setModalConfirmLoading(false);
+                });
+            }
+        } catch (errorInfo) {
+            console.log('Failed:', errorInfo);
+        }
+
+
+
+    };
 
     const handleCancel = () => {
         setModalOpen(false);
         setModalSpinLoading(false);
-        setModalState('CREATE');
+        setmodalState('CREATE');
     };
 
 
-
     // table rendering settings
-    const jobTitleColumns: ColumnsType<IJobTitle> = [
+    const transactionTypeColumns: ColumnsType<ITransactionType> = [
         {
             title: 'Name',
             dataIndex: 'name',
@@ -125,25 +181,20 @@ const JobTitle: React.FC = () => {
             key: 'alias',
         },
         {
-            title: 'Description',
-            dataIndex: 'description',
-            key: 'description',
-        },
-        {
-            title: 'Status',
-            dataIndex: 'status',
-            key: 'status',
-            render: (_: any, record: IJobTitle) => {
-                if (record.activeStatus) {
+            title: 'Flow',
+            dataIndex: 'transactionFlow',
+            key: 'transactionFlow',
+            render: (_: any, record: ITransactionType) => {
+                if (record.transactionFlow === 'OUT') {
                     return (
                         <span>
-                            <CheckCircleTwoTone twoToneColor="#52c41a" /> Active
+                            <ArrowDownOutlined /> {record.transactionFlow}
                         </span>
                     )
                 } else {
                     return (
                         <span>
-                            <CheckCircleTwoTone twoToneColor="#eb2f96" /> InActive
+                            <ArrowUpOutlined />  {record.transactionFlow}
                         </span>
                     )
                 }
@@ -151,31 +202,36 @@ const JobTitle: React.FC = () => {
             },
         },
         {
+            title: 'Description',
+            dataIndex: 'description',
+            key: 'description',
+        },
+        {
             title: 'Created Date',
             dataIndex: 'createdDate',
             key: 'createdDate',
-            render: (_: any, record: IJobTitle) => (
+            render: (_, record) => (
                 moment
                     .utc(record.createdDate)
                     .local()
-                    .format('DD-MMM-YYYY')
+                    .format('DD-MM-YYYY')
             )
         },
         {
-            title: 'Modified Date',
+            title: 'Last Modified Date',
             dataIndex: 'lastModifiedDate',
             key: 'lastModifiedDate',
-            render: (_: any, record: IJobTitle) => (
+            render: (_, record) => (
                 moment
                     .utc(record.lastModifiedDate)
                     .local()
-                    .format('DD-MMM-YYYY')
+                    .format('DD-MM-YYYY')
             )
         },
         {
             title: 'Action',
             key: 'action',
-            render: (_: any, record: IJobTitle) => (
+            render: (_, record) => (
                 <Space size="middle">
                     <a onClick={() => viewAction(record.id)}>View</a>
                     <a onClick={() => updateAction(record.id)}>Update</a>
@@ -186,69 +242,17 @@ const JobTitle: React.FC = () => {
                         okText="Yes"
                         cancelText="No"
                     >
-                        <a onClick={() => deleteJobTitleAction(record.id)}>Delete</a>
+                        <a onClick={() => deleteITransactionTypeAction(record.id)}>Delete</a>
                     </Popconfirm>
                 </Space>
             ),
         },
     ];
 
-
-    const modalFormSubmit = async () => {
-
-        try {
-            const values = await jobTitleForm.validateFields();
-            console.log('Success:', values);
-            setModalConfirmLoading(true);
-
-            if (modalState === 'CREATE') {
-                axios.post(`http://localhost:8081/jobTitles`, {
-                    name: jobTitleForm.getFieldValue('name'),
-                    alias: jobTitleForm.getFieldValue('alias'),
-                    description: jobTitleForm.getFieldValue('description'),
-                    activeStatus: jobTitleForm.getFieldValue('activeStatus'),
-
-                }).then((response) => {
-                    setModalOpen(false);
-                    clearModalField();
-                    setModalConfirmLoading(false);
-                    getJobTitles();
-                    console.log(response);
-                }).catch(err => {
-                    // Handle error
-                    console.log("server error");
-                    setModalConfirmLoading(false);
-                });
-            } else {
-                axios.put(`http://localhost:8081/jobTitles/${jobTitleId}`, {
-                    name: jobTitleForm.getFieldValue('name'),
-                    alias: jobTitleForm.getFieldValue('alias'),
-                    description: jobTitleForm.getFieldValue('description'),
-                    activeStatus: jobTitleForm.getFieldValue('activeStatus')
-
-                }).then((response) => {
-                    clearModalField();
-                    setModalOpen(false);
-                    setModalConfirmLoading(false);
-                    getJobTitles();
-                    setModalState('CREATE');
-                }).catch(err => {
-                    // Handle error
-                    console.log("server error");
-                    setModalConfirmLoading(false);
-                });
-            }
-        } catch (errorInfo) {
-            console.log('Failed:', errorInfo);
-        }
-
-    };
-
-
     const deletePopConfirm = (e: any) => {
-        axios.delete(`http://localhost:8081/jobTitles/${jobTitleId}`)
+        axios.delete(`http://localhost:8081/transactionTypes/${transactionTypeId}`)
             .then((response) => {
-                getJobTitles();
+                getITransactionTypes();
                 message.success('Deleted Successfully.');
             }).catch(err => {
                 console.log("server error", err);
@@ -256,22 +260,23 @@ const JobTitle: React.FC = () => {
     };
 
     const deletePopCancel = (e: any) => {
+        console.log(e);
     };
 
     const updateAction = (id: number) => {
 
-        setJobTitleId(id);
-        setModalState('UPDATE');
+        setITransactionTypeId(id);
+        setmodalState('UPDATE');
         showModal();
         setModalSpinLoading(true);
-        axios.get(`http://localhost:8081/jobTitles/${id}`)
+        axios.get(`http://localhost:8081/transactionTypes/${id}`)
             .then((response) => {
 
-                jobTitleForm.setFieldsValue({
+                transactionTypeForm.setFieldsValue({
                     name: response.data.name,
                     alias: response.data.alias,
                     description: response.data.description,
-                    activeStatus: response.data.activeStatus
+                    transactionFlow: response.data.transactionFlow
                 });
 
                 setModalSpinLoading(false);
@@ -282,27 +287,28 @@ const JobTitle: React.FC = () => {
             });
     }
 
-    const deleteJobTitleAction = (id: number) => {
-        setJobTitleId(id);
+    const deleteITransactionTypeAction = (id: number) => {
+        setITransactionTypeId(id);
     }
 
     const viewAction = (id: number) => {
-        setJobTitleId(id);
-        setModalState('VIEW');
+        setITransactionTypeId(id);
+        setmodalState('VIEW');
         showModal();
         setModalSpinLoading(true);
-        axios.get(`http://localhost:8081/jobTitles/${id}`)
+        axios.get(`http://localhost:8081/transactionTypes/${id}`)
             .then((response) => {
 
-                jobTitleForm.setFieldsValue({
+                transactionTypeForm.setFieldsValue({
                     name: response.data.name,
                     alias: response.data.alias,
                     description: response.data.description,
-                    activeStatus: response.data.activeStatus
+                    transactionFlow: response.data.transactionFlow
                 });
 
                 setModalSpinLoading(false);
             }).catch(err => {
+                // Handle error
                 console.log("server error");
                 setModalSpinLoading(false);
             });
@@ -312,17 +318,19 @@ const JobTitle: React.FC = () => {
         <>
             <Row>
                 <Col md={24}>
+
                     <div>
-                        <Title level={2}>Job Title</Title>
+                        <Title level={2}>Transaction Type</Title>
+
                         <Button type="primary" onClick={showModal}>Create</Button>
                         <Table
                             loading={tableLoadingSpin}
                             size="small"
-                            dataSource={jobTitles}
-                            columns={jobTitleColumns} />
+                            dataSource={transactionTypes}
+                            columns={transactionTypeColumns} />
 
                         <Modal
-                            title="JobTitle"
+                            title="Transaction Type"
                             open={modalOpen}
                             onOk={modalFormSubmit}
                             confirmLoading={modalConfirmLoading}
@@ -334,8 +342,8 @@ const JobTitle: React.FC = () => {
 
                                 <div>
                                     <Form
-                                        name="jobTitleForm"
-                                        form={jobTitleForm}
+                                        name="transactionTypeForm"
+                                        form={transactionTypeForm}
                                         labelCol={{ span: 8 }}
                                         wrapperCol={{ span: 16 }}
                                         initialValues={{ remember: true }}
@@ -356,16 +364,19 @@ const JobTitle: React.FC = () => {
                                         >
                                             <Input />
                                         </Form.Item>
+                                        <Form.Item name="transactionFlow" label="Flow" rules={[{ required: true }]}>
+                                            <Select
+                                                placeholder="Select a option"
+                                                allowClear={false}
+                                            >
+                                                <Option value="IN">IN (+)</Option>
+                                                <Option value="OUT">OUT (-)</Option>
+                                            </Select>
+                                        </Form.Item>
                                         <Form.Item
                                             name="description"
                                             label="Description">
                                             <Input.TextArea />
-                                        </Form.Item>
-                                        <Form.Item
-                                            name="activeStatus"
-                                            label="Active"
-                                            valuePropName="checked">
-                                            <Switch />
                                         </Form.Item>
                                     </Form>
                                 </div>
@@ -380,4 +391,4 @@ const JobTitle: React.FC = () => {
     )
 }
 
-export default JobTitle;
+export default TransactionType;

@@ -1,10 +1,10 @@
 import { Layout } from 'antd';
 import React from 'react';
 import './App.css';
-import ContentComponent from './Component/Content/ContentComponent';
-import FooterComponent from './Component/Footer/FooterComponent';
-import HeaderComponent from './Component/Header/HeaderComponent';
-import LeftSidebarComponent from './Component/Sidebar/LeftSidebarComponent';
+import ContentComponent from './components/Content/ContentComponent';
+import FooterComponent from './components/Footer/FooterComponent';
+import HeaderComponent from './components/Header/HeaderComponent';
+import LeftSidebarComponent from './components/Sidebar/LeftSidebarComponent';
 
 const App: React.FC = () => (
   <>

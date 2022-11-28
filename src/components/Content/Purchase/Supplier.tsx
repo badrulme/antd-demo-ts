@@ -7,20 +7,19 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import ICustomer from '../../../Interfaces/Customer';
-
+import ISupplier from '../../../interfaces/Supplier';
 const { Panel } = Collapse;
 
-const Customer: React.FC = () => {
+const Supplier: React.FC = () => {
     var [tableLoadingSpin, setTableSpinLoading] = useState(false);
+
+
+
     const dateFormat = 'DD-MMM-YYYY';
-
-
-
-    const [customerForm] = Form.useForm();
-    const [customers, setCustomers] = useState<ICustomer[]>([]);
-    const [customer, setCustomer] = useState<ICustomer>();
-    const [customerId, setCustomerId] = useState<number>();
+    const [supplierForm] = Form.useForm();
+    const [suppliers, setSuppliers] = useState<ISupplier[]>([]);
+    const [supplier, setSupplier] = useState<ISupplier>();
+    const [supplierId, setSupplierId] = useState<number>();
     const [isFormDisabled, setIsFormDisabled] = useState(false);
 
     // Modal related properties
@@ -33,22 +32,22 @@ const Customer: React.FC = () => {
 
     useEffect(() => {
 
-        getCustomers();
+        getSuppliers();
 
         return () => {
 
         }
     }, []);
 
-    const getCustomers = () => {
+    const getSuppliers = () => {
         setTableSpinLoading(true);
-        axios.get(`http://localhost:8081/customers/all-customer-details`)
+        axios.get(`http://localhost:8081/suppliers/all-supplier-details`)
             .then((response) => {
                 console.log(response.data);
                 response.data.map((x: { [x: string]: any; id: any; }) => {
                     x['key'] = x.id;
                 })
-                setCustomers(response.data);
+                setSuppliers(response.data);
                 setTableSpinLoading(false);
             }).catch(err => {
                 // Handle error
@@ -57,11 +56,11 @@ const Customer: React.FC = () => {
             });
     }
 
-    const getCustomer = (id: number) => {
-        axios.get(`http://localhost:8081/customers/${id}`)
+    const getSupplier = (id: number) => {
+        axios.get(`http://localhost:8081/suppliers/${id}`)
             .then((response) => {
                 console.log(response.data);
-                setCustomer(response.data);
+                setSupplier(response.data);
             }).catch(err => {
                 // Handle error
                 console.log("server error");
@@ -69,10 +68,12 @@ const Customer: React.FC = () => {
     }
 
     useEffect(() => {
+        console.log(new Date());
+
         if (modalState === 'CREATE') {
             setModalOkButtonText('Create');
             setIsFormDisabled(false);
-            setCustomerId(0);
+            setSupplierId(0);
         } else if (modalState === 'VIEW') {
             setModalOkButtonText('Change');
             setIsFormDisabled(true);
@@ -92,8 +93,8 @@ const Customer: React.FC = () => {
     };
 
     const clearModalField = () => {
-        customerForm.resetFields();
-        customerForm.setFieldsValue(
+        supplierForm.resetFields();
+        supplierForm.setFieldsValue(
             {
                 'gender': 'MALE',
                 'openingBalance': 0,
@@ -110,7 +111,7 @@ const Customer: React.FC = () => {
 
     const checkFormValidation = async () => {
         try {
-            const values = await customerForm.validateFields();
+            const values = await supplierForm.validateFields();
             console.log('Success:', values);
         } catch (errorInfo) {
             console.log('Failed:', errorInfo);
@@ -120,32 +121,34 @@ const Customer: React.FC = () => {
     const modalFormSubmit = async () => {
 
         try {
-            const values = await customerForm.validateFields();
+            const values = await supplierForm.validateFields();
             console.log('Success:', values);
             checkFormValidation();
             setModalConfirmLoading(true);
 
             if (modalState === 'CREATE') {
-                axios.post(`http://localhost:8081/customers`, {
-                    code: customerForm.getFieldValue('code'),
-                    name: customerForm.getFieldValue('name'),
-                    openingBalance: customerForm.getFieldValue('openingBalance'),
-                    openingDate: customerForm.getFieldValue('openingDate'),
-                    companyName: customerForm.getFieldValue('companyName'),
-                    description: customerForm.getFieldValue('description'),
-                    address: customerForm.getFieldValue('address'),
-                    email: customerForm.getFieldValue('email'),
-                    gender: customerForm.getFieldValue('gender'),
-                    remarks: customerForm.getFieldValue('remarks'),
-                    activeStatus: customerForm.getFieldValue('activeStatus'),
-                    mobile1: customerForm.getFieldValue('mobile1'),
-                    mobile2: customerForm.getFieldValue('mobile2'),
+                axios.post(`http://localhost:8081/suppliers`, {
+                    code: supplierForm.getFieldValue('code'),
+                    name: supplierForm.getFieldValue('name'),
+                    openingBalance: supplierForm.getFieldValue('openingBalance'),
+                    openingDate: supplierForm.getFieldValue('openingDate'),
+                    companyName: supplierForm.getFieldValue('companyName'),
+                    description: supplierForm.getFieldValue('description'),
+                    address: supplierForm.getFieldValue('address'),
+                    email: supplierForm.getFieldValue('email'),
+                    gender: supplierForm.getFieldValue('gender'),
+                    contactPersonName: supplierForm.getFieldValue('contactPersonName'),
+                    contactPersonPhone: supplierForm.getFieldValue('contactPersonPhone'),
+                    remarks: supplierForm.getFieldValue('remarks'),
+                    activeStatus: supplierForm.getFieldValue('activeStatus'),
+                    mobile1: supplierForm.getFieldValue('mobile1'),
+                    mobile2: supplierForm.getFieldValue('mobile2'),
 
                 }).then((response) => {
                     setModalOpen(false);
                     clearModalField();
                     setModalConfirmLoading(false);
-                    getCustomers();
+                    getSuppliers();
                     console.log(response);
                 }).catch(err => {
                     // Handle error
@@ -153,26 +156,28 @@ const Customer: React.FC = () => {
                     setModalConfirmLoading(false);
                 });
             } else {
-                axios.put(`http://localhost:8081/customers/${customerId}`, {
-                    code: customerForm.getFieldValue('code'),
-                    name: customerForm.getFieldValue('name'),
-                    openingBalance: customerForm.getFieldValue('openingBalance'),
-                    openingDate: customerForm.getFieldValue('openingDate'),
-                    companyName: customerForm.getFieldValue('companyName'),
-                    description: customerForm.getFieldValue('description'),
-                    address: customerForm.getFieldValue('address'),
-                    email: customerForm.getFieldValue('email'),
-                    gender: customerForm.getFieldValue('gender'),
-                    remarks: customerForm.getFieldValue('remarks'),
-                    activeStatus: customerForm.getFieldValue('activeStatus'),
-                    mobile1: customerForm.getFieldValue('mobile1'),
-                    mobile2: customerForm.getFieldValue('mobile2'),
+                axios.put(`http://localhost:8081/suppliers/${supplierId}`, {
+                    code: supplierForm.getFieldValue('code'),
+                    name: supplierForm.getFieldValue('name'),
+                    openingBalance: supplierForm.getFieldValue('openingBalance'),
+                    openingDate: supplierForm.getFieldValue('openingDate'),
+                    companyName: supplierForm.getFieldValue('companyName'),
+                    description: supplierForm.getFieldValue('description'),
+                    address: supplierForm.getFieldValue('address'),
+                    email: supplierForm.getFieldValue('email'),
+                    gender: supplierForm.getFieldValue('gender'),
+                    contactPersonName: supplierForm.getFieldValue('contactPersonName'),
+                    contactPersonPhone: supplierForm.getFieldValue('contactPersonPhone'),
+                    remarks: supplierForm.getFieldValue('remarks'),
+                    activeStatus: supplierForm.getFieldValue('activeStatus'),
+                    mobile1: supplierForm.getFieldValue('mobile1'),
+                    mobile2: supplierForm.getFieldValue('mobile2'),
 
                 }).then((response) => {
                     clearModalField();
                     setModalOpen(false);
                     setModalConfirmLoading(false);
-                    getCustomers();
+                    getSuppliers();
                     console.log(response);
                     setmodalState('CREATE');
                 }).catch(err => {
@@ -197,7 +202,7 @@ const Customer: React.FC = () => {
 
 
     // table rendering settings
-    const customerColumns: ColumnsType<ICustomer> = [
+    const supplierColumns: ColumnsType<ISupplier> = [
         {
             title: 'Code',
             dataIndex: 'code',
@@ -209,7 +214,7 @@ const Customer: React.FC = () => {
             key: 'name',
         },
         {
-            title: 'Mobile No',
+            title: 'Mobile1',
             dataIndex: 'mobile1',
             key: 'mobile1',
         },
@@ -222,7 +227,7 @@ const Customer: React.FC = () => {
             title: 'Status',
             dataIndex: 'status',
             key: 'status',
-            render: (_: any, record: ICustomer) => {
+            render: (_: any, record: ISupplier) => {
                 if (record.activeStatus) {
                     return (
                         <span>
@@ -280,7 +285,7 @@ const Customer: React.FC = () => {
                         okText="Yes"
                         cancelText="No"
                     >
-                        <a onClick={() => deleteCustomerAction(record.id)}>Delete</a>
+                        <a onClick={() => deleteSupplierAction(record.id)}>Delete</a>
                     </Popconfirm>
                 </Space>
             ),
@@ -288,9 +293,9 @@ const Customer: React.FC = () => {
     ];
 
     const deletePopConfirm = (e: any) => {
-        axios.delete(`http://localhost:8081/customers/${customerId}`)
+        axios.delete(`http://localhost:8081/suppliers/${supplierId}`)
             .then((response) => {
-                getCustomers();
+                getSuppliers();
                 message.success('Deleted Successfully.');
             }).catch(err => {
                 console.log("server error", err);
@@ -303,13 +308,13 @@ const Customer: React.FC = () => {
 
     const updateAction = (id: number) => {
 
-        setCustomerId(id);
+        setSupplierId(id);
         setmodalState('UPDATE');
         showModal();
         setModalSpinLoading(true);
-        axios.get(`http://localhost:8081/customers/${id}`)
+        axios.get(`http://localhost:8081/suppliers/${id}`)
             .then((response) => {
-                customerForm.setFieldsValue({
+                supplierForm.setFieldsValue({
                     name: response.data.name,
                     code: response.data.code,
                     openingBalance: response.data.openingBalance,
@@ -322,6 +327,8 @@ const Customer: React.FC = () => {
                     address: response.data.address,
                     email: response.data.email,
                     gender: response.data.gender,
+                    contactPersonName: response.data.contactPersonName,
+                    contactPersonPhone: response.data.contactPersonPhone,
                     remarks: response.data.remarks,
                     activeStatus: response.data.activeStatus,
                     mobile1: response.data.mobile1,
@@ -336,19 +343,19 @@ const Customer: React.FC = () => {
             });
     }
 
-    const deleteCustomerAction = (id: number) => {
-        setCustomerId(id);
+    const deleteSupplierAction = (id: number) => {
+        setSupplierId(id);
     }
 
     const viewAction = (id: number) => {
-        setCustomerId(id);
+        setSupplierId(id);
         setmodalState('VIEW');
         showModal();
         setModalSpinLoading(true);
-        axios.get(`http://localhost:8081/customers/${id}`)
+        axios.get(`http://localhost:8081/suppliers/${id}`)
             .then((response) => {
 
-                customerForm.setFieldsValue({
+                supplierForm.setFieldsValue({
                     name: response.data.name,
                     code: response.data.code,
                     openingBalance: response.data.openingBalance,
@@ -361,6 +368,8 @@ const Customer: React.FC = () => {
                     address: response.data.address,
                     email: response.data.email,
                     gender: response.data.gender,
+                    contactPersonName: response.data.contactPersonName,
+                    contactPersonPhone: response.data.contactPersonPhone,
                     remarks: response.data.remarks,
                     activeStatus: response.data.activeStatus,
                     mobile1: response.data.mobile1,
@@ -381,18 +390,18 @@ const Customer: React.FC = () => {
                 <Col md={24}>
 
                     <div>
-                        <Title level={2}>Customer</Title>
+                        <Title level={2}>Supplier</Title>
 
                         <Button type="primary" onClick={showModal}>Create</Button>
                         <Table
                             loading={tableLoadingSpin}
                             size="small"
-                            dataSource={customers}
-                            columns={customerColumns}
+                            dataSource={suppliers}
+                            columns={supplierColumns}
                         />
 
                         <Modal
-                            title="Customer"
+                            title="Supplier"
                             open={modalOpen}
                             onOk={modalFormSubmit}
                             confirmLoading={modalConfirmLoading}
@@ -406,8 +415,8 @@ const Customer: React.FC = () => {
                                 <div>
                                     <Form
 
-                                        name="customerForm"
-                                        form={customerForm}
+                                        name="supplierForm"
+                                        form={supplierForm}
                                         labelCol={{ span: 8 }}
                                         wrapperCol={{ span: 16 }}
                                         initialValues={{ remember: true }}
@@ -429,27 +438,19 @@ const Customer: React.FC = () => {
                                             <Input />
                                         </Form.Item>
                                         <Form.Item
-                                            label="Mobile No"
-                                            name="mobile1"
+                                            label="Company Name"
+                                            name="companyName"
+                                            rules={[{ required: true, message: 'Company Name can not be null!' }]}
                                         >
                                             <Input />
                                         </Form.Item>
-
-
                                         <Form.Item
-                                            label="Gender"
-                                            name="gender"
-                                            rules={[{ required: true, message: 'Gender can not be null!' }]}
+                                            label="Mobile No"
+                                            name="mobile1"
+                                            rules={[{ required: true, message: 'Mobile No can not be null!' }]}
                                         >
-                                            <Select
-                                                placeholder="Select a option"
-                                                allowClear={false}
-                                            >
-                                                <Option value="MALE">Male</Option>
-                                                <Option value="FEMALE">Female</Option>
-                                            </Select>
+                                            <Input />
                                         </Form.Item>
-
 
                                         <Form.Item
                                             label="Active Status"
@@ -464,6 +465,7 @@ const Customer: React.FC = () => {
                                                     label="Opening Balance"
                                                     name="openingBalance"
                                                     rules={[{ required: true, message: 'Opening Balance can not be null!' }]}
+
                                                 >
                                                     <InputNumber />
                                                 </Form.Item>
@@ -471,28 +473,49 @@ const Customer: React.FC = () => {
                                                     label="Opening Date"
                                                     name="openingDate"
                                                     rules={[{ required: true, message: 'Opening Date can not be null!' }]}
-
                                                 >
                                                     <DatePicker
                                                         allowClear={false}
                                                         format={dateFormat}
                                                     />
                                                 </Form.Item>
+
+
                                                 <Form.Item
-                                                    label="Phone Home"
+                                                    label="Gender"
+                                                    name="gender"
+                                                >
+                                                    <Select
+                                                        placeholder="Select a option"
+                                                        allowClear={false}
+                                                    >
+                                                        <Option value="MALE">Male</Option>
+                                                        <Option value="FEMALE">Female</Option>
+                                                    </Select>
+                                                </Form.Item>
+                                                <Form.Item
+                                                    label="Contact Person Name"
+                                                    name="contactPersonName"
+                                                >
+                                                    <Input />
+                                                </Form.Item>
+                                                <Form.Item
+                                                    label="Contact Person Phone"
+                                                    name="contactPersonPhone"
+                                                >
+                                                    <Input />
+                                                </Form.Item>
+
+                                                <Form.Item
+                                                    label="Mobile Home"
                                                     name="mobile2"
                                                 >
                                                     <Input />
                                                 </Form.Item>
                                                 <Form.Item
-                                                    label="Company Name"
-                                                    name="companyName"
-                                                >
-                                                    <Input />
-                                                </Form.Item>
-                                                <Form.Item rules={[{ type: 'email' }]}
                                                     label="email"
                                                     name="email"
+                                                    rules={[{ type: 'email' }]}
                                                 >
                                                     <Input />
                                                 </Form.Item>
@@ -512,9 +535,10 @@ const Customer: React.FC = () => {
                                                     label="Address">
                                                     <Input.TextArea />
                                                 </Form.Item>
-                                            </Panel>
 
+                                            </Panel>
                                         </Collapse>
+
                                     </Form>
                                 </div>
                             </Spin>
@@ -527,4 +551,4 @@ const Customer: React.FC = () => {
     )
 }
 
-export default Customer;
+export default Supplier;

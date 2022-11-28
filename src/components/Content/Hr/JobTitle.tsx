@@ -5,16 +5,16 @@ import Title from 'antd/es/typography/Title';
 import axios from 'axios';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import IDepartment from '../../../Interfaces/Department';
+import IJobTitle from '../../../interfaces/JobTitle';
 
 
-const Department: React.FC = () => {
+const JobTitle: React.FC = () => {
     var [tableLoadingSpin, setTableSpinLoading] = useState(false);
 
-    const [departmentForm] = Form.useForm();
-    const [departments, setDepartments] = useState<IDepartment[]>([]);
-    // const [department, setDepartment] = useState<Department>();
-    const [departmentId, setDepartmentId] = useState<number>();
+    const [jobTitleForm] = Form.useForm();
+    const [jobTitles, setJobTitles] = useState<IJobTitle[]>([]);
+    // const [jobTitle, setJobTitle] = useState<JobTitle>();
+    const [jobTitleId, setJobTitleId] = useState<number>();
     const [isFormDisabled, setIsFormDisabled] = useState(false);
 
     // Modal related properties
@@ -27,22 +27,22 @@ const Department: React.FC = () => {
 
     useEffect(() => {
 
-        getDepartments();
+        getJobTitles();
 
         return () => {
 
         }
     }, []);
 
-    const getDepartments = () => {
+    const getJobTitles = () => {
         setTableSpinLoading(true);
-        axios.get(`http://localhost:8081/departments`)
+        axios.get(`http://localhost:8081/jobTitles`)
             .then((response) => {
                 console.log(response.data);
                 response.data.map((x: { [x: string]: any; id: any; }) => {
                     x['key'] = x.id;
                 })
-                setDepartments(response.data);
+                setJobTitles(response.data);
                 setTableSpinLoading(false);
             }).catch(err => {
                 // Handle error
@@ -51,11 +51,11 @@ const Department: React.FC = () => {
             });
     }
 
-    // const getDepartment = (id: number) => {
-    //     axios.get(`http://localhost:8081/departments/${id}`)
+    // const getJobTitle = (id: number) => {
+    //     axios.get(`http://localhost:8081/jobTitles/${id}`)
     //         .then((response) => {
     //             console.log(response.data);
-    //             setDepartment(response.data);
+    //             setJobTitle(response.data);
     //         }).catch(err => {
     //             // Handle error
     //             console.log("server error");
@@ -66,7 +66,7 @@ const Department: React.FC = () => {
         if (modalState === 'CREATE') {
             setModalOkButtonText('Create');
             setIsFormDisabled(false);
-            setDepartmentId(0);
+            setJobTitleId(0);
         } else if (modalState === 'VIEW') {
             setModalOkButtonText('Change');
             setIsFormDisabled(true);
@@ -86,7 +86,7 @@ const Department: React.FC = () => {
     };
 
     const clearModalField = () => {
-        departmentForm.setFieldsValue({
+        jobTitleForm.setFieldsValue({
             name: '',
             alias: '',
             description: '',
@@ -96,7 +96,7 @@ const Department: React.FC = () => {
 
     // const checkFormValidation = async () => {
     //     try {
-    //         const values = await departmentForm.validateFields();
+    //         const values = await jobTitleForm.validateFields();
     //         console.log('Success:', values);
     //     } catch (errorInfo) {
     //         console.log('Failed:', errorInfo);
@@ -113,7 +113,7 @@ const Department: React.FC = () => {
 
 
     // table rendering settings
-    const departmentColumns: ColumnsType<IDepartment> = [
+    const jobTitleColumns: ColumnsType<IJobTitle> = [
         {
             title: 'Name',
             dataIndex: 'name',
@@ -133,7 +133,7 @@ const Department: React.FC = () => {
             title: 'Status',
             dataIndex: 'status',
             key: 'status',
-            render: (_: any, record: IDepartment) => {
+            render: (_: any, record: IJobTitle) => {
                 if (record.activeStatus) {
                     return (
                         <span>
@@ -154,7 +154,7 @@ const Department: React.FC = () => {
             title: 'Created Date',
             dataIndex: 'createdDate',
             key: 'createdDate',
-            render: (_: any, record: IDepartment) => (
+            render: (_: any, record: IJobTitle) => (
                 moment
                     .utc(record.createdDate)
                     .local()
@@ -165,7 +165,7 @@ const Department: React.FC = () => {
             title: 'Modified Date',
             dataIndex: 'lastModifiedDate',
             key: 'lastModifiedDate',
-            render: (_: any, record: IDepartment) => (
+            render: (_: any, record: IJobTitle) => (
                 moment
                     .utc(record.lastModifiedDate)
                     .local()
@@ -175,7 +175,7 @@ const Department: React.FC = () => {
         {
             title: 'Action',
             key: 'action',
-            render: (_: any, record: IDepartment) => (
+            render: (_: any, record: IJobTitle) => (
                 <Space size="middle">
                     <a onClick={() => viewAction(record.id)}>View</a>
                     <a onClick={() => updateAction(record.id)}>Update</a>
@@ -186,7 +186,7 @@ const Department: React.FC = () => {
                         okText="Yes"
                         cancelText="No"
                     >
-                        <a onClick={() => deleteDepartmentAction(record.id)}>Delete</a>
+                        <a onClick={() => deleteJobTitleAction(record.id)}>Delete</a>
                     </Popconfirm>
                 </Space>
             ),
@@ -197,22 +197,22 @@ const Department: React.FC = () => {
     const modalFormSubmit = async () => {
 
         try {
-            const values = await departmentForm.validateFields();
+            const values = await jobTitleForm.validateFields();
             console.log('Success:', values);
             setModalConfirmLoading(true);
 
             if (modalState === 'CREATE') {
-                axios.post(`http://localhost:8081/departments`, {
-                    name: departmentForm.getFieldValue('name'),
-                    alias: departmentForm.getFieldValue('alias'),
-                    description: departmentForm.getFieldValue('description'),
-                    activeStatus: departmentForm.getFieldValue('activeStatus'),
+                axios.post(`http://localhost:8081/jobTitles`, {
+                    name: jobTitleForm.getFieldValue('name'),
+                    alias: jobTitleForm.getFieldValue('alias'),
+                    description: jobTitleForm.getFieldValue('description'),
+                    activeStatus: jobTitleForm.getFieldValue('activeStatus'),
 
                 }).then((response) => {
                     setModalOpen(false);
                     clearModalField();
                     setModalConfirmLoading(false);
-                    getDepartments();
+                    getJobTitles();
                     console.log(response);
                 }).catch(err => {
                     // Handle error
@@ -220,17 +220,17 @@ const Department: React.FC = () => {
                     setModalConfirmLoading(false);
                 });
             } else {
-                axios.put(`http://localhost:8081/departments/${departmentId}`, {
-                    name: departmentForm.getFieldValue('name'),
-                    alias: departmentForm.getFieldValue('alias'),
-                    description: departmentForm.getFieldValue('description'),
-                    activeStatus: departmentForm.getFieldValue('activeStatus')
+                axios.put(`http://localhost:8081/jobTitles/${jobTitleId}`, {
+                    name: jobTitleForm.getFieldValue('name'),
+                    alias: jobTitleForm.getFieldValue('alias'),
+                    description: jobTitleForm.getFieldValue('description'),
+                    activeStatus: jobTitleForm.getFieldValue('activeStatus')
 
                 }).then((response) => {
                     clearModalField();
                     setModalOpen(false);
                     setModalConfirmLoading(false);
-                    getDepartments();
+                    getJobTitles();
                     setModalState('CREATE');
                 }).catch(err => {
                     // Handle error
@@ -246,9 +246,9 @@ const Department: React.FC = () => {
 
 
     const deletePopConfirm = (e: any) => {
-        axios.delete(`http://localhost:8081/departments/${departmentId}`)
+        axios.delete(`http://localhost:8081/jobTitles/${jobTitleId}`)
             .then((response) => {
-                getDepartments();
+                getJobTitles();
                 message.success('Deleted Successfully.');
             }).catch(err => {
                 console.log("server error", err);
@@ -260,14 +260,14 @@ const Department: React.FC = () => {
 
     const updateAction = (id: number) => {
 
-        setDepartmentId(id);
+        setJobTitleId(id);
         setModalState('UPDATE');
         showModal();
         setModalSpinLoading(true);
-        axios.get(`http://localhost:8081/departments/${id}`)
+        axios.get(`http://localhost:8081/jobTitles/${id}`)
             .then((response) => {
 
-                departmentForm.setFieldsValue({
+                jobTitleForm.setFieldsValue({
                     name: response.data.name,
                     alias: response.data.alias,
                     description: response.data.description,
@@ -282,19 +282,19 @@ const Department: React.FC = () => {
             });
     }
 
-    const deleteDepartmentAction = (id: number) => {
-        setDepartmentId(id);
+    const deleteJobTitleAction = (id: number) => {
+        setJobTitleId(id);
     }
 
     const viewAction = (id: number) => {
-        setDepartmentId(id);
+        setJobTitleId(id);
         setModalState('VIEW');
         showModal();
         setModalSpinLoading(true);
-        axios.get(`http://localhost:8081/departments/${id}`)
+        axios.get(`http://localhost:8081/jobTitles/${id}`)
             .then((response) => {
 
-                departmentForm.setFieldsValue({
+                jobTitleForm.setFieldsValue({
                     name: response.data.name,
                     alias: response.data.alias,
                     description: response.data.description,
@@ -313,16 +313,16 @@ const Department: React.FC = () => {
             <Row>
                 <Col md={24}>
                     <div>
-                        <Title level={2}>Department</Title>
+                        <Title level={2}>Job Title</Title>
                         <Button type="primary" onClick={showModal}>Create</Button>
                         <Table
                             loading={tableLoadingSpin}
                             size="small"
-                            dataSource={departments}
-                            columns={departmentColumns} />
+                            dataSource={jobTitles}
+                            columns={jobTitleColumns} />
 
                         <Modal
-                            title="Department"
+                            title="JobTitle"
                             open={modalOpen}
                             onOk={modalFormSubmit}
                             confirmLoading={modalConfirmLoading}
@@ -334,8 +334,8 @@ const Department: React.FC = () => {
 
                                 <div>
                                     <Form
-                                        name="departmentForm"
-                                        form={departmentForm}
+                                        name="jobTitleForm"
+                                        form={jobTitleForm}
                                         labelCol={{ span: 8 }}
                                         wrapperCol={{ span: 16 }}
                                         initialValues={{ remember: true }}
@@ -380,4 +380,4 @@ const Department: React.FC = () => {
     )
 }
 
-export default Department;
+export default JobTitle;

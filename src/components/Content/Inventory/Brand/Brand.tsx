@@ -3,26 +3,20 @@ import { ColumnsType } from 'antd/es/table';
 import Title from 'antd/es/typography/Title';
 import axios from 'axios';
 import moment from 'moment';
-import React, { useEffect, useState } from 'react';
-import IUom from '../../../../Interfaces/Uom';
+import { useEffect, useState } from 'react';
+import IBrand from '../../../../interfaces/Brand';
 
+type Props = {}
 
-const Uom: React.FC = () => {
+export default function Brand({ }: Props) {
     var [tableLoadingSpin, setTableSpinLoading] = useState(false);
 
-    // interface IUom {
-    //     id: number;
-    //     name: string;
-    //     alias: string;
-    //     description: string;
-    //     createdDate: string;
-    //     lastModifiedDate: string;
-    // }
 
-    const [uomForm] = Form.useForm();
-    const [uoms, setIUoms] = useState<IUom[]>([]);
-    const [uom, setIUom] = useState<IUom>();
-    const [uomId, setIUomId] = useState<number>();
+
+    const [brandForm] = Form.useForm();
+    const [brands, setIBrands] = useState<IBrand[]>([]);
+    const [brand, setIBrand] = useState<IBrand>();
+    const [brandId, setIBrandId] = useState<number>();
     const [isFormDisabled, setIsFormDisabled] = useState(false);
 
     // Modal related properties
@@ -35,22 +29,22 @@ const Uom: React.FC = () => {
 
     useEffect(() => {
 
-        getIUoms();
+        getIBrands();
 
         return () => {
 
         }
     }, []);
 
-    const getIUoms = () => {
+    const getIBrands = () => {
         setTableSpinLoading(true);
-        axios.get(`http://localhost:8081/uoms`)
+        axios.get(`http://localhost:8081/brands`)
             .then((response) => {
                 console.log(response.data);
                 response.data.map((x: { [x: string]: any; id: any; }) => {
                     x['key'] = x.id;
                 })
-                setIUoms(response.data);
+                setIBrands(response.data);
                 setTableSpinLoading(false);
             }).catch(err => {
                 // Handle error
@@ -59,11 +53,11 @@ const Uom: React.FC = () => {
             });
     }
 
-    const getIUom = (id: number) => {
-        axios.get(`http://localhost:8081/uoms/${id}`)
+    const getIBrand = (id: number) => {
+        axios.get(`http://localhost:8081/brands/${id}`)
             .then((response) => {
                 console.log(response.data);
-                setIUom(response.data);
+                setIBrand(response.data);
             }).catch(err => {
                 // Handle error
                 console.log("server error");
@@ -74,7 +68,7 @@ const Uom: React.FC = () => {
         if (modalState === 'CREATE') {
             setModalOkButtonText('Create');
             setIsFormDisabled(false);
-            setIUomId(0);
+            setIBrandId(0);
         } else if (modalState === 'VIEW') {
             setModalOkButtonText('Change');
             setIsFormDisabled(true);
@@ -94,8 +88,7 @@ const Uom: React.FC = () => {
     };
 
     const clearModalField = () => {
-
-        uomForm.setFieldsValue({
+        brandForm.setFieldsValue({
             name: '',
             alias: '',
             description: ''
@@ -104,7 +97,7 @@ const Uom: React.FC = () => {
 
     const checkFormValidation = async () => {
         try {
-            const values = await uomForm.validateFields();
+            const values = await brandForm.validateFields();
             console.log('Success:', values);
         } catch (errorInfo) {
             console.log('Failed:', errorInfo);
@@ -114,22 +107,22 @@ const Uom: React.FC = () => {
     const modalFormSubmit = async () => {
 
         try {
-            const values = await uomForm.validateFields();
+            const values = await brandForm.validateFields();
             console.log('Success:', values);
             checkFormValidation();
             setModalConfirmLoading(true);
 
             if (modalState === 'CREATE') {
-                axios.post(`http://localhost:8081/uoms`, {
-                    name: uomForm.getFieldValue('name'),
-                    alias: uomForm.getFieldValue('alias'),
-                    description: uomForm.getFieldValue('description')
+                axios.post(`http://localhost:8081/brands`, {
+                    name: brandForm.getFieldValue('name'),
+                    alias: brandForm.getFieldValue('alias'),
+                    description: brandForm.getFieldValue('description')
 
                 }).then((response) => {
                     setModalOpen(false);
                     clearModalField();
                     setModalConfirmLoading(false);
-                    getIUoms();
+                    getIBrands();
                     console.log(response);
                 }).catch(err => {
                     // Handle error
@@ -137,17 +130,16 @@ const Uom: React.FC = () => {
                     setModalConfirmLoading(false);
                 });
             } else {
-                axios.put(`http://localhost:8081/uoms/${uomId}`, {
-                    name: uomForm.getFieldValue('name'),
-                    alias: uomForm.getFieldValue('alias'),
-                    description: uomForm.getFieldValue('description')
+                axios.put(`http://localhost:8081/brands/${brandId}`, {
+                    name: brandForm.getFieldValue('name'),
+                    alias: brandForm.getFieldValue('alias'),
+                    description: brandForm.getFieldValue('description')
 
                 }).then((response) => {
                     clearModalField();
                     setModalOpen(false);
                     setModalConfirmLoading(false);
-                    getIUoms();
-                    console.log(response);
+                    getIBrands();
                     setmodalState('CREATE');
                 }).catch(err => {
                     // Handle error
@@ -171,7 +163,7 @@ const Uom: React.FC = () => {
 
 
     // table rendering settings
-    const uomColumns: ColumnsType<IUom> = [
+    const brandColumns: ColumnsType<IBrand> = [
         {
             title: 'Name',
             dataIndex: 'name',
@@ -191,18 +183,18 @@ const Uom: React.FC = () => {
             title: 'Created Date',
             dataIndex: 'createdDate',
             key: 'createdDate',
-            render: (_, record) => (
+            render: (_: any, record: IBrand) => (
                 moment
                     .utc(record.createdDate)
                     .local()
-                    .format('DD-MM-YYYY')
+                    .format('DD-MMM-YYYY')
             )
         },
         {
             title: 'Last Modified Date',
             dataIndex: 'lastModifiedDate',
             key: 'lastModifiedDate',
-            render: (_, record) => (
+            render: (_: any, record: IBrand) => (
                 moment
                     .utc(record.lastModifiedDate)
                     .local()
@@ -212,7 +204,7 @@ const Uom: React.FC = () => {
         {
             title: 'Action',
             key: 'action',
-            render: (_, record) => (
+            render: (_: any, record: IBrand) => (
                 <Space size="middle">
                     <a onClick={() => viewAction(record.id)}>View</a>
                     <a onClick={() => updateAction(record.id)}>Update</a>
@@ -223,7 +215,7 @@ const Uom: React.FC = () => {
                         okText="Yes"
                         cancelText="No"
                     >
-                        <a onClick={() => deleteIUomAction(record.id)}>Delete</a>
+                        <a onClick={() => deleteIBrandAction(record.id)}>Delete</a>
                     </Popconfirm>
                 </Space>
             ),
@@ -231,9 +223,9 @@ const Uom: React.FC = () => {
     ];
 
     const deletePopConfirm = (e: any) => {
-        axios.delete(`http://localhost:8081/uoms/${uomId}`)
+        axios.delete(`http://localhost:8081/brands/${brandId}`)
             .then((response) => {
-                getIUoms();
+                getIBrands();
                 message.success('Deleted Successfully.');
             }).catch(err => {
                 console.log("server error", err);
@@ -246,14 +238,14 @@ const Uom: React.FC = () => {
 
     const updateAction = (id: number) => {
 
-        setIUomId(id);
+        setIBrandId(id);
         setmodalState('UPDATE');
         showModal();
         setModalSpinLoading(true);
-        axios.get(`http://localhost:8081/uoms/${id}`)
+        axios.get(`http://localhost:8081/brands/${id}`)
             .then((response) => {
 
-                uomForm.setFieldsValue({
+                brandForm.setFieldsValue({
                     name: response.data.name,
                     alias: response.data.alias,
                     description: response.data.description
@@ -267,19 +259,19 @@ const Uom: React.FC = () => {
             });
     }
 
-    const deleteIUomAction = (id: number) => {
-        setIUomId(id);
+    const deleteIBrandAction = (id: number) => {
+        setIBrandId(id);
     }
 
     const viewAction = (id: number) => {
-        setIUomId(id);
+        setIBrandId(id);
         setmodalState('VIEW');
         showModal();
         setModalSpinLoading(true);
-        axios.get(`http://localhost:8081/uoms/${id}`)
+        axios.get(`http://localhost:8081/brands/${id}`)
             .then((response) => {
 
-                uomForm.setFieldsValue({
+                brandForm.setFieldsValue({
                     name: response.data.name,
                     alias: response.data.alias,
                     description: response.data.description
@@ -297,24 +289,17 @@ const Uom: React.FC = () => {
         <>
             <Row>
                 <Col md={24}>
-
                     <div>
-
-                        {/* <PageHeader
-                            title="UoM"
-                            subTitle=""
-                        /> */}
-                        <Title level={2}>UoM</Title>
-
+                        <Title level={2}>Brand</Title>
                         <Button type="primary" onClick={showModal}>Create</Button>
                         <Table
                             loading={tableLoadingSpin}
                             size="small"
-                            dataSource={uoms}
-                            columns={uomColumns} />
+                            dataSource={brands}
+                            columns={brandColumns} />
 
                         <Modal
-                            title="IUom"
+                            title="IBrand"
                             open={modalOpen}
                             onOk={modalFormSubmit}
                             confirmLoading={modalConfirmLoading}
@@ -326,8 +311,8 @@ const Uom: React.FC = () => {
 
                                 <div>
                                     <Form
-                                        name="uomForm"
-                                        form={uomForm}
+                                        name="brandForm"
+                                        form={brandForm}
                                         labelCol={{ span: 8 }}
                                         wrapperCol={{ span: 16 }}
                                         initialValues={{ remember: true }}
@@ -365,5 +350,3 @@ const Uom: React.FC = () => {
         </>
     )
 }
-
-export default Uom;

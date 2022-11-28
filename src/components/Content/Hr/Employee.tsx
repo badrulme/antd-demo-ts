@@ -7,9 +7,9 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import IDepartment from '../../../Interfaces/Department';
-import IEmployee from '../../../Interfaces/Employee';
-import IJobTitle from '../../../Interfaces/JobTitle';
+import IDepartment from '../../../interfaces/Department';
+import IEmployee from '../../../interfaces/Employee';
+import IJobTitle from '../../../interfaces/JobTitle';
 const { Panel } = Collapse;
 
 const Employee: React.FC = () => {

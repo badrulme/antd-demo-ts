@@ -1,5 +1,6 @@
-import IJobTitle from "./JobTitle";
 import IDepartment from "./Department";
+import IJobTitle from "./JobTitle";
+
 
 interface IEmployee {
     id: number;
