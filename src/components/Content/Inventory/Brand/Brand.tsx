@@ -4,7 +4,7 @@ import Title from 'antd/es/typography/Title';
 import axios from 'axios';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
-import IBrand from '../../../../interface/Brand';
+import IBrand from '../../../../interfaces/Brand';
 
 type Props = {}
 

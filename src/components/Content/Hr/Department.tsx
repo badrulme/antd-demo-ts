@@ -5,7 +5,7 @@ import Title from 'antd/es/typography/Title';
 import axios from 'axios';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import IDepartment from '../../../interface/Department';
+import IDepartment from '../../../interfaces/Department';
 
 
 const Department: React.FC = () => {
