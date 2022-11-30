@@ -5,7 +5,7 @@ import axios from 'axios';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { deleteUom, getUom, getUoms } from '../../../../actions/UomAction';
-import IUom from '../../../../interfaces/Uom';
+import IUom from '../../../../interface/Uom';
 
 
 const Uom: React.FC = () => {

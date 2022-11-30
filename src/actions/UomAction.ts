@@ -2,7 +2,7 @@ import { AxiosResponse } from "axios";
 import axios from 'axios';
 import { API_URL } from "../settings";
 import ApiServicePath from "../enums/ApiServicePath";
-import IUom from "../interfaces/Uom";
+import IUom from "../interface/Uom";
 
 export const getUoms = async (): Promise<AxiosResponse<IUom[]>> => {
     return axios.get(

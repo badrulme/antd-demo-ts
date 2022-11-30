@@ -7,7 +7,7 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import ICustomer from '../../../interfaces/Customer';
+import ICustomer from '../../../interface/Customer';
 
 const { Panel } = Collapse;
 

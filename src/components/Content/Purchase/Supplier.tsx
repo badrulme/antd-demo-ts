@@ -7,7 +7,7 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import ISupplier from '../../../interfaces/Supplier';
+import ISupplier from '../../../interface/Supplier';
 const { Panel } = Collapse;
 
 const Supplier: React.FC = () => {

@@ -6,7 +6,7 @@ import Title from 'antd/es/typography/Title';
 import axios from 'axios';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import ITransactionType from '../../../../interfaces/TransactionType';
+import ITransactionType from '../../../../interface/TransactionType';
 
 
 const TransactionType: React.FC = () => {

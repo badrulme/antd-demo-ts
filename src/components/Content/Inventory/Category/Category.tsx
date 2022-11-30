@@ -4,7 +4,7 @@ import Title from 'antd/es/typography/Title';
 import axios from 'axios';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
-import ICategory from '../../../../interfaces/Category';
+import ICategory from '../../../../interface/Category';
 
 type Props = {}
 

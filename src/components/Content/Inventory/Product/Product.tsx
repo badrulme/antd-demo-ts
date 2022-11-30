@@ -8,10 +8,10 @@ import dayjs from 'dayjs';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { getUoms } from '../../../../actions/UomAction';
-import IBrand from '../../../../interfaces/Brand';
-import ICategory from '../../../../interfaces/Category';
-import IProduct from '../../../../interfaces/Product';
-import IUom from '../../../../interfaces/Uom';
+import IBrand from '../../../../interface/Brand';
+import ICategory from '../../../../interface/Category';
+import IProduct from '../../../../interface/Product';
+import IUom from '../../../../interface/Uom';
 const { Panel } = Collapse;
 
 const Product: React.FC = () => {
