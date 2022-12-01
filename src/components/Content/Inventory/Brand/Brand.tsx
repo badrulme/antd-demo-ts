@@ -4,6 +4,7 @@ import Title from 'antd/es/typography/Title';
 import axios from 'axios';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
+import { deleteBrand, getBrand, getBrands } from '../../../../actions/BrandAction';
 import IBrand from '../../../../interfaces/Brand';
 
 type Props = {}
@@ -16,7 +17,7 @@ export default function Brand({ }: Props) {
     const [brandForm] = Form.useForm();
     const [brands, setIBrands] = useState<IBrand[]>([]);
     const [brand, setIBrand] = useState<IBrand>();
-    const [brandId, setIBrandId] = useState<number>();
+    const [brandId, setIBrandId] = useState<number>(0);
     const [isFormDisabled, setIsFormDisabled] = useState(false);
 
     // Modal related properties
@@ -36,33 +37,29 @@ export default function Brand({ }: Props) {
         }
     }, []);
 
-    const getIBrands = () => {
-        setTableSpinLoading(true);
-        axios.get(`http://localhost:8081/brands`)
-            .then((response) => {
-                console.log(response.data);
-                response.data.map((x: { [x: string]: any; id: any; }) => {
-                    x['key'] = x.id;
-                })
-                setIBrands(response.data);
-                setTableSpinLoading(false);
-            }).catch(err => {
-                // Handle error
-                console.log("server error");
-                setTableSpinLoading(false);
+    const getIBrands = async () => {
+        try {
+            setTableSpinLoading(true);
+            const { data } = await getBrands();
+            data.map((x: { [x: string]: any; id: any }) => {
+                x["key"] = x.id;
             });
+            setIBrands(data);
+            setTableSpinLoading(false);
+        } catch (error) {
+            console.log("server error");
+            setTableSpinLoading(false);
+        }
     }
 
-    const getIBrand = (id: number) => {
-        axios.get(`http://localhost:8081/brands/${id}`)
-            .then((response) => {
-                console.log(response.data);
-                setIBrand(response.data);
-            }).catch(err => {
-                // Handle error
-                console.log("server error");
-            });
-    }
+    const getBrandDetails = async (id: number) => {
+        try {
+            const { data } = await getBrand(id);
+            setIBrand(data);
+        } catch (error) {
+            console.log("server error");
+        }
+    };
 
     useEffect(() => {
         if (modalState === 'CREATE') {
@@ -222,41 +219,38 @@ export default function Brand({ }: Props) {
         },
     ];
 
-    const deletePopConfirm = (e: any) => {
-        axios.delete(`http://localhost:8081/brands/${brandId}`)
-            .then((response) => {
-                getIBrands();
-                message.success('Deleted Successfully.');
-            }).catch(err => {
-                console.log("server error", err);
-            });
+    const deletePopConfirm = async (e: any) => {
+        try {
+            await deleteBrand(brandId);
+            message.success("Deleted Successfully.");
+            getBrands();
+        } catch (error) {
+            message.error("Failed!");
+        }
     };
+
 
     const deletePopCancel = (e: any) => {
         console.log(e);
     };
 
-    const updateAction = (id: number) => {
 
+    const setFormValues = () => {
+        brandForm.setFieldsValue({
+            name: brand?.name,
+            alias: brand?.alias,
+            description: brand?.description,
+        });
+    };
+
+    const updateAction = (id: number) => {
         setIBrandId(id);
-        setmodalState('UPDATE');
+        setmodalState("UPDATE");
         showModal();
         setModalSpinLoading(true);
-        axios.get(`http://localhost:8081/brands/${id}`)
-            .then((response) => {
-
-                brandForm.setFieldsValue({
-                    name: response.data.name,
-                    alias: response.data.alias,
-                    description: response.data.description
-                });
-
-                setModalSpinLoading(false);
-            }).catch(err => {
-                // Handle error
-                console.log("server error");
-                setModalSpinLoading(false);
-            });
+        getBrandDetails(id);
+        setFormValues();
+        setModalSpinLoading(false);
     }
 
     const deleteIBrandAction = (id: number) => {
@@ -264,25 +258,13 @@ export default function Brand({ }: Props) {
     }
 
     const viewAction = (id: number) => {
+
         setIBrandId(id);
-        setmodalState('VIEW');
+        setmodalState("VIEW");
         showModal();
         setModalSpinLoading(true);
-        axios.get(`http://localhost:8081/brands/${id}`)
-            .then((response) => {
-
-                brandForm.setFieldsValue({
-                    name: response.data.name,
-                    alias: response.data.alias,
-                    description: response.data.description
-                });
-
-                setModalSpinLoading(false);
-            }).catch(err => {
-                // Handle error
-                console.log("server error");
-                setModalSpinLoading(false);
-            });
+        setFormValues();
+        setModalSpinLoading(false);
     }
 
     return (
