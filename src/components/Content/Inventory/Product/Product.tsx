@@ -1,10 +1,8 @@
 import { CheckCircleTwoTone } from '@ant-design/icons';
-import { Button, Col, Collapse, DatePicker, Form, Input, message, Modal, Popconfirm, Row, Select, Space, Spin, Switch, Table } from 'antd';
-import { Option } from 'antd/es/mentions';
+import { Button, Col, Collapse, Form, Input, message, Modal, Popconfirm, Row, Select, Space, Spin, Switch, Table } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import Title from 'antd/es/typography/Title';
 import axios from 'axios';
-import dayjs from 'dayjs';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { getUoms } from '../../../../actions/UomAction';
@@ -170,8 +168,7 @@ const Product: React.FC = () => {
     const modalFormSubmit = async () => {
 
         try {
-            const values = await productForm.validateFields();
-            console.log('Success:', values);
+           
             checkFormValidation();
             setModalConfirmLoading(true);
 
@@ -250,7 +247,7 @@ const Product: React.FC = () => {
             dataIndex: 'uom',
             key: 'uom',
             render: (_, record) => (
-                record.uom.name
+                record.uom?.name
             )
         },
         {
@@ -258,7 +255,7 @@ const Product: React.FC = () => {
             dataIndex: 'category',
             key: 'category',
             render: (_, record) => (
-                record.category.name
+                record.category?.name
             )
         },
         {
@@ -266,7 +263,7 @@ const Product: React.FC = () => {
             dataIndex: 'brand',
             key: 'brand',
             render: (_, record) => (
-                record.brand.name
+                record.brand?.name
             )
         },
         {
