@@ -1,11 +1,12 @@
-import { Avatar, Button, Col, Divider, Form, Input, InputNumber, List, Row, Skeleton } from "antd";
+import { Avatar, Button, Col, DatePicker, Divider, Form, Input, InputNumber, List, Row, Skeleton } from "antd";
 import Title from "antd/es/typography/Title";
 import { useEffect, useState } from "react";
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { APPLICATION_DATE_FORMAT } from "../../../../settings";
 
 type Props = {};
 
-export default function OpeningBalance({}: Props) {
+export default function OpeningBalance({ }: Props) {
   interface DataType {
     gender: string;
     name: {
@@ -117,37 +118,39 @@ export default function OpeningBalance({}: Props) {
             validateMessages={validateMessages}
           >
             <Form.Item
-              name={["user", "name"]}
-              label="Name"
+              name={["code"]}
+              label="code"
               rules={[{ required: true }]}
             >
               <Input />
             </Form.Item>
             <Form.Item
-              name={["user", "email"]}
-              label="Email"
-              rules={[{ type: "email" }]}
+              name={["date"]}
+              label="Date"
             >
-              <Input />
+              <DatePicker
+                allowClear={false}
+                format={APPLICATION_DATE_FORMAT}
+              />
             </Form.Item>
-            <Form.Item
+            {/* <Form.Item
               name={["user", "age"]}
               label="Age"
               rules={[{ type: "number", min: 0, max: 99 }]}
             >
               <InputNumber />
-            </Form.Item>
-            <Form.Item name={["user", "website"]} label="Website">
+            </Form.Item> */}
+            {/* <Form.Item name={["user", "website"]} label="Website">
               <Input />
             </Form.Item>
             <Form.Item name={["user", "introduction"]} label="Introduction">
               <Input.TextArea />
-            </Form.Item>
-            <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 8 }}>
+            </Form.Item> */}
+            {/* <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 8 }}>
               <Button type="primary" htmlType="submit">
                 Submit
               </Button>
-            </Form.Item>
+            </Form.Item> */}
           </Form>
         </Col>
       </Row>
