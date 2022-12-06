@@ -1,5 +1,5 @@
-enum Gender {
+enum TransactionFlow {
   IN = 'IN',
   OUT = 'OUT',
 }
-export default Gender;
+export default TransactionFlow;

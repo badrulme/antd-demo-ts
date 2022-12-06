@@ -1,12 +1,46 @@
-import { Avatar, Button, Col, DatePicker, Divider, Form, Input, InputNumber, List, Row, Skeleton } from "antd";
+import {
+  Avatar,
+  Col,
+  DatePicker,
+  Divider,
+  Form,
+  Input,
+  List,
+  Row,
+  Select,
+  Skeleton,
+  Switch,
+  Table,
+} from "antd";
+import { Option } from "antd/es/mentions";
 import Title from "antd/es/typography/Title";
 import { useEffect, useState } from "react";
-import InfiniteScroll from 'react-infinite-scroll-component';
+import InfiniteScroll from "react-infinite-scroll-component";
+import { getCustomers } from "../../../../actions/CustomerAction";
+import ICustomer from "../../../../interfaces/Customer";
+import ITransaction from "../../../../interfaces/Transaction";
 import { APPLICATION_DATE_FORMAT } from "../../../../settings";
 
 type Props = {};
 
-export default function OpeningBalance({ }: Props) {
+export default function OpeningBalance({}: Props) {
+  const [transaction, settransaction] = useState<ITransaction>();
+  const [customers, setCustomers] = useState<ICustomer[]>();
+
+  const getIUoms = async () => {
+    try {
+      const { data } = await getCustomers();
+      data.map((x: { [x: string]: any; id: any }) => {
+        x["key"] = x.id;
+        x["value"] = x.id;
+        x["label"] = x.name;
+      });
+      setCustomers(data);
+    } catch (error) {
+      console.log("server error");
+    }
+  };
+
   interface DataType {
     gender: string;
     name: {
@@ -22,6 +56,39 @@ export default function OpeningBalance({ }: Props) {
     };
     nat: string;
   }
+
+  const dataSource = [
+    {
+      key: "1",
+      name: "Mike",
+      age: 32,
+      address: "10 Downing Street",
+    },
+    {
+      key: "2",
+      name: "John",
+      age: 42,
+      address: "10 Downing Street",
+    },
+  ];
+
+  const columns = [
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+    },
+    {
+      title: "Age",
+      dataIndex: "age",
+      key: "age",
+    },
+    {
+      title: "Address",
+      dataIndex: "address",
+      key: "address",
+    },
+  ];
 
   const loadMoreData = () => {
     if (loading) {
@@ -127,12 +194,44 @@ export default function OpeningBalance({ }: Props) {
             <Form.Item
               name={["date"]}
               label="Date"
+              rules={[{ required: true }]}
             >
-              <DatePicker
-                allowClear={false}
-                format={APPLICATION_DATE_FORMAT}
+              <DatePicker allowClear={false} format={APPLICATION_DATE_FORMAT} />
+            </Form.Item>
+            <Form.Item
+              name="customerId"
+              label="Customer"
+              rules={[{ required: true }]}
+            >
+              <Select
+                showSearch={true}
+                placeholder="Select a Customer"
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                  (option?.name ?? "")
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
+                }
+                options={customers}
               />
             </Form.Item>
+            <Form.Item
+              label="Posting Status"
+              name="postingStatus"
+              valuePropName="checked"
+            >
+              <Switch />
+            </Form.Item>
+            <Form.Item label="Payment Method" name="paymentMethod">
+              <Select placeholder="Select a option" allowClear={false}>
+                <Option value="DUE">Due</Option>
+                <Option value="CASH">Cash</Option>
+              </Select>
+            </Form.Item>
+            <Form.Item name={["description"]} label="Description">
+              <Input.TextArea />
+            </Form.Item>
+
             {/* <Form.Item
               name={["user", "age"]}
               label="Age"
@@ -151,6 +250,8 @@ export default function OpeningBalance({ }: Props) {
                 Submit
               </Button>
             </Form.Item> */}
+
+            <Table pagination={false} dataSource={dataSource} columns={columns} />
           </Form>
         </Col>
       </Row>
