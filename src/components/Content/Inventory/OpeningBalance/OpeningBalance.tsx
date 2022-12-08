@@ -1,4 +1,4 @@
-import { LockOutlined, PlusCircleTwoTone, PlusOutlined, UserOutlined } from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
 import {
   Avatar,
   Button,
@@ -14,15 +14,16 @@ import {
   Table
 } from "antd";
 import Title from "antd/es/typography/Title";
+import dayjs from 'dayjs';
+import moment from 'moment';
 import { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { getProducts } from "../../../../actions/ProductAction";
 import IProduct from "../../../../interfaces/Product";
-
 import ITransaction from "../../../../interfaces/Transaction";
 import ITransactionItem from "../../../../interfaces/TransactionItem";
 import { APPLICATION_DATE_FORMAT } from "../../../../settings";
-
+import './Style.css';
 type Props = {};
 
 export default function OpeningBalance({ }: Props) {
@@ -35,6 +36,7 @@ export default function OpeningBalance({ }: Props) {
   const [productId, setProductId] = useState<number>(0);
 
   const [itemAddform] = Form.useForm();
+  const [transactionForm] = Form.useForm();
   const [, forceUpdate] = useState({});
 
   interface DataType {
@@ -85,6 +87,7 @@ export default function OpeningBalance({ }: Props) {
       title: "Receive Quantity",
       dataIndex: "receiveQuantity",
       key: "receiveQuantity",
+      render: (_: any, record: ITransactionItem) => record.receiveQuantity,
     }
   ];
 
@@ -107,6 +110,7 @@ export default function OpeningBalance({ }: Props) {
   };
 
   useEffect(() => {
+    resetTransactionForm();
     getProductList();
     loadMoreData();
   }, []);
@@ -122,38 +126,63 @@ export default function OpeningBalance({ }: Props) {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<DataType[]>([]);
 
+  const onCreateTransaction = (values: any) => {
+
+  }
+
+  const resetTransactionForm = () => {
+    transactionForm.resetFields();
+    transactionForm.setFieldsValue(
+      {
+        'gender': 'MALE',
+        'postingStatus': false,
+        'date': dayjs(
+          moment
+            .utc()
+            .local()
+            .format('DD-MMM-YYYY')
+          , APPLICATION_DATE_FORMAT)
+      }
+    )
+
+  }
+
   const onAddProduct = (values: any) => {
 
     const currentProductId = values.productId;
 
-    const obj: ITransactionItem = {
-      productId: currentProductId,
-      receiveQuantity: values.quantity,
-      salePrice: 0,
-      issueQuantity: 0,
-      transaction: null,
-      product: products?.find(x => x.id === currentProductId),
-      createdDate: null,
-      lastModifiedDate: null
-    }
-    // console.log(obj);
+    if (populatedTransactionItems?.find(x => x.productId === currentProductId) != null) {
+      console.log('Found');
+      const updateItems = populatedTransactionItems.map(element => {
+        if (element.productId === currentProductId) {
+          element.receiveQuantity += values.quantity;
+        }
+        return element;
+      });
 
-    setPopulatedTransactionItems(items => [...items, { ...obj, 'key': obj.productId }]);
-    // transaction: ITransaction;
-    // productId: number;
-    // product: IProduct;
-    // salePrice: number;
-    // receiveQuantity: number;
-    // issueQuantity: number;
-    // setTransactionItem({
-    //   productId: form.getFieldValue("productId"),
-    //   receiveQuantity: form.getFieldValue("quantity")
-    // })
-    // setPopulatedTransactionItems(names => [...names, {
-    //   name: form.getFieldValue("name"),
-    //         alias: form.getFieldValue("alias"),
-    //         description: form.getFieldValue("description")
-    // }])
+      console.log(updateItems);
+
+      setPopulatedTransactionItems(updateItems);
+      console.log(updateItems);
+    } else {
+      const obj: ITransactionItem = {
+        productId: currentProductId,
+        receiveQuantity: values.quantity,
+        salePrice: 0,
+        issueQuantity: 0,
+        transaction: null,
+        product: products?.find(x => x.id === currentProductId),
+        createdDate: null,
+        lastModifiedDate: null
+      }
+
+      setPopulatedTransactionItems(items => [...items, { ...obj, 'key': obj.productId }]);
+      console.log('Not Found');
+    }
+
+
+    itemAddform.resetFields();
+
   };
 
   const validateMessages = {
@@ -217,24 +246,28 @@ export default function OpeningBalance({ }: Props) {
         <Col span={18}>
           <Form
             {...layout}
-            name="nest-messages"
-            onFinish={onAddProduct}
+            name="transactionForm"
+            form={transactionForm}
+            onFinish={onCreateTransaction}
             validateMessages={validateMessages}
           >
-            <Form.Item
-              name={["code"]}
-              label="code"
-              rules={[{ required: true }]}
-            >
-              <Input />
+
+            <Form.Item label="Tran Code" style={{ marginBottom: 0 }}>
+              <Form.Item
+                name={["code"]}
+                style={{ display: 'inline-block', width: 'calc(50% - 8px)' }}
+              >
+                <Input disabled={true} />
+              </Form.Item>
+              <Form.Item
+                name={["date"]}
+                style={{ display: 'inline-block', width: 'calc(50% - 8px)', margin: '0 8px' }}
+                rules={[{ required: true }]}
+              >
+                <DatePicker allowClear={false} format={APPLICATION_DATE_FORMAT} />
+              </Form.Item>
             </Form.Item>
-            <Form.Item
-              name={["date"]}
-              label="Date"
-              rules={[{ required: true }]}
-            >
-              <DatePicker allowClear={false} format={APPLICATION_DATE_FORMAT} />
-            </Form.Item>
+
             <Form.Item
               label="Posting Status"
               name="postingStatus"
@@ -247,50 +280,55 @@ export default function OpeningBalance({ }: Props) {
             </Form.Item>
           </Form>
 
-
-
           <Form form={itemAddform} onFinish={onAddProduct}>
-            <Form.Item
-              name="productId"
-              rules={[{ required: true }]}
-            >
-              <Select
-                showSearch={true}
-                placeholder="Select a Product"
-                optionFilterProp="children"
-                filterOption={(input, option) =>
-                  (option?.name ?? "")
-                    .toLowerCase()
-                    .includes(input.toLowerCase()) ||
-                  (option?.code ?? "")
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
-                }
-                options={products}
-              />
+            <Form.Item label="Select a Item" style={{ marginBottom: 0 }} >
+              <Form.Item
+                name="productId"
+                rules={[{ required: true }]}
+                style={{ display: 'inline-block', width: 'calc(30% - 8px)' }}
+              >
+                <Select
+                  showSearch={true}
+                  placeholder="Select a Product"
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.name ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase()) ||
+                    (option?.code ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  options={products}
+                />
+              </Form.Item>
+              <Form.Item
+                name="quantity"
+                rules={[{ required: true, message: 'Please input your Quantity!' }]}
+                style={{ display: 'inline-block', width: 'calc(15% - 8px)', margin: '0 8px' }}
+              >
+                <InputNumber
+                  placeholder="Quantity"
+                />
+              </Form.Item>
+              <Form.Item shouldUpdate
+                style={{ display: 'inline-block', width: 'calc(30% - 8px)' }}>
+                {() => (
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                  // disabled={
+                  //   !form.isFieldsTouched(true) ||
+                  //   !!form.getFieldsError().filter(({ errors }) => errors.length).length
+                  // }
+                  >
+                    <PlusOutlined /> Add
+                  </Button>
+                )}
+              </Form.Item>
             </Form.Item>
-            <Form.Item
-              name="quantity"
-              rules={[{ required: true, message: 'Please input your Quantity!' }]}
-            >
-              <InputNumber
-                placeholder="Quantity"
-              />
-            </Form.Item>
-            <Form.Item shouldUpdate>
-              {() => (
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                // disabled={
-                //   !form.isFieldsTouched(true) ||
-                //   !!form.getFieldsError().filter(({ errors }) => errors.length).length
-                // }
-                >
-                  <PlusOutlined /> Add
-                </Button>
-              )}
-            </Form.Item>
+
+
           </Form>
           <br />
           <Table size="small"
