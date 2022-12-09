@@ -1,24 +1,23 @@
 import ITransactionItem from "./TransactionItem";
 
 interface ITransaction {
-  id: number;
-  code: string;
+  id: number | null;
+  code: string | null;
   date: Date;
   description: string;
   postingStatus: boolean;
   transactionTypeId: number;
-  customerId: number;
-  //   paymentMethod: PaymentMethod;
-  paymentMethod: string;
-  invoiceAmount: number;
-  discountAmount: number;
-  actualAmount: number;
-  paidAmount: number;
-  dueAmount: number;
+  customerId: number | null;
+  paymentMethod: string | null;
+  invoiceAmount: number | null;
+  discountAmount: number | null;
+  actualAmount: number | null;
+  paidAmount: number | null;
+  dueAmount: number | null;
   transactionItems: ITransactionItem[];
 
-  createdDate: Date;
-  lastModifiedDate: Date;
+  createdDate: Date | null;
+  lastModifiedDate: Date | null;
 }
 
 export default ITransaction;

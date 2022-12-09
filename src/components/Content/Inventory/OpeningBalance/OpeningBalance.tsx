@@ -14,15 +14,18 @@ import {
   Table
 } from "antd";
 import Title from "antd/es/typography/Title";
+import axios from "axios";
 import dayjs from 'dayjs';
 import moment from 'moment';
 import { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { getProducts } from "../../../../actions/ProductAction";
+import ApiServicePath from "../../../../enums/ApiServicePath";
+import ListOperationType from "../../../../enums/ListOperationType";
 import IProduct from "../../../../interfaces/Product";
 import ITransaction from "../../../../interfaces/Transaction";
 import ITransactionItem from "../../../../interfaces/TransactionItem";
-import { APPLICATION_DATE_FORMAT } from "../../../../settings";
+import { API_URL, APPLICATION_DATE_FORMAT } from "../../../../settings";
 import './Style.css';
 type Props = {};
 
@@ -34,6 +37,7 @@ export default function OpeningBalance({ }: Props) {
   const [products, setProducts] = useState<IProduct[]>();
   const [product, setProduct] = useState<IProduct>();
   const [productId, setProductId] = useState<number>(0);
+  const [entityState, setEntityState] = useState("CREATE");
 
   const [itemAddform] = Form.useForm();
   const [transactionForm] = Form.useForm();
@@ -126,8 +130,53 @@ export default function OpeningBalance({ }: Props) {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<DataType[]>([]);
 
-  const onCreateTransaction = (values: any) => {
+  const onCreateTransaction = () => {
 
+    let tranRequest: ITransaction = {
+      date: transactionForm.getFieldValue('date'),
+      transactionTypeId: 2,
+      description: transactionForm.getFieldValue('description'),
+      postingStatus: transactionForm.getFieldValue('postingStatus'),
+      id: null,
+      code: null,
+      customerId: null,
+      paymentMethod: null,
+      invoiceAmount: null,
+      discountAmount: null,
+      actualAmount: null,
+      paidAmount: null,
+      dueAmount: null,
+      transactionItems: populatedTransactionItems,
+      createdDate: null,
+      lastModifiedDate: null
+    }
+
+    if (entityState === 'CREATE') {
+      axios.post(`${API_URL}/${ApiServicePath.Transaction}`, {
+        date: transactionForm.getFieldValue('date'),
+        transactionTypeId: 2,
+        description: transactionForm.getFieldValue('description'),
+        postingStatus: transactionForm.getFieldValue('postingStatus'),
+        id: null,
+        code: null,
+        customerId: null,
+        paymentMethod: null,
+        invoiceAmount: null,
+        discountAmount: null,
+        actualAmount: null,
+        paidAmount: null,
+        dueAmount: null,
+        transactionItems: populatedTransactionItems,
+        createdDate: null,
+        lastModifiedDate: null
+      }).then((response) => {
+
+        console.log(response);
+      }).catch(err => {
+        // Handle error
+        console.log("server error");
+      });
+    }
   }
 
   const resetTransactionForm = () => {
@@ -152,18 +201,15 @@ export default function OpeningBalance({ }: Props) {
     const currentProductId = values.productId;
 
     if (populatedTransactionItems?.find(x => x.productId === currentProductId) != null) {
-      console.log('Found');
       const updateItems = populatedTransactionItems.map(element => {
         if (element.productId === currentProductId) {
           element.receiveQuantity += values.quantity;
+          element.listOperationType = ListOperationType.CHANGE;
         }
         return element;
       });
 
-      console.log(updateItems);
-
       setPopulatedTransactionItems(updateItems);
-      console.log(updateItems);
     } else {
       const obj: ITransactionItem = {
         productId: currentProductId,
@@ -173,7 +219,8 @@ export default function OpeningBalance({ }: Props) {
         transaction: null,
         product: products?.find(x => x.id === currentProductId),
         createdDate: null,
-        lastModifiedDate: null
+        lastModifiedDate: null,
+        listOperationType: ListOperationType.ADD
       }
 
       setPopulatedTransactionItems(items => [...items, { ...obj, 'key': obj.productId }]);
@@ -248,7 +295,6 @@ export default function OpeningBalance({ }: Props) {
             {...layout}
             name="transactionForm"
             form={transactionForm}
-            onFinish={onCreateTransaction}
             validateMessages={validateMessages}
           >
 
@@ -328,14 +374,36 @@ export default function OpeningBalance({ }: Props) {
               </Form.Item>
             </Form.Item>
 
+            <br />
+            <Table size="small"
+              pagination={false}
+              dataSource={populatedTransactionItems}
+              columns={columns}
+            />
 
+            {/* <Form.Item shouldUpdate>
+              {() => (
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                >
+                  <PlusOutlined /> Add
+                </Button>
+              )}
+            </Form.Item> */}
+            <Form.Item
+              name="submitButton"
+            >
+              <Button
+                onClick={onCreateTransaction}
+                type="primary"
+                htmlType="button"
+              >
+                <PlusOutlined /> Add
+              </Button>
+            </Form.Item>
           </Form>
-          <br />
-          <Table size="small"
-            pagination={false}
-            dataSource={populatedTransactionItems}
-            columns={columns}
-          />
+
 
         </Col>
       </Row>

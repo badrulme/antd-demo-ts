@@ -9,5 +9,6 @@ const ApiServicePath = {
   TransactionType: `transactionTypes`,
   Employee: `employees`,
   Product: `products`,
+  Transaction: `transactions`,
 };
 export default ApiServicePath;

@@ -1,3 +1,4 @@
+import ListOperationType from "../enums/ListOperationType";
 import IProduct from "./Product";
 import ITransaction from "./Transaction";
 
@@ -8,6 +9,7 @@ interface ITransactionItem {
   salePrice: number;
   receiveQuantity: number;
   issueQuantity: number;
+  listOperationType: ListOperationType | null;
 
   createdDate: Date | null;
   lastModifiedDate: Date | null;
