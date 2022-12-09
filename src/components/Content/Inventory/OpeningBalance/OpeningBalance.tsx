@@ -132,45 +132,16 @@ export default function OpeningBalance({ }: Props) {
 
   const onCreateTransaction = () => {
 
-    let tranRequest: ITransaction = {
-      date: transactionForm.getFieldValue('date'),
-      transactionTypeId: 2,
-      description: transactionForm.getFieldValue('description'),
-      postingStatus: transactionForm.getFieldValue('postingStatus'),
-      id: null,
-      code: null,
-      customerId: null,
-      paymentMethod: null,
-      invoiceAmount: null,
-      discountAmount: null,
-      actualAmount: null,
-      paidAmount: null,
-      dueAmount: null,
-      transactionItems: populatedTransactionItems,
-      createdDate: null,
-      lastModifiedDate: null
-    }
-
     if (entityState === 'CREATE') {
       axios.post(`${API_URL}/${ApiServicePath.Transaction}`, {
+
         date: transactionForm.getFieldValue('date'),
-        transactionTypeId: 2,
+        transactionTypeId: 1,
         description: transactionForm.getFieldValue('description'),
         postingStatus: transactionForm.getFieldValue('postingStatus'),
-        id: null,
-        code: null,
-        customerId: null,
-        paymentMethod: null,
-        invoiceAmount: null,
-        discountAmount: null,
-        actualAmount: null,
-        paidAmount: null,
-        dueAmount: null,
         transactionItems: populatedTransactionItems,
-        createdDate: null,
-        lastModifiedDate: null
-      }).then((response) => {
 
+      }).then((response) => {
         console.log(response);
       }).catch(err => {
         // Handle error

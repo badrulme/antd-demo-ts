@@ -53,7 +53,7 @@ const Product: React.FC = () => {
     getBrands();
     getCategories();
 
-    return () => {};
+    return () => { };
   }, []);
 
   const getUomList = async () => {
@@ -153,7 +153,7 @@ const Product: React.FC = () => {
       setIsFormDisabled(false);
     }
 
-    return () => {};
+    return () => { };
   }, [modalState]);
 
   const showModal = () => {
@@ -481,25 +481,6 @@ const Product: React.FC = () => {
                         options={uoms}
                       />
                     </Form.Item>
-
-                    <Form.Item
-                      name="brandId"
-                      label="Brand"
-                      rules={[{ required: true }]}
-                    >
-                      <Select
-                        showSearch={true}
-                        placeholder="Select a Brand"
-                        optionFilterProp="children"
-                        filterOption={(input, option) =>
-                          (option?.name ?? "")
-                            .toLowerCase()
-                            .includes(input.toLowerCase())
-                        }
-                        options={brands}
-                      />
-                    </Form.Item>
-
                     <Form.Item
                       name="categoryId"
                       label="Category"
@@ -517,6 +498,24 @@ const Product: React.FC = () => {
                         options={categories}
                       />
                     </Form.Item>
+                    <Form.Item
+                      name="brandId"
+                      label="Brand"
+                    >
+                      <Select
+                        showSearch={true}
+                        placeholder="Select a Brand"
+                        optionFilterProp="children"
+                        filterOption={(input, option) =>
+                          (option?.name ?? "")
+                            .toLowerCase()
+                            .includes(input.toLowerCase())
+                        }
+                        options={brands}
+                      />
+                    </Form.Item>
+
+
 
                     <Form.Item
                       label="Active Status"

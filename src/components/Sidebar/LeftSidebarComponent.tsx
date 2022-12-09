@@ -31,16 +31,33 @@ const items: MenuProps['items'] = [
         getItem('Employee', '/employee'),
     ]),
     getItem('Inventory', 'invsubm', <SettingOutlined />, [
-        getItem('Transaction Type', '/transaction-type'),
-        getItem('UoM', '/uom'),
-        getItem('Brand', '/brand'),
-        getItem('Category', '/category'),
-        getItem('Product', '/product'),
-        getItem('Opening Balance', '/opening-balance'),
+        getItem('Configuration', 'invConfigSub', null,
+            [
+                getItem('Transaction Type', '/transaction-type'),
+                getItem('UoM', '/uom'),
+                getItem('Brand', '/brand'),
+                getItem('Category', '/category'),
+                getItem('Product', '/product'),
+            ]),
+
+        getItem('Status', 'invStatusSub', null,
+            [
+                getItem('Opening Balance', '/opening-balance'),
+                getItem('Item Price Setup', '/item-price-setup'),
+                getItem('Item Track', '/item-track'),
+            ]),
+
+        getItem('Requisation', 'invRequisationSub', null,
+            [
+                getItem('Internal Requisation', '/internal-requisation'),
+                getItem('Requisation Register', '/requisation-register'),
+            ]),
+
     ]),
     getItem('Purchase', 'pursubm', <SettingOutlined />, [
         getItem('Supplier', '/supplier'),
         getItem('Purchase Order', '/purchase-order'),
+        getItem('Purchase Order Register', '/purchase-order-register'),
         getItem('Product Receive', '/product-receive'),
         getItem('Purchase Register', '/purchase-register'),
     ]),
