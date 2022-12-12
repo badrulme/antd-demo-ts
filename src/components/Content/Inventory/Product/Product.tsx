@@ -257,19 +257,19 @@ const Product: React.FC = () => {
       key: "name",
     },
     {
-      title: "uom",
+      title: "UoM",
       dataIndex: "uom",
       key: "uom",
       render: (_, record) => record.uom?.name,
     },
     {
-      title: "category",
+      title: "Category",
       dataIndex: "category",
       key: "category",
       render: (_, record) => record.category?.name,
     },
     {
-      title: "brand",
+      title: "Brand",
       dataIndex: "brand",
       key: "brand",
       render: (_, record) => record.brand?.name,
