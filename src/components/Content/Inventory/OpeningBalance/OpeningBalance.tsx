@@ -22,6 +22,7 @@ import moment from "moment";
 import { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { getProducts } from "../../../../actions/ProductAction";
+import { getTransactionBasicList } from "../../../../actions/TransactionAction";
 import ApiServicePath from "../../../../enums/ApiServicePath";
 import ListOperationType from "../../../../enums/ListOperationType";
 import IProduct from "../../../../interfaces/Product";
@@ -36,7 +37,7 @@ export default function OpeningBalance({}: Props) {
   const [transaction, settransaction] = useState<ITransaction>();
   const [transactionItem, setTransactionItem] = useState<ITransactionItem>();
   const [transactionBasicList, setTransactionBasicList] =
-    useState<ITransactionBasic>();
+    useState<ITransactionBasic[]>();
   const [transactionItems, setTransactionItems] =
     useState<ITransactionItem[]>();
   const [populatedTransactionItems, setPopulatedTransactionItems] = useState<
@@ -103,11 +104,27 @@ export default function OpeningBalance({}: Props) {
     },
   ];
 
-  const loadMoreData = () => {
+  const getTransactionBasic = async () => {
+    try {
+      const { data } = await getTransactionBasicList();
+      setTransactionBasicList(data);
+    } catch (error) {
+      console.log("server error");
+    }
+  };
+
+  const loadMoreData = async  () => {
     if (loading) {
       return;
     }
     setLoading(true);
+    try {
+      const { data } = await getTransactionBasicList();
+      setTransactionBasicList(data);
+    } catch (error) {
+      console.log("server error");
+    }
+
     fetch(
       "https://randomuser.me/api/?results=10&inc=name,gender,email,nat,picture&noinfo"
     )
