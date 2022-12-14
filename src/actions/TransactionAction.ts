@@ -10,9 +10,9 @@ export const getTransactions = async (): Promise<AxiosResponse<ITransaction[]>> 
   return axios.get(`${API_URL}/${ApiServicePath.Transaction}`);
 };
 
-export const getTransactionBasicList = async (): Promise<AxiosResponse<ITransactionBasic[]>> => {
-    
-  return axios.get(`${API_URL}/${ApiServicePath.Transaction}/basic-list`);
+export const getTransactionBasicList = async (transactionTypeId: Number): Promise<AxiosResponse<ITransactionBasic[]>> => {
+  
+  return axios.get(`${API_URL}/${ApiServicePath.Transaction}/basic-list?transactionTypeId=${transactionTypeId}`);
 };
 
 

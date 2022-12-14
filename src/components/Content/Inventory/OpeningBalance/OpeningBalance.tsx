@@ -33,11 +33,11 @@ import { API_URL, APPLICATION_DATE_FORMAT } from "../../../../settings";
 import "./Style.css";
 type Props = {};
 
-export default function OpeningBalance({}: Props) {
+export default function OpeningBalance({ }: Props) {
   const [transaction, settransaction] = useState<ITransaction>();
   const [transactionItem, setTransactionItem] = useState<ITransactionItem>();
   const [transactionBasicList, setTransactionBasicList] =
-    useState<ITransactionBasic[]>();
+    useState<ITransactionBasic[]>([]);
   const [transactionItems, setTransactionItems] =
     useState<ITransactionItem[]>();
   const [populatedTransactionItems, setPopulatedTransactionItems] = useState<
@@ -106,43 +106,51 @@ export default function OpeningBalance({}: Props) {
 
   const getTransactionBasic = async () => {
     try {
-      const { data } = await getTransactionBasicList();
+      const { data } = await getTransactionBasicList(1);
       setTransactionBasicList(data);
     } catch (error) {
       console.log("server error");
     }
   };
 
-  const loadMoreData = async  () => {
+  const loadMoreData = async () => {
     if (loading) {
       return;
     }
     setLoading(true);
     try {
-      const { data } = await getTransactionBasicList();
-      setTransactionBasicList(data);
+      const { data } = await getTransactionBasicList(1);
+      // console.log(data.map(x => x));
+      
+      setTransactionBasicList([...transactionBasicList, ...data]);
+      setLoading(false);
     } catch (error) {
       console.log("server error");
+      setLoading(false);
     }
 
-    fetch(
-      "https://randomuser.me/api/?results=10&inc=name,gender,email,nat,picture&noinfo"
-    )
-      .then((res) => res.json())
-      .then((body) => {
-        setData([...data, ...body.results]);
-        setLoading(false);
-      })
-      .catch(() => {
-        setLoading(false);
-      });
-
-    fetch("http://localhost:8081/transactions/list?transactionTypeId=1")
-      .then((res) => res.json())
-      .then((body) => {
-        console.log(body.content);
-      })
-      .catch(() => {});
+    // fetch(
+    //   "https://randomuser.me/api/?results=10&inc=name,gender,email,nat,picture&noinfo"
+    // )
+    //   .then((res) => res.json())
+    //   .then((body) => {
+    //     setData([...data, ...body.results]);
+    //     setLoading(false);
+    //   })
+    //   .catch(() => {
+    //     setLoading(false);
+    //   });
+    // if (loading) {
+    //   return;
+    // }
+    // setLoading(true);
+    // fetch("http://localhost:8081/transactions/basic-list?transactionTypeId=1")
+    //   .then((res) => res.json())
+    //   .then((body) => {
+    //     setTransactionBasicList([...transactionBasicList, ...body.content]);
+    //     setLoading(false);
+    //   })
+    //   .catch(() => { setLoading(false); });
   };
 
   useEffect(() => {
@@ -153,11 +161,11 @@ export default function OpeningBalance({}: Props) {
 
   useEffect(() => {
     setProduct(products?.find((x) => x.id === productId));
-    return () => {};
+    return () => { };
   }, [productId]);
 
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<DataType[]>([]);
+  // const [data, setData] = useState<DataType[]>([]);
 
   const datas = [
     "Racing car sprays ",
@@ -279,18 +287,18 @@ export default function OpeningBalance({}: Props) {
               renderItem={(item) => <List.Item>{item}</List.Item>}
             /> */}
             <InfiniteScroll
-              dataLength={data.length}
+              dataLength={transactionBasicList.length}
               next={loadMoreData}
-              hasMore={data.length < 50}
+              hasMore={transactionBasicList.length < 1}
               loader={<Skeleton paragraph={{ rows: 1 }} active />}
               endMessage={<Divider plain>It is all, nothing more 🤐</Divider>}
               scrollableTarget="scrollableDiv"
             >
               <List
-                dataSource={data}
+                dataSource={transactionBasicList}
                 renderItem={(item) => (
-                  <List.Item key={item.email}>
-                    <div>{item.name.first}</div>
+                  <List.Item key={item.id}>
+                    <div>{item.code}</div>
                   </List.Item>
                 )}
               />
@@ -382,10 +390,10 @@ export default function OpeningBalance({}: Props) {
                   <Button
                     type="primary"
                     htmlType="submit"
-                    // disabled={
-                    //   !form.isFieldsTouched(true) ||
-                    //   !!form.getFieldsError().filter(({ errors }) => errors.length).length
-                    // }
+                  // disabled={
+                  //   !form.isFieldsTouched(true) ||
+                  //   !!form.getFieldsError().filter(({ errors }) => errors.length).length
+                  // }
                   >
                     <PlusOutlined /> Add
                   </Button>
