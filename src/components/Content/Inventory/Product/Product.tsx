@@ -53,7 +53,7 @@ const Product: React.FC = () => {
     getBrands();
     getCategories();
 
-    return () => { };
+    return () => {};
   }, []);
 
   const getUomList = async () => {
@@ -153,7 +153,7 @@ const Product: React.FC = () => {
       setIsFormDisabled(false);
     }
 
-    return () => { };
+    return () => {};
   }, [modalState]);
 
   const showModal = () => {
@@ -445,14 +445,8 @@ const Product: React.FC = () => {
                     autoComplete="off"
                     disabled={isFormDisabled}
                   >
-                    <Form.Item
-                      label="Code"
-                      name="code"
-                      rules={[
-                        { required: true, message: "Code can not be null!" },
-                      ]}
-                    >
-                      <Input />
+                    <Form.Item label="Code" name="code">
+                      <Input disabled={true} />
                     </Form.Item>
                     <Form.Item
                       label="Name"
@@ -498,10 +492,7 @@ const Product: React.FC = () => {
                         options={categories}
                       />
                     </Form.Item>
-                    <Form.Item
-                      name="brandId"
-                      label="Brand"
-                    >
+                    <Form.Item name="brandId" label="Brand">
                       <Select
                         showSearch={true}
                         placeholder="Select a Brand"
@@ -514,8 +505,6 @@ const Product: React.FC = () => {
                         options={brands}
                       />
                     </Form.Item>
-
-
 
                     <Form.Item
                       label="Active Status"

@@ -33,11 +33,12 @@ import { API_URL, APPLICATION_DATE_FORMAT } from "../../../../settings";
 import "./Style.css";
 type Props = {};
 
-export default function OpeningBalance({ }: Props) {
-  const [transaction, settransaction] = useState<ITransaction>();
+export default function OpeningBalance({}: Props) {
+  const [transaction, setTransaction] = useState<ITransaction>();
   const [transactionItem, setTransactionItem] = useState<ITransactionItem>();
-  const [transactionBasicList, setTransactionBasicList] =
-    useState<ITransactionBasic[]>([]);
+  const [transactionBasicList, setTransactionBasicList] = useState<
+    ITransactionBasic[]
+  >([]);
   const [transactionItems, setTransactionItems] =
     useState<ITransactionItem[]>();
   const [populatedTransactionItems, setPopulatedTransactionItems] = useState<
@@ -46,8 +47,9 @@ export default function OpeningBalance({ }: Props) {
   const [products, setProducts] = useState<IProduct[]>();
   const [product, setProduct] = useState<IProduct>();
   const [productId, setProductId] = useState<number>(0);
-  const [transactionId, setTransactionId] = useState<number>(0);
-  const [entityState, setEntityState] = useState("CREATE");
+  const [transactionId, setTransactionId] = useState<number>();
+  const [formState, setFormState] = useState("CREATE");
+  const [formActionButtonText, setFormActionButtonText] = useState("Create");
 
   const [itemAddform] = Form.useForm();
   const [transactionForm] = Form.useForm();
@@ -118,16 +120,17 @@ export default function OpeningBalance({ }: Props) {
       return;
     }
     setLoading(true);
-    try {
-      const { data } = await getTransactionBasicList(1);
-      // console.log(data.map(x => x));
-      
-      setTransactionBasicList([...transactionBasicList, ...data]);
-      setLoading(false);
-    } catch (error) {
-      console.log("server error");
-      setLoading(false);
-    }
+    // try {
+    //   const { data } = await getTransactionBasicList(1);
+    //   // console.log(data.map(x => x));
+    //   console.log();
+
+    //   setTransactionBasicList([...transactionBasicList, ...data]);
+    //   setLoading(false);
+    // } catch (error) {
+    //   console.log("server error");
+    //   setLoading(false);
+    // }
 
     // fetch(
     //   "https://randomuser.me/api/?results=10&inc=name,gender,email,nat,picture&noinfo"
@@ -144,13 +147,15 @@ export default function OpeningBalance({ }: Props) {
     //   return;
     // }
     // setLoading(true);
-    // fetch("http://localhost:8081/transactions/basic-list?transactionTypeId=1")
-    //   .then((res) => res.json())
-    //   .then((body) => {
-    //     setTransactionBasicList([...transactionBasicList, ...body.content]);
-    //     setLoading(false);
-    //   })
-    //   .catch(() => { setLoading(false); });
+    fetch("http://localhost:8081/transactions/basic-list?transactionTypeId=1")
+      .then((res) => res.json())
+      .then((body) => {
+        setTransactionBasicList([...transactionBasicList, ...body.content]);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
   };
 
   useEffect(() => {
@@ -161,8 +166,17 @@ export default function OpeningBalance({ }: Props) {
 
   useEffect(() => {
     setProduct(products?.find((x) => x.id === productId));
-    return () => { };
+    return () => {};
   }, [productId]);
+
+  useEffect(() => {
+    if (formState === "CREATE") {
+      setFormActionButtonText("Create");
+    } else if (formState === "UPDATE") {
+      setFormActionButtonText("Change");
+    }
+    return () => {};
+  }, [formState]);
 
   const [loading, setLoading] = useState(false);
   // const [data, setData] = useState<DataType[]>([]);
@@ -176,7 +190,7 @@ export default function OpeningBalance({ }: Props) {
   ];
 
   const onCreateTransaction = () => {
-    if (entityState === "CREATE") {
+    if (formState === "CREATE") {
       axios
         .post(`${API_URL}/${ApiServicePath.Transaction}`, {
           date: transactionForm.getFieldValue("date"),
@@ -186,7 +200,30 @@ export default function OpeningBalance({ }: Props) {
           transactionItems: populatedTransactionItems,
         })
         .then((response) => {
-          console.log(response);
+          console.log(response.data);
+          setTransactionId(response.data.id);
+          setTransaction(response.data);
+          transactionForm.setFieldsValue({
+            code: response.data.code,
+            date: dayjs(
+              moment
+                .utc(response.data.date)
+                .local()
+                .format(APPLICATION_DATE_FORMAT),
+              APPLICATION_DATE_FORMAT
+            ),
+            description: response.data.description,
+            postingStatus: response.data.postingStatus,
+          });
+
+          let items = response.data.transactionItems.map((element: any) => {
+            element["key"] = element.productId;
+            return element;
+          });
+          console.log(items);
+
+          setPopulatedTransactionItems(items);
+          setFormState("UPDATE");
         })
         .catch((err) => {
           // Handle error
@@ -290,7 +327,7 @@ export default function OpeningBalance({ }: Props) {
               dataLength={transactionBasicList.length}
               next={loadMoreData}
               hasMore={transactionBasicList.length < 1}
-              loader={<Skeleton paragraph={{ rows: 1 }} active />}
+              loader={<Skeleton paragraph={{ rows: 0 }} active />}
               endMessage={<Divider plain>It is all, nothing more 🤐</Divider>}
               scrollableTarget="scrollableDiv"
             >
@@ -346,7 +383,7 @@ export default function OpeningBalance({ }: Props) {
               <Input.TextArea />
             </Form.Item>
           </Form>
-
+          <br />
           <Form form={itemAddform} onFinish={onAddProduct}>
             <Form.Item label="Select a Item" style={{ marginBottom: 0 }}>
               <Form.Item
@@ -387,14 +424,7 @@ export default function OpeningBalance({ }: Props) {
                 style={{ display: "inline-block", width: "calc(30% - 8px)" }}
               >
                 {() => (
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                  // disabled={
-                  //   !form.isFieldsTouched(true) ||
-                  //   !!form.getFieldsError().filter(({ errors }) => errors.length).length
-                  // }
-                  >
+                  <Button type="primary" htmlType="submit">
                     <PlusOutlined /> Add
                   </Button>
                 )}
@@ -408,24 +438,13 @@ export default function OpeningBalance({ }: Props) {
               dataSource={populatedTransactionItems}
               columns={columns}
             />
-
-            {/* <Form.Item shouldUpdate>
-              {() => (
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                >
-                  <PlusOutlined /> Add
-                </Button>
-              )}
-            </Form.Item> */}
             <Form.Item name="submitButton">
               <Button
                 onClick={onCreateTransaction}
                 type="primary"
                 htmlType="button"
               >
-                <PlusOutlined /> Add
+                {formActionButtonText}
               </Button>
             </Form.Item>
           </Form>

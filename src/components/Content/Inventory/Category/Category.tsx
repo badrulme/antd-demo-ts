@@ -341,7 +341,7 @@ export default function Category({ }: Props) {
                                             label="Description">
                                             <Input.TextArea />
                                         </Form.Item>
-                                        <Form.Item name="parentId" label="Parent ICategory" rules={[{ required: false }]}>
+                                        <Form.Item name="parentId" label="Parent Category" rules={[{ required: false }]}>
                                             <Select
                                                 allowClear={true}
                                                 showSearch
