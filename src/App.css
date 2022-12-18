@@ -1,5 +1,5 @@
-@import 'antd/dist/reset.css';
-@import url('../src/assets/css/main.css');
+@import "antd/dist/reset.css";
+@import url("../src/assets/css/main.css");
 
 /* 
 #components-layout-demo-responsive .logo {
@@ -18,9 +18,18 @@
 
 .ant-page-header-ghost {
   padding: 0px 0px 15px 0px !important;
-
 }
 
-.ant-layout-header{
+.ant-layout-header {
   background-color: #ffffff !important;
+}
+
+.ant-layout-content {
+  margin: 10px 10px 0px !important;
+}
+
+.transaction-item-highlight {
+  /* color:
+    #ffffff; */
+  background-color: #007ad9;
 }

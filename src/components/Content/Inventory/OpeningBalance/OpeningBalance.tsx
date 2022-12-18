@@ -47,29 +47,23 @@ export default function OpeningBalance({}: Props) {
   const [products, setProducts] = useState<IProduct[]>();
   const [product, setProduct] = useState<IProduct>();
   const [productId, setProductId] = useState<number>(0);
+
   const [transactionId, setTransactionId] = useState<number>();
   const [formState, setFormState] = useState("CREATE");
   const [formActionButtonText, setFormActionButtonText] = useState("Create");
 
+  // Page related
+  const [pageNo, setPageNo] = useState<number>(1);
+  const [totalElements, setTotalElements] = useState<number>(0);
+  const [collectedElements, setCollectedElements] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(0);
+  const [offset, setOffset] = useState<number>(0);
+  const [pageNumber, setPageNumber] = useState<number>(0);
+
   const [itemAddform] = Form.useForm();
   const [transactionForm] = Form.useForm();
   const [, forceUpdate] = useState({});
-
-  interface DataType {
-    gender: string;
-    name: {
-      title: string;
-      first: string;
-      last: string;
-    };
-    email: string;
-    picture: {
-      large: string;
-      medium: string;
-      thumbnail: string;
-    };
-    nat: string;
-  }
 
   const getProductList = async () => {
     try {
@@ -120,33 +114,25 @@ export default function OpeningBalance({}: Props) {
       return;
     }
     setLoading(true);
-    // try {
-    //   const { data } = await getTransactionBasicList(1);
-    //   // console.log(data.map(x => x));
-    //   console.log();
 
-    //   setTransactionBasicList([...transactionBasicList, ...data]);
-    //   setLoading(false);
-    // } catch (error) {
-    //   console.log("server error");
-    //   setLoading(false);
-    // }
+    axios
+      .get(
+        `http://localhost:8081/transactions/basic-list?transactionTypeId=1&pageNo=${pageNo}`
+      )
+      .then((response) => {
+        setPageNo((prevState) => prevState + 1);
+        setCollectedElements(
+          (prevState) => prevState + response.data.content.length
+        );
+        setTotalElements(response.data.totalElements);
 
-    // fetch(
-    //   "https://randomuser.me/api/?results=10&inc=name,gender,email,nat,picture&noinfo"
-    // )
-    //   .then((res) => res.json())
-    //   .then((body) => {
-    //     setData([...data, ...body.results]);
-    //     setLoading(false);
-    //   })
-    //   .catch(() => {
-    //     setLoading(false);
-    //   });
-    // if (loading) {
-    //   return;
-    // }
-    // setLoading(true);
+        console.log(response.data);
+        console.log(response.data.totalElements);
+      })
+      .catch((err) => {
+        console.log("server error");
+      });
+
     fetch("http://localhost:8081/transactions/basic-list?transactionTypeId=1")
       .then((res) => res.json())
       .then((body) => {
@@ -181,16 +167,8 @@ export default function OpeningBalance({}: Props) {
   const [loading, setLoading] = useState(false);
   // const [data, setData] = useState<DataType[]>([]);
 
-  const datas = [
-    "Racing car sprays ",
-    "Japanese princess ",
-    "Australian walks ",
-    "Man charged over",
-    "Los Angeles battles",
-  ];
-
   const onCreateTransaction = () => {
-    if (formState === "CREATE") {
+    if (formState === "CREATE" || formState === "UPDATE") {
       axios
         .post(`${API_URL}/${ApiServicePath.Transaction}`, {
           date: transactionForm.getFieldValue("date"),
@@ -200,18 +178,19 @@ export default function OpeningBalance({}: Props) {
           transactionItems: populatedTransactionItems,
         })
         .then((response) => {
+          let date = dayjs(
+            moment
+              .utc(response.data.date)
+              .local()
+              .format(APPLICATION_DATE_FORMAT),
+            APPLICATION_DATE_FORMAT
+          );
           console.log(response.data);
           setTransactionId(response.data.id);
           setTransaction(response.data);
           transactionForm.setFieldsValue({
             code: response.data.code,
-            date: dayjs(
-              moment
-                .utc(response.data.date)
-                .local()
-                .format(APPLICATION_DATE_FORMAT),
-              APPLICATION_DATE_FORMAT
-            ),
+            date: date,
             description: response.data.description,
             postingStatus: response.data.postingStatus,
           });
@@ -223,6 +202,19 @@ export default function OpeningBalance({}: Props) {
           console.log(items);
 
           setPopulatedTransactionItems(items);
+
+          const tranItem: ITransactionBasic = {
+            id: response.data.id,
+            code: response.data.code,
+            date: response.data.code,
+          };
+
+          let tranList = transactionBasicList;
+          tranList.splice(0, 0, tranItem);
+          setTransactionBasicList(tranList);
+
+          setTotalElements((prevState) => prevState + 1);
+          setCollectedElements((prevState) => prevState + 1);
           setFormState("UPDATE");
         })
         .catch((err) => {
@@ -326,21 +318,25 @@ export default function OpeningBalance({}: Props) {
             <InfiniteScroll
               dataLength={transactionBasicList.length}
               next={loadMoreData}
-              hasMore={transactionBasicList.length < 1}
-              loader={<Skeleton paragraph={{ rows: 0 }} active />}
+              hasMore={collectedElements < totalElements}
+              loader={<Skeleton paragraph={{ rows: 10 }} active />}
               endMessage={<Divider plain>It is all, nothing more 🤐</Divider>}
               scrollableTarget="scrollableDiv"
             >
               <List
                 dataSource={transactionBasicList}
-                renderItem={(item) => (
-                  <List.Item key={item.id}>
-                    <div>{item.code}</div>
+                renderItem={(transaction) => (
+                  <List.Item
+                    key={transaction.id}
+                    className={`transaction.id==transactionId ? "transaction-item-highlight" : ""`}
+                  >
+                    <div>{transaction.code}</div>
                   </List.Item>
                 )}
               />
             </InfiniteScroll>
           </div>
+          Count: {collectedElements}/{totalElements}
         </Col>
         <Col span={18}>
           <Form
@@ -445,6 +441,16 @@ export default function OpeningBalance({}: Props) {
                 htmlType="button"
               >
                 {formActionButtonText}
+              </Button>
+            </Form.Item>
+            <Form.Item name="addNewButton">
+              <Button type="primary" htmlType="button">
+                Add New
+              </Button>
+            </Form.Item>
+            <Form.Item name="resetButton">
+              <Button type="default" htmlType="button">
+                Add New
               </Button>
             </Form.Item>
           </Form>
