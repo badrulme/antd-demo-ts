@@ -21,6 +21,8 @@ import CompanyInfo from './Settings/CompanyInfo/CompanyInfo';
 
 import { Layout } from 'antd';
 import Department from "./Hr/Department";
+import ItemPriceSetup from "./Inventory/ItemPriceSetup/ItemPriceSetup";
+import ItemTrack from "./Inventory/ItemTrack/ItemTrack";
 
 const { Content } = Layout;
 
@@ -66,6 +68,8 @@ const ContentComponent: React.FC = () => (
                     <Route path="purchase-register" element={<PurchaseRegister />} />
                     <Route path="purchase-register:id" element={<PurchaseRegister />} />
                     <Route path="company" element={<CompanyInfo />} />
+                    <Route path="item-price-setup" element={<ItemPriceSetup />} />
+                    <Route path="item-track" element={<ItemTrack />} />
                 </Routes>
             </div>
         </Content></>
