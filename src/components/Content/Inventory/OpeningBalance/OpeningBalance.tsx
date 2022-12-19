@@ -1,6 +1,5 @@
 import { PlusOutlined } from "@ant-design/icons";
 import {
-  Avatar,
   Button,
   Col,
   DatePicker,
@@ -13,7 +12,7 @@ import {
   Select,
   Skeleton,
   Switch,
-  Table,
+  Table
 } from "antd";
 import Title from "antd/es/typography/Title";
 import axios from "axios";
@@ -22,9 +21,10 @@ import moment from "moment";
 import { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { getProducts } from "../../../../actions/ProductAction";
-import { getTransactionBasicList } from "../../../../actions/TransactionAction";
+import { getTransaction, getTransactionBasicList } from "../../../../actions/TransactionAction";
 import ApiServicePath from "../../../../enums/ApiServicePath";
 import ListOperationType from "../../../../enums/ListOperationType";
+import TransactionFormState from "../../../../enums/TransactionFormState";
 import IProduct from "../../../../interfaces/Product";
 import ITransaction from "../../../../interfaces/Transaction";
 import ITransactionBasic from "../../../../interfaces/TransactionBasic";
@@ -33,7 +33,10 @@ import { API_URL, APPLICATION_DATE_FORMAT } from "../../../../settings";
 import "./Style.css";
 type Props = {};
 
-export default function OpeningBalance({}: Props) {
+
+export default function OpeningBalance({ }: Props) {
+  const [loadingTransactionList, setLoadingTransactionList] = useState(false);
+
   const [transaction, setTransaction] = useState<ITransaction>();
   const [transactionItem, setTransactionItem] = useState<ITransactionItem>();
   const [transactionBasicList, setTransactionBasicList] = useState<
@@ -48,8 +51,8 @@ export default function OpeningBalance({}: Props) {
   const [product, setProduct] = useState<IProduct>();
   const [productId, setProductId] = useState<number>(0);
 
-  const [transactionId, setTransactionId] = useState<number>();
-  const [formState, setFormState] = useState("CREATE");
+  const [transactionId, setTransactionId] = useState<number>(0);
+  const [formState, setFormState] = useState(TransactionFormState.CREATE);
   const [formActionButtonText, setFormActionButtonText] = useState("Create");
 
   // Page related
@@ -109,66 +112,104 @@ export default function OpeningBalance({}: Props) {
     }
   };
 
-  const loadMoreData = async () => {
-    if (loading) {
+  const getTransactionDetails = async (id: number) => {
+    try {
+      const { data } = await getTransaction(id);
+      setTransaction(data);
+
+      let date = dayjs(
+        moment
+          .utc(data.date)
+          .local()
+          .format(APPLICATION_DATE_FORMAT),
+        APPLICATION_DATE_FORMAT
+      );
+
+      transactionForm.setFieldsValue({
+        code: data.code,
+        date: date,
+        description: data.description,
+        postingStatus: data.postingStatus,
+      });
+      console.log('data.transactionItems', data.transactionItems);
+
+      let items = data.transactionItems.map((element: any) => {
+        element["key"] = element.productId;
+        return element;
+      });
+
+      console.log('items', items);
+
+
+      setPopulatedTransactionItems(items);
+      setFormState(TransactionFormState.UPDATE);
+
+    } catch (error) {
+      console.log("server error");
+    }
+  };
+
+  const loadTransactionList = async () => {
+    if (loadingTransactionList) {
       return;
     }
-    setLoading(true);
+    setLoadingTransactionList(true);
 
     axios
       .get(
         `http://localhost:8081/transactions/basic-list?transactionTypeId=1&pageNo=${pageNo}`
       )
       .then((response) => {
-        setPageNo((prevState) => prevState + 1);
-        setCollectedElements(
-          (prevState) => prevState + response.data.content.length
-        );
-        setTotalElements(response.data.totalElements);
+        if (response.data.content.length > 0) {
+          setTransactionBasicList([...transactionBasicList, ...response.data.content]);
+          setPageNo((prevState) => prevState + 1);
+          setCollectedElements(
+            (prevState) => prevState + response.data.content.length
+          );
+          setTotalElements(response.data.totalElements);
 
-        console.log(response.data);
-        console.log(response.data.totalElements);
+          if (response.data.first) {
+            setTransactionId(response.data.content[0].id);
+          }
+        }
+
+        setLoadingTransactionList(false);
+
       })
       .catch((err) => {
-        console.log("server error");
-      });
-
-    fetch("http://localhost:8081/transactions/basic-list?transactionTypeId=1")
-      .then((res) => res.json())
-      .then((body) => {
-        setTransactionBasicList([...transactionBasicList, ...body.content]);
-        setLoading(false);
-      })
-      .catch(() => {
-        setLoading(false);
+        setLoadingTransactionList(false);
+        console.log("server error", err);
       });
   };
 
+  // Initial page setup
   useEffect(() => {
     resetTransactionForm();
     getProductList();
-    loadMoreData();
+    loadTransactionList();
+    if (transactionBasicList.length > 0) {
+      setTransactionId(transactionBasicList[0].id);
+    }
+
   }, []);
 
   useEffect(() => {
     setProduct(products?.find((x) => x.id === productId));
-    return () => {};
+    return () => { };
   }, [productId]);
 
   useEffect(() => {
-    if (formState === "CREATE") {
+    if (formState === TransactionFormState.CREATE) {
       setFormActionButtonText("Create");
-    } else if (formState === "UPDATE") {
+    } else if (formState === TransactionFormState.UPDATE) {
       setFormActionButtonText("Change");
     }
-    return () => {};
+    return () => { };
   }, [formState]);
 
-  const [loading, setLoading] = useState(false);
-  // const [data, setData] = useState<DataType[]>([]);
 
   const onCreateTransaction = () => {
-    if (formState === "CREATE" || formState === "UPDATE") {
+    if (formState === TransactionFormState.CREATE) {
       axios
         .post(`${API_URL}/${ApiServicePath.Transaction}`, {
           date: transactionForm.getFieldValue("date"),
@@ -178,30 +219,6 @@ export default function OpeningBalance({}: Props) {
           transactionItems: populatedTransactionItems,
         })
         .then((response) => {
-          let date = dayjs(
-            moment
-              .utc(response.data.date)
-              .local()
-              .format(APPLICATION_DATE_FORMAT),
-            APPLICATION_DATE_FORMAT
-          );
-          console.log(response.data);
-          setTransactionId(response.data.id);
-          setTransaction(response.data);
-          transactionForm.setFieldsValue({
-            code: response.data.code,
-            date: date,
-            description: response.data.description,
-            postingStatus: response.data.postingStatus,
-          });
-
-          let items = response.data.transactionItems.map((element: any) => {
-            element["key"] = element.productId;
-            return element;
-          });
-          console.log(items);
-
-          setPopulatedTransactionItems(items);
 
           const tranItem: ITransactionBasic = {
             id: response.data.id,
@@ -215,11 +232,26 @@ export default function OpeningBalance({}: Props) {
 
           setTotalElements((prevState) => prevState + 1);
           setCollectedElements((prevState) => prevState + 1);
-          setFormState("UPDATE");
+          setTransactionId(response.data.id);
+          setFormState(TransactionFormState.UPDATE);
         })
         .catch((err) => {
-          // Handle error
-          console.log("server error");
+          console.log("server error", err);
+        });
+    } else if (formState === TransactionFormState.UPDATE) {
+      axios
+        .put(`${API_URL}/${ApiServicePath.Transaction}/${transactionId}`, {
+          date: transactionForm.getFieldValue("date"),
+          transactionTypeId: 1,
+          description: transactionForm.getFieldValue("description"),
+          postingStatus: transactionForm.getFieldValue("postingStatus"),
+          transactionItems: populatedTransactionItems,
+        })
+        .then((response) => {
+          setTransactionId(response.data.id);
+        })
+        .catch((err) => {
+          console.log("server error", err);
         });
     }
   };
@@ -264,6 +296,7 @@ export default function OpeningBalance({}: Props) {
         createdDate: null,
         lastModifiedDate: null,
         listOperationType: ListOperationType.ADD,
+        id: null
       };
 
       setPopulatedTransactionItems((items) => [
@@ -292,6 +325,20 @@ export default function OpeningBalance({}: Props) {
     wrapperCol: { span: 10 },
   };
 
+  useEffect(() => {
+    if (transactionId != 0) {
+      getTransactionDetails(transactionId);
+    }
+
+    return () => {
+    }
+  }, [transactionId])
+
+
+  const onSelectTransaction = (tranId: number) => {
+    setTransactionId(tranId);
+  }
+
   return (
     <>
       <Row>
@@ -310,14 +357,9 @@ export default function OpeningBalance({}: Props) {
               border: "1px solid rgba(140, 140, 140, 0.35)",
             }}
           >
-            {/* <List
-              size="small"
-              dataSource={datas}
-              renderItem={(item) => <List.Item>{item}</List.Item>}
-            /> */}
             <InfiniteScroll
               dataLength={transactionBasicList.length}
-              next={loadMoreData}
+              next={loadTransactionList}
               hasMore={collectedElements < totalElements}
               loader={<Skeleton paragraph={{ rows: 10 }} active />}
               endMessage={<Divider plain>It is all, nothing more 🤐</Divider>}
@@ -326,9 +368,9 @@ export default function OpeningBalance({}: Props) {
               <List
                 dataSource={transactionBasicList}
                 renderItem={(transaction) => (
-                  <List.Item
+                  <List.Item onClick={() => onSelectTransaction(transaction.id)}
                     key={transaction.id}
-                    className={`transaction.id==transactionId ? "transaction-item-highlight" : ""`}
+                    className={`cursor-pointer ${transaction.id == transactionId ? "transaction-item-highlight" : ""} `}
                   >
                     <div>{transaction.code}</div>
                   </List.Item>

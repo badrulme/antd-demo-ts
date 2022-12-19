@@ -33,3 +33,7 @@
     #ffffff; */
   background-color: #007ad9;
 }
+
+.cursor-pointer {
+  cursor: pointer;
+}
