@@ -8,11 +8,13 @@ import {
   Input,
   InputNumber,
   List,
+  Popconfirm,
   Row,
   Select,
   Skeleton,
   Switch,
-  Table
+  Table,
+  Typography
 } from "antd";
 import Title from "antd/es/typography/Title";
 import axios from "axios";
@@ -32,6 +34,52 @@ import ITransactionItem from "../../../../interfaces/TransactionItem";
 import { API_URL, APPLICATION_DATE_FORMAT } from "../../../../settings";
 import "./Style.css";
 type Props = {};
+
+
+interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
+  editing: boolean;
+  dataIndex: string;
+  title: any;
+  inputType: 'number' | 'text';
+  record: ITransactionItem;
+  index: number;
+  children: React.ReactNode;
+}
+
+const EditableCell: React.FC<EditableCellProps> = ({
+  editing,
+  dataIndex,
+  title,
+  inputType,
+  record,
+  index,
+  children,
+  ...restProps
+}) => {
+  const inputNode = inputType === 'number' ? <InputNumber /> : <Input />;
+
+  return (
+    <td {...restProps}>
+      {editing ? (
+        <Form.Item
+          name={dataIndex}
+          style={{ margin: 0 }}
+          rules={[
+            {
+              required: true,
+              message: `Please Input ${title}!`,
+            },
+          ]}
+        >
+          {inputNode}
+        </Form.Item>
+      ) : (
+        children
+      )}
+    </td>
+  );
+};
+
 
 
 export default function OpeningBalance({ }: Props) {
@@ -68,6 +116,45 @@ export default function OpeningBalance({ }: Props) {
   const [transactionForm] = Form.useForm();
   const [, forceUpdate] = useState({});
 
+
+  const [form] = Form.useForm();
+  const [editingKey, setEditingKey] = useState<string>('');
+  const isEditing = (record: ITransactionItem) => record.key === editingKey;
+
+  const edit = (record: Partial<ITransactionItem> & { key: React.Key }) => {
+    form.setFieldsValue({ code: '', name: '', receiveQuantity: '', ...record });
+    setEditingKey(record.key);
+  };
+
+  const cancel = () => {
+    setEditingKey('');
+  };
+
+  const save = async (key: React.Key) => {
+    try {
+      const row = (await form.validateFields()) as ITransactionItem;
+
+      const newData = [...populatedTransactionItems];
+      const index = newData.findIndex((item) => key === item.key);
+      if (index > -1) {
+        const item = newData[index];
+        newData.splice(index, 1, {
+          ...item,
+          ...row,
+        });
+        setPopulatedTransactionItems(newData);
+        setEditingKey('');
+      } else {
+        newData.push(row);
+        setPopulatedTransactionItems(newData);
+        setEditingKey('');
+      }
+    } catch (errInfo) {
+      console.log('Validate Failed:', errInfo);
+    }
+  };
+
+
   const getProductList = async () => {
     try {
       const { data } = await getProducts();
@@ -81,6 +168,8 @@ export default function OpeningBalance({ }: Props) {
       console.log("server error");
     }
   };
+
+
 
   const columns = [
     {
@@ -99,9 +188,45 @@ export default function OpeningBalance({ }: Props) {
       title: "Receive Quantity",
       dataIndex: "receiveQuantity",
       key: "receiveQuantity",
+      editable: true,
       render: (_: any, record: ITransactionItem) => record.receiveQuantity,
     },
+    {
+      title: 'operation',
+      dataIndex: 'operation',
+      render: (_: any, record: ITransactionItem) => {
+        const editable = isEditing(record);
+        return editable ? (
+          <span>
+            <Typography.Link onClick={() => save(record.key)} style={{ marginRight: 8 }}>
+              Save
+            </Typography.Link>
+            <a onClick={cancel}>Cancel</a>
+          </span>
+        ) : (
+          <Typography.Link disabled={editingKey !== ''} onClick={() => edit(record)}>
+            Edit
+          </Typography.Link>
+        );
+      },
+    },
   ];
+
+  const mergedColumns = columns.map((col) => {
+    if (!col.editable) {
+      return col;
+    }
+    return {
+      ...col,
+      onCell: (record: ITransactionItem) => ({
+        record,
+        inputType: col.dataIndex === 'receiveQuantity' ? 'number' : 'text',
+        dataIndex: col.dataIndex,
+        title: col.title,
+        editing: isEditing(record),
+      }),
+    };
+  });
 
   const getTransactionBasic = async () => {
     try {
@@ -296,12 +421,12 @@ export default function OpeningBalance({ }: Props) {
         createdDate: null,
         lastModifiedDate: null,
         listOperationType: ListOperationType.ADD,
-        id: null
+        id: null,
+        key: currentProductId
       };
 
       setPopulatedTransactionItems((items) => [
-        ...items,
-        { ...obj, key: obj.productId },
+        ...items, obj,
       ]);
       console.log("Not Found");
     }
@@ -470,12 +595,20 @@ export default function OpeningBalance({ }: Props) {
             </Form.Item>
 
             <br />
-            <Table
-              size="small"
-              pagination={false}
-              dataSource={populatedTransactionItems}
-              columns={columns}
-            />
+            <Form form={form} component={false}>
+              <Table
+                components={{
+                  body: {
+                    cell: EditableCell,
+                  },
+                }}
+                size="small"
+                rowClassName="editable-row"
+                pagination={false}
+                dataSource={populatedTransactionItems}
+                columns={mergedColumns}
+              />
+            </Form>
             <Form.Item name="submitButton">
               <Button
                 onClick={onCreateTransaction}

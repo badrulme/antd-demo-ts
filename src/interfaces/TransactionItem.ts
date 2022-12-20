@@ -3,6 +3,7 @@ import IProduct from "./Product";
 import ITransaction from "./Transaction";
 
 interface ITransactionItem {
+  key: string;
   id: number | null;
   transaction: ITransaction | null;
   productId: number;
