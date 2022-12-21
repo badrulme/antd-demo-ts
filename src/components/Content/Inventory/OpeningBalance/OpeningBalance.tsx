@@ -1,4 +1,4 @@
-import { PlusOutlined } from "@ant-design/icons";
+import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 import {
   Button,
   Col,
@@ -12,6 +12,7 @@ import {
   Row,
   Select,
   Skeleton,
+  Spin,
   Switch,
   Table,
   Typography
@@ -116,6 +117,8 @@ export default function OpeningBalance({ }: Props) {
   const [transactionForm] = Form.useForm();
   const [, forceUpdate] = useState({});
 
+  const [loading, setLoading] = useState(false);
+  const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
   const [form] = Form.useForm();
   const [editingKey, setEditingKey] = useState<string>('');
@@ -124,6 +127,10 @@ export default function OpeningBalance({ }: Props) {
   const edit = (record: Partial<ITransactionItem> & { key: React.Key }) => {
     form.setFieldsValue({ code: '', name: '', receiveQuantity: '', ...record });
     setEditingKey(record.key);
+  };
+
+  const deleteItem = (record: Partial<ITransactionItem> & { key: React.Key }) => {
+    setPopulatedTransactionItems((prevState) => prevState.filter(x => x.key != record.key));
   };
 
   const cancel = () => {
@@ -169,8 +176,6 @@ export default function OpeningBalance({ }: Props) {
     }
   };
 
-
-
   const columns = [
     {
       title: "Product Code",
@@ -201,12 +206,19 @@ export default function OpeningBalance({ }: Props) {
             <Typography.Link onClick={() => save(record.key)} style={{ marginRight: 8 }}>
               Save
             </Typography.Link>
-            <a onClick={cancel}>Cancel</a>
+            <Typography.Link onClick={cancel}>
+              Cancel
+            </Typography.Link>
           </span>
         ) : (
-          <Typography.Link disabled={editingKey !== ''} onClick={() => edit(record)}>
-            Edit
-          </Typography.Link>
+          <span>
+            <Typography.Link disabled={editingKey !== ''} style={{ marginRight: 8 }} onClick={() => edit(record)}>
+              Edit
+            </Typography.Link>
+            <Typography.Link disabled={editingKey !== ''} onClick={() => deleteItem(record)}>
+              Delete
+            </Typography.Link>
+          </span>
         );
       },
     },
@@ -239,6 +251,7 @@ export default function OpeningBalance({ }: Props) {
 
   const getTransactionDetails = async (id: number) => {
     try {
+      setLoading(true);
       const { data } = await getTransaction(id);
       setTransaction(data);
 
@@ -268,8 +281,9 @@ export default function OpeningBalance({ }: Props) {
 
       setPopulatedTransactionItems(items);
       setFormState(TransactionFormState.UPDATE);
-
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
       console.log("server error");
     }
   };
@@ -318,6 +332,10 @@ export default function OpeningBalance({ }: Props) {
 
   }, []);
 
+  const resetItemAddform = () => {
+    itemAddform.resetFields();
+  }
+
   useEffect(() => {
     setProduct(products?.find((x) => x.id === productId));
     return () => { };
@@ -334,6 +352,7 @@ export default function OpeningBalance({ }: Props) {
 
 
   const onCreateTransaction = () => {
+    setLoading(true);
     if (formState === TransactionFormState.CREATE) {
       axios
         .post(`${API_URL}/${ApiServicePath.Transaction}`, {
@@ -359,8 +378,12 @@ export default function OpeningBalance({ }: Props) {
           setCollectedElements((prevState) => prevState + 1);
           setTransactionId(response.data.id);
           setFormState(TransactionFormState.UPDATE);
+
+          setLoading(false);
+
         })
         .catch((err) => {
+          setLoading(false);
           console.log("server error", err);
         });
     } else if (formState === TransactionFormState.UPDATE) {
@@ -374,8 +397,10 @@ export default function OpeningBalance({ }: Props) {
         })
         .then((response) => {
           setTransactionId(response.data.id);
+          setLoading(false);
         })
         .catch((err) => {
+          setLoading(false);
           console.log("server error", err);
         });
     }
@@ -451,8 +476,12 @@ export default function OpeningBalance({ }: Props) {
   };
 
   useEffect(() => {
+
     if (transactionId != 0) {
+      setLoading(true);
       getTransactionDetails(transactionId);
+      setEditingKey('');
+      resetItemAddform();
     }
 
     return () => {
@@ -495,7 +524,7 @@ export default function OpeningBalance({ }: Props) {
                 renderItem={(transaction) => (
                   <List.Item onClick={() => onSelectTransaction(transaction.id)}
                     key={transaction.id}
-                    className={`cursor-pointer ${transaction.id == transactionId ? "transaction-item-highlight" : ""} `}
+                    className={`cursor-pointer ${transaction.id === transactionId ? "transaction-item-highlight" : ""} `}
                   >
                     <div>{transaction.code}</div>
                   </List.Item>
@@ -506,129 +535,132 @@ export default function OpeningBalance({ }: Props) {
           Count: {collectedElements}/{totalElements}
         </Col>
         <Col span={18}>
-          <Form
-            {...layout}
-            name="transactionForm"
-            form={transactionForm}
-            validateMessages={validateMessages}
-          >
-            <Form.Item label="Tran Code" style={{ marginBottom: 0 }}>
-              <Form.Item
-                name={["code"]}
-                style={{ display: "inline-block", width: "calc(50% - 8px)" }}
-              >
-                <Input disabled={true} />
-              </Form.Item>
-              <Form.Item
-                name={["date"]}
-                style={{
-                  display: "inline-block",
-                  width: "calc(50% - 8px)",
-                  margin: "0 8px",
-                }}
-                rules={[{ required: true }]}
-              >
-                <DatePicker
-                  allowClear={false}
-                  format={APPLICATION_DATE_FORMAT}
-                />
-              </Form.Item>
-            </Form.Item>
-
-            <Form.Item
-              label="Posting Status"
-              name="postingStatus"
-              valuePropName="checked"
+          <Spin indicator={antIcon} spinning={loading}>
+            <Form
+              {...layout}
+              name="transactionForm"
+              form={transactionForm}
+              validateMessages={validateMessages}
             >
-              <Switch />
-            </Form.Item>
-            <Form.Item name={["description"]} label="Description">
-              <Input.TextArea />
-            </Form.Item>
-          </Form>
-          <br />
-          <Form form={itemAddform} onFinish={onAddProduct}>
-            <Form.Item label="Select a Item" style={{ marginBottom: 0 }}>
-              <Form.Item
-                name="productId"
-                rules={[{ required: true }]}
-                style={{ display: "inline-block", width: "calc(30% - 8px)" }}
-              >
-                <Select
-                  showSearch={true}
-                  placeholder="Select a Product"
-                  optionFilterProp="children"
-                  filterOption={(input, option) =>
-                    (option?.name ?? "")
-                      .toLowerCase()
-                      .includes(input.toLowerCase()) ||
-                    (option?.code ?? "")
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
-                  }
-                  options={products}
-                />
+              <Form.Item label="Tran Code" style={{ marginBottom: 0 }}>
+                <Form.Item
+                  name={["code"]}
+                  style={{ display: "inline-block", width: "calc(50% - 8px)" }}
+                >
+                  <Input disabled={true} />
+                </Form.Item>
+                <Form.Item
+                  name={["date"]}
+                  style={{
+                    display: "inline-block",
+                    width: "calc(50% - 8px)",
+                    margin: "0 8px",
+                  }}
+                  rules={[{ required: true }]}
+                >
+                  <DatePicker
+                    allowClear={false}
+                    format={APPLICATION_DATE_FORMAT}
+                  />
+                </Form.Item>
               </Form.Item>
-              <Form.Item
-                name="quantity"
-                rules={[
-                  { required: true, message: "Please input your Quantity!" },
-                ]}
-                style={{
-                  display: "inline-block",
-                  width: "calc(15% - 8px)",
-                  margin: "0 8px",
-                }}
-              >
-                <InputNumber placeholder="Quantity" />
-              </Form.Item>
-              <Form.Item
-                shouldUpdate
-                style={{ display: "inline-block", width: "calc(30% - 8px)" }}
-              >
-                {() => (
-                  <Button type="primary" htmlType="submit">
-                    <PlusOutlined /> Add
-                  </Button>
-                )}
-              </Form.Item>
-            </Form.Item>
 
-            <br />
-            <Form form={form} component={false}>
-              <Table
-                components={{
-                  body: {
-                    cell: EditableCell,
-                  },
-                }}
-                size="small"
-                rowClassName="editable-row"
-                pagination={false}
-                dataSource={populatedTransactionItems}
-                columns={mergedColumns}
-              />
-            </Form>
-            <Form.Item name="submitButton">
-              <Button
-                onClick={onCreateTransaction}
-                type="primary"
-                htmlType="button"
+              <Form.Item
+                label="Posting Status"
+                name="postingStatus"
+                valuePropName="checked"
               >
-                {formActionButtonText}
-              </Button>
-            </Form.Item>
-            <Form.Item name="addNewButton">
-              <Button type="primary" htmlType="button">
-                Add New
-              </Button>
-            </Form.Item>
-            <Form.Item name="resetButton">
-              <Button type="default" htmlType="button">
-                Add New
-              </Button>
-            </Form.Item>
-          </Form>
+                <Switch />
+              </Form.Item>
+              <Form.Item name={["description"]} label="Description">
+                <Input.TextArea />
+              </Form.Item>
+            </Form>
+            <br />
+            <Form form={itemAddform} onFinish={onAddProduct}>
+              <Form.Item label="Select a Item" style={{ marginBottom: 0 }}>
+                <Form.Item
+                  name="productId"
+                  rules={[{ required: true }]}
+                  style={{ display: "inline-block", width: "calc(50% - 8px)" }}
+                >
+                  <Select
+                    showSearch={true}
+                    placeholder="Select a Product"
+                    optionFilterProp="children"
+                    filterOption={(input, option) =>
+                      (option?.name ?? "")
+                        .toLowerCase()
+                        .includes(input.toLowerCase()) ||
+                      (option?.code ?? "")
+                        .toLowerCase()
+                        .includes(input.toLowerCase())
+                    }
+                    options={products}
+                  />
+                </Form.Item>
+                <Form.Item
+                  name="quantity"
+                  rules={[
+                    { required: true, message: "Please input your Quantity!" },
+                  ]}
+                  style={{
+                    display: "inline-block",
+                    width: "calc(15% - 8px)",
+                    margin: "0 8px",
+                  }}
+                >
+                  <InputNumber placeholder="Quantity" />
+                </Form.Item>
+                <Form.Item
+                  shouldUpdate
+                  style={{ display: "inline-block", width: "calc(30% - 8px)" }}
+                >
+                  {() => (
+                    <Button type="primary" htmlType="submit">
+                      <PlusOutlined /> Add
+                    </Button>
+                  )}
+                </Form.Item>
+              </Form.Item>
+
+              <br />
+              <Form form={form} component={false}>
+                <Table
+                  components={{
+                    body: {
+                      cell: EditableCell,
+                    },
+                  }}
+                  size="small"
+                  rowClassName="editable-row"
+                  pagination={false}
+                  dataSource={populatedTransactionItems}
+                  columns={mergedColumns}
+                />
+              </Form>
+              <Form.Item name="submitButton">
+                <Button
+                  onClick={onCreateTransaction}
+                  type="primary"
+                  htmlType="button"
+                  disabled={editingKey !== ''}
+                >
+                  {formActionButtonText}
+                </Button>
+              </Form.Item>
+              <Form.Item name="addNewButton">
+                <Button disabled={editingKey !== ''} type="primary" htmlType="button">
+                  Add New
+                </Button>
+              </Form.Item>
+              <Form.Item name="resetButton">
+                <Button type="default" htmlType="button">
+                  Reset
+                </Button>
+              </Form.Item>
+            </Form>
+          </Spin>
         </Col>
       </Row>
     </>
