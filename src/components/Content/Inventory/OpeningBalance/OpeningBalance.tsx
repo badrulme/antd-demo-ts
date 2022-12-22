@@ -7,9 +7,7 @@ import {
   Form,
   Input,
   InputNumber,
-  List,
-  Popconfirm,
-  Row,
+  List, Row,
   Select,
   Skeleton,
   Spin,
@@ -24,7 +22,7 @@ import moment from "moment";
 import { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { getProducts } from "../../../../actions/ProductAction";
-import { getTransaction, getTransactionBasicList } from "../../../../actions/TransactionAction";
+import { deleteTransaction, getTransaction, getTransactionBasicList } from "../../../../actions/TransactionAction";
 import ApiServicePath from "../../../../enums/ApiServicePath";
 import ListOperationType from "../../../../enums/ListOperationType";
 import TransactionFormState from "../../../../enums/TransactionFormState";
@@ -86,20 +84,14 @@ const EditableCell: React.FC<EditableCellProps> = ({
 export default function OpeningBalance({ }: Props) {
   const [loadingTransactionList, setLoadingTransactionList] = useState(false);
 
-  const [transaction, setTransaction] = useState<ITransaction>();
-  const [transactionItem, setTransactionItem] = useState<ITransactionItem>();
   const [transactionBasicList, setTransactionBasicList] = useState<
     ITransactionBasic[]
   >([]);
-  const [transactionItems, setTransactionItems] =
-    useState<ITransactionItem[]>();
+
   const [populatedTransactionItems, setPopulatedTransactionItems] = useState<
     ITransactionItem[]
   >([]);
   const [products, setProducts] = useState<IProduct[]>();
-  const [product, setProduct] = useState<IProduct>();
-  const [productId, setProductId] = useState<number>(0);
-
   const [transactionId, setTransactionId] = useState<number>(0);
   const [formState, setFormState] = useState(TransactionFormState.CREATE);
   const [formActionButtonText, setFormActionButtonText] = useState("Create");
@@ -108,24 +100,23 @@ export default function OpeningBalance({ }: Props) {
   const [pageNo, setPageNo] = useState<number>(1);
   const [totalElements, setTotalElements] = useState<number>(0);
   const [collectedElements, setCollectedElements] = useState<number>(0);
-  const [totalPages, setTotalPages] = useState<number>(0);
-  const [pageSize, setPageSize] = useState<number>(0);
-  const [offset, setOffset] = useState<number>(0);
-  const [pageNumber, setPageNumber] = useState<number>(0);
+  // const [totalPages, setTotalPages] = useState<number>(0);
+  // const [pageSize, setPageSize] = useState<number>(0);
+  // const [offset, setOffset] = useState<number>(0);
+  // const [pageNumber, setPageNumber] = useState<number>(0);
 
   const [itemAddform] = Form.useForm();
   const [transactionForm] = Form.useForm();
-  const [, forceUpdate] = useState({});
 
   const [loading, setLoading] = useState(false);
   const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
-  const [form] = Form.useForm();
+  const [transactionItemForm] = Form.useForm();
   const [editingKey, setEditingKey] = useState<string>('');
   const isEditing = (record: ITransactionItem) => record.key === editingKey;
 
   const edit = (record: Partial<ITransactionItem> & { key: React.Key }) => {
-    form.setFieldsValue({ code: '', name: '', receiveQuantity: '', ...record });
+    transactionItemForm.setFieldsValue({ code: '', name: '', receiveQuantity: '', ...record });
     setEditingKey(record.key);
   };
 
@@ -133,13 +124,25 @@ export default function OpeningBalance({ }: Props) {
     setPopulatedTransactionItems((prevState) => prevState.filter(x => x.key != record.key));
   };
 
-  const cancel = () => {
+  const cancelItemEditing = () => {
     setEditingKey('');
   };
 
+  const resetTransactionScreen = () => {
+    setTransactionId(0);
+    setFormState(TransactionFormState.CREATE);
+    resetTransactionForm();
+    resetItemAddform();
+    resetTransactionItemForm();
+    setPopulatedTransactionItems([]);
+  }
+
+  const resetTransactionItemForm = () => {
+    transactionItemForm.resetFields();
+  }
   const save = async (key: React.Key) => {
     try {
-      const row = (await form.validateFields()) as ITransactionItem;
+      const row = (await transactionItemForm.validateFields()) as ITransactionItem;
 
       const newData = [...populatedTransactionItems];
       const index = newData.findIndex((item) => key === item.key);
@@ -206,7 +209,7 @@ export default function OpeningBalance({ }: Props) {
             <Typography.Link onClick={() => save(record.key)} style={{ marginRight: 8 }}>
               Save
             </Typography.Link>
-            <Typography.Link onClick={cancel}>
+            <Typography.Link onClick={cancelItemEditing}>
               Cancel
             </Typography.Link>
           </span>
@@ -249,11 +252,16 @@ export default function OpeningBalance({ }: Props) {
     }
   };
 
+  const deleteTransactionEntity = async () => {
+    await deleteTransaction(transactionId);
+    setTransactionBasicList((prevState) => prevState.filter(x => x.id !== transactionId));
+    setTransactionId(0);
+  }
+
   const getTransactionDetails = async (id: number) => {
     try {
       setLoading(true);
       const { data } = await getTransaction(id);
-      setTransaction(data);
 
       let date = dayjs(
         moment
@@ -269,15 +277,11 @@ export default function OpeningBalance({ }: Props) {
         description: data.description,
         postingStatus: data.postingStatus,
       });
-      console.log('data.transactionItems', data.transactionItems);
 
       let items = data.transactionItems.map((element: any) => {
         element["key"] = element.productId;
         return element;
       });
-
-      console.log('items', items);
-
 
       setPopulatedTransactionItems(items);
       setFormState(TransactionFormState.UPDATE);
@@ -323,23 +327,23 @@ export default function OpeningBalance({ }: Props) {
 
   // Initial page setup
   useEffect(() => {
-    resetTransactionForm();
+    
     getProductList();
     loadTransactionList();
+    resetTransactionScreen();
     if (transactionBasicList.length > 0) {
       setTransactionId(transactionBasicList[0].id);
     }
 
   }, []);
 
+  const addNew = () => {
+    resetTransactionScreen()
+  }
+
   const resetItemAddform = () => {
     itemAddform.resetFields();
   }
-
-  useEffect(() => {
-    setProduct(products?.find((x) => x.id === productId));
-    return () => { };
-  }, [productId]);
 
   useEffect(() => {
     if (formState === TransactionFormState.CREATE) {
@@ -453,10 +457,8 @@ export default function OpeningBalance({ }: Props) {
       setPopulatedTransactionItems((items) => [
         ...items, obj,
       ]);
-      console.log("Not Found");
     }
-
-    itemAddform.resetFields();
+    resetItemAddform();
   };
 
   const validateMessages = {
@@ -477,8 +479,7 @@ export default function OpeningBalance({ }: Props) {
 
   useEffect(() => {
 
-    if (transactionId != 0) {
-      setLoading(true);
+    if (transactionId !== 0) {
       getTransactionDetails(transactionId);
       setEditingKey('');
       resetItemAddform();
@@ -617,15 +618,19 @@ export default function OpeningBalance({ }: Props) {
                   style={{ display: "inline-block", width: "calc(30% - 8px)" }}
                 >
                   {() => (
-                    <Button type="primary" htmlType="submit">
-                      <PlusOutlined /> Add
+                    <Button
+                      type="primary" htmlType="submit"
+                      disabled={
+                        !itemAddform.isFieldsTouched()
+                      }>
+                      <PlusOutlined />
                     </Button>
                   )}
                 </Form.Item>
               </Form.Item>
 
               <br />
-              <Form form={form} component={false}>
+              <Form form={transactionItemForm} component={false}>
                 <Table
                   components={{
                     body: {
@@ -634,9 +639,11 @@ export default function OpeningBalance({ }: Props) {
                   }}
                   size="small"
                   rowClassName="editable-row"
-                  pagination={false}
                   dataSource={populatedTransactionItems}
                   columns={mergedColumns}
+                  pagination={{
+                    onChange: cancelItemEditing,
+                  }}
                 />
               </Form>
               <Form.Item name="submitButton">
@@ -650,15 +657,18 @@ export default function OpeningBalance({ }: Props) {
                 </Button>
               </Form.Item>
               <Form.Item name="addNewButton">
-                <Button disabled={editingKey !== ''} type="primary" htmlType="button">
+                <Button disabled={editingKey !== '' || transactionId < 1} onClick={addNew} type="default" htmlType="button">
                   Add New
                 </Button>
               </Form.Item>
-              <Form.Item name="resetButton">
-                <Button type="default" htmlType="button">
-                  Reset
-                </Button>
-              </Form.Item>
+              {
+                formState !== TransactionFormState.CREATE &&
+                <Form.Item name="resetButton">
+                  <Button disabled={(editingKey !== '' || transactionId < 1)} onClick={deleteTransactionEntity} danger type="default" htmlType="button">
+                    Delete
+                  </Button>
+                </Form.Item>
+              }
             </Form>
           </Spin>
         </Col>
