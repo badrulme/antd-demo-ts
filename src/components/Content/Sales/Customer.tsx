@@ -381,7 +381,7 @@ const Customer: React.FC = () => {
                 <Col md={24}>
 
                     <div>
-                        <Title level={2}>Customer</Title>
+                        <Title level={4}>Customer</Title>
 
                         <Button type="primary" onClick={showModal}>Create</Button>
                         <Table
@@ -417,9 +417,8 @@ const Customer: React.FC = () => {
                                         <Form.Item
                                             label="Code"
                                             name="code"
-                                            rules={[{ required: true, message: 'Code can not be null!' }]}
                                         >
-                                            <Input />
+                                            <Input disabled={true} />
                                         </Form.Item>
                                         <Form.Item
                                             label="Name"

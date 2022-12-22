@@ -313,7 +313,7 @@ const JobTitle: React.FC = () => {
             <Row>
                 <Col md={24}>
                     <div>
-                        <Title level={2}>Job Title</Title>
+                        <Title level={4}>Job Title</Title>
                         <Button type="primary" onClick={showModal}>Create</Button>
                         <Table
                             loading={tableLoadingSpin}

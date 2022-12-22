@@ -26,6 +26,7 @@ import { deleteTransaction, getTransaction, getTransactionBasicList } from "../.
 import ApiServicePath from "../../../../enums/ApiServicePath";
 import ListOperationType from "../../../../enums/ListOperationType";
 import TransactionFormState from "../../../../enums/TransactionFormState";
+import TransactionType from "../../../../enums/TransactionType";
 import IProduct from "../../../../interfaces/Product";
 import ITransaction from "../../../../interfaces/Transaction";
 import ITransactionBasic from "../../../../interfaces/TransactionBasic";
@@ -193,7 +194,7 @@ export default function OpeningBalance({ }: Props) {
       render: (_: any, record: ITransactionItem) => record.product?.name,
     },
     {
-      title: "Receive Quantity",
+      title: "Quantity",
       dataIndex: "receiveQuantity",
       key: "receiveQuantity",
       editable: true,
@@ -300,7 +301,7 @@ export default function OpeningBalance({ }: Props) {
 
     axios
       .get(
-        `http://localhost:8081/transactions/basic-list?transactionTypeId=1&pageNo=${pageNo}`
+        `${API_URL}/${ApiServicePath.Transaction}/basic-list?transactionTypeId=${TransactionType.OPENING_BALANCE}&pageNo=${pageNo}`
       )
       .then((response) => {
         if (response.data.content.length > 0) {
@@ -327,7 +328,7 @@ export default function OpeningBalance({ }: Props) {
 
   // Initial page setup
   useEffect(() => {
-    
+
     getProductList();
     loadTransactionList();
     resetTransactionScreen();
@@ -361,7 +362,7 @@ export default function OpeningBalance({ }: Props) {
       axios
         .post(`${API_URL}/${ApiServicePath.Transaction}`, {
           date: transactionForm.getFieldValue("date"),
-          transactionTypeId: 1,
+          transactionTypeId: TransactionType.OPENING_BALANCE,
           description: transactionForm.getFieldValue("description"),
           postingStatus: transactionForm.getFieldValue("postingStatus"),
           transactionItems: populatedTransactionItems,
@@ -394,7 +395,7 @@ export default function OpeningBalance({ }: Props) {
       axios
         .put(`${API_URL}/${ApiServicePath.Transaction}/${transactionId}`, {
           date: transactionForm.getFieldValue("date"),
-          transactionTypeId: 1,
+          transactionTypeId: TransactionType.OPENING_BALANCE,
           description: transactionForm.getFieldValue("description"),
           postingStatus: transactionForm.getFieldValue("postingStatus"),
           transactionItems: populatedTransactionItems,
@@ -498,7 +499,7 @@ export default function OpeningBalance({ }: Props) {
     <>
       <Row>
         <Col span={24}>
-          <Title level={2}>Opening Balance</Title>
+          <Title level={4}>Opening Balance</Title>
         </Col>
       </Row>
       <Row>
@@ -517,7 +518,6 @@ export default function OpeningBalance({ }: Props) {
               next={loadTransactionList}
               hasMore={collectedElements < totalElements}
               loader={<Skeleton paragraph={{ rows: 10 }} active />}
-              endMessage={<Divider plain>It is all, nothing more 🤐</Divider>}
               scrollableTarget="scrollableDiv"
             >
               <List

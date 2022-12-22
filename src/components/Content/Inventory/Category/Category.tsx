@@ -299,7 +299,7 @@ export default function Category({ }: Props) {
                 <Col md={24}>
                     <div>
 
-                        <Title level={2}>Category</Title>
+                        <Title level={4}>Category</Title>
 
                         <Button type="primary" onClick={showModal}>Create</Button>
                         <Table

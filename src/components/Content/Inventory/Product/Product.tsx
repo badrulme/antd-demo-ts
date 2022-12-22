@@ -412,7 +412,7 @@ const Product: React.FC = () => {
       <Row>
         <Col span={24}>
           <div>
-            <Title level={2}>Product</Title>
+            <Title level={4}>Product</Title>
 
             <Button type="primary" onClick={showModal}>
               Create

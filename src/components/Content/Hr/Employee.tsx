@@ -429,7 +429,7 @@ const Employee: React.FC = () => {
                 <Col span={24}>
 
                     <div>
-                        <Title level={2}>Employee</Title>
+                        <Title level={4}>Employee</Title>
 
                         <Button type="primary" onClick={showModal}>Create</Button>
                         <Table

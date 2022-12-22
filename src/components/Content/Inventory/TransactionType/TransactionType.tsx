@@ -320,7 +320,7 @@ const TransactionType: React.FC = () => {
                 <Col md={24}>
 
                     <div>
-                        <Title level={2}>Transaction Type</Title>
+                        <Title level={4}>Transaction Type</Title>
 
                         <Button type="primary" onClick={showModal}>Create</Button>
                         <Table

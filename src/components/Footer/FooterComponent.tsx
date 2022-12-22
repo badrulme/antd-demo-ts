@@ -7,7 +7,7 @@ const FooterComponent: React.FC = () => (
                 textAlign: 'center',
             }}
         >
-            Ant Design ©2018 Created by Ant UED
+            Business Management System ©2022 Created by Badrul.
         </Footer>
     </>
 )

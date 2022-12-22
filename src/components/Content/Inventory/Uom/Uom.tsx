@@ -257,7 +257,7 @@ const Uom: React.FC = () => {
       <Row>
         <Col md={24}>
           <div>
-            <Title level={2}>UoM</Title>
+            <Title level={4}>UoM</Title>
 
             <Button type="primary" onClick={showModal}>
               Create

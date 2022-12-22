@@ -8,6 +8,7 @@ interface ITransaction {
   postingStatus: boolean;
   transactionTypeId: number;
   customerId: number | null;
+  supplierId: number | null;
   paymentMethod: string | null;
   invoiceAmount: number | null;
   discountAmount: number | null;

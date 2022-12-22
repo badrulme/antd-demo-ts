@@ -272,7 +272,7 @@ export default function Brand({ }: Props) {
             <Row>
                 <Col md={24}>
                     <div>
-                        <Title level={2}>Brand</Title>
+                        <Title level={4}>Brand</Title>
                         <Button type="primary" onClick={showModal}>Create</Button>
                         <Table
                             loading={tableLoadingSpin}
